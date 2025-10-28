@@ -46,19 +46,13 @@ public class TriangleLoftingTests
     }
 
     [Fact]
-    public void OctahedralLoftProducesFourTetrahedra()
+    public void PerpendicularTrianglesReturnEmpty()
     {
         var t1 = MakeTriangle((0, 0, 0), (6, 0, 0), (0, 6, 0));
         var t2 = MakeTriangle((3, 2, 2), (3, 8, 2), (3, 2, 8));
 
-        var tets = TriangleLofting.Loft(t1, t2);
-        Assert.Equal(4, tets.Count);
-        Assert.True(tets.All(t => AbsVol6(t) > 0));
-        Assert.True(UsesOnly(tets, t1.A, t1.B, t1.C, t2.A, t2.B, t2.C));
-
-        var solid = new Solid(UnitScale.Millimeter, tets);
-        Assert.True(BoundaryContains(solid, t1));
-        Assert.True(BoundaryContains(solid, t2));
+        Assert.Equal(LoftCase.Empty, TriangleLofting.Explain(t1, t2));
+        Assert.Empty(TriangleLofting.Loft(t1, t2));
     }
 
     [Fact]

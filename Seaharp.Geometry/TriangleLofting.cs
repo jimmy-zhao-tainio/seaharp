@@ -254,14 +254,12 @@ public static class TriangleLofting
             return LoftCase.Empty;
         }
 
-        if (StrictSameSide(t1, t2.A, t2.B, t2.C) && StrictSameSide(t2, t1.A, t1.B, t1.C))
+        var t2Strict = StrictSameSide(t1, t2.A, t2.B, t2.C);
+        var t1Strict = StrictSameSide(t2, t1.A, t1.B, t1.C);
+
+        if (t1Strict && t2Strict)
         {
             return LoftCase.Prism3Tets;
-        }
-
-        if (!AreCoplanar(t1, t2))
-        {
-            return LoftCase.Octa4Tets;
         }
 
         return LoftCase.Empty;
@@ -316,27 +314,8 @@ public static class TriangleLofting
             LoftCase.VertexOnEdge => LoftVertexOnEdge(t1, t2),
             LoftCase.SharedVertex => LoftSharedVertex(t1, t2),
             LoftCase.Prism3Tets => LoftPrism3(t1, t2),
-            LoftCase.Octa4Tets => LoftOcta4(t1, t2),
             _ => Array.Empty<Tetrahedron>()
         };
-    }
-
-    private static bool AreCoplanar(in TriangleFace t1, in TriangleFace t2)
-    {
-        if (Exact.Orient3D(t1.A, t1.B, t1.C, t2.A) != default)
-        {
-            return false;
-        }
-        if (Exact.Orient3D(t1.A, t1.B, t1.C, t2.B) != default)
-        {
-            return false;
-        }
-        if (Exact.Orient3D(t1.A, t1.B, t1.C, t2.C) != default)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     private static (GridPoint, GridPoint) GetOtherVertices(in TriangleFace triangle, in GridPoint excluded)
@@ -507,51 +486,6 @@ public static class TriangleLofting
         return bestPack ?? Array.Empty<Tetrahedron>();
     }
 
-    private static IReadOnlyList<Tetrahedron> LoftOcta4(in TriangleFace t1, in TriangleFace t2)
-    {
-        var apex1 = SelectApex(t1, t2);
-        var apex2 = SelectApex(t2, t1);
-
-        var (t1Eq0, t1Eq1) = GetOtherVertices(t1, apex1);
-        var (t2Eq0, t2Eq1) = GetOtherVertices(t2, apex2);
-
-        var p0 = t1Eq0;
-        var p1 = t1Eq1;
-        var q0 = t2Eq0;
-        var q1 = t2Eq1;
-
-        var diag1Vol1 = Exact.AbsVol6(apex1, p0, q0, p1);
-        var diag1Vol2 = Exact.AbsVol6(apex1, p0, p1, q1);
-        var diag1Vol3 = Exact.AbsVol6(apex2, p0, q0, p1);
-        var diag1Vol4 = Exact.AbsVol6(apex2, p0, p1, q1);
-        var diag1Min = MinVolumes(diag1Vol1, diag1Vol2, diag1Vol3, diag1Vol4);
-
-        var diag2Vol1 = Exact.AbsVol6(apex1, p0, q0, q1);
-        var diag2Vol2 = Exact.AbsVol6(apex1, q1, p1, p0);
-        var diag2Vol3 = Exact.AbsVol6(apex2, p0, q0, q1);
-        var diag2Vol4 = Exact.AbsVol6(apex2, q1, p1, p0);
-        var diag2Min = MinVolumes(diag2Vol1, diag2Vol2, diag2Vol3, diag2Vol4);
-
-        var result = new List<Tetrahedron>(4);
-
-        if (diag2Min > diag1Min)
-        {
-            result.Add(new Tetrahedron(apex1, p0, q0, q1));
-            result.Add(new Tetrahedron(apex1, q1, p1, p0));
-            result.Add(new Tetrahedron(apex2, p0, q0, q1));
-            result.Add(new Tetrahedron(apex2, q1, p1, p0));
-        }
-        else
-        {
-            result.Add(new Tetrahedron(apex1, p0, q0, p1));
-            result.Add(new Tetrahedron(apex1, p0, p1, q1));
-            result.Add(new Tetrahedron(apex2, p0, q0, p1));
-            result.Add(new Tetrahedron(apex2, p0, p1, q1));
-        }
-
-        return result;
-    }
-
     private static Tetrahedron[] SelectPrismPack(in TriangleFace baseTriangle, in GridPoint d, in GridPoint e, in GridPoint f)
     {
         var pack1 = new[]
@@ -693,27 +627,6 @@ public static class TriangleLofting
         d = others2.Item1;
         e = others2.Item2;
         return true;
-    }
-
-    private static GridPoint SelectApex(in TriangleFace source, in TriangleFace target)
-    {
-        var vertices = new[] { source.A, source.B, source.C };
-        var targetVertices = new[] { target.A, target.B, target.C };
-
-        var bestIndex = 0;
-        var bestValue = Exact.AbsVol6(targetVertices[0], targetVertices[1], targetVertices[2], vertices[0]);
-
-        for (var i = 1; i < 3; i++)
-        {
-            var volume = Exact.AbsVol6(targetVertices[0], targetVertices[1], targetVertices[2], vertices[i]);
-            if (volume > bestValue)
-            {
-                bestValue = volume;
-                bestIndex = i;
-            }
-        }
-
-        return vertices[bestIndex];
     }
 
     private static bool SegmentIntersectsTriangle(in GridPoint p, in GridPoint q, in TriangleFace tri)
