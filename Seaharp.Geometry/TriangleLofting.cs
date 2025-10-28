@@ -673,7 +673,7 @@ public static class TriangleLofting
         return pos == 3 || neg == 3;
     }
 
-    private static bool TrianglesIntersect(in TriangleFace t1, in TriangleFace t2)
+    internal static bool TrianglesIntersect(in TriangleFace t1, in TriangleFace t2)
     {
         if (SegmentIntersectsTriangle(t1.A, t1.B, t2)) return true;
         if (SegmentIntersectsTriangle(t1.B, t1.C, t2)) return true;
