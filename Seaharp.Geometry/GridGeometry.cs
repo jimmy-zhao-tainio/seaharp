@@ -229,8 +229,7 @@ public sealed class Tetrahedron : IEquatable<Tetrahedron>
         var c = _vertices[i2];
         var opposite = _vertices[oppositeIndex];
 
-        var normal = Vector3.Cross(ToVector(b) - ToVector(a), ToVector(c) - ToVector(a));
-        if (Vector3.Dot(normal, ToVector(opposite) - ToVector(a)) > 0)
+        if (Exact.Orient3D(a, b, c, opposite) > 0)
         {
             (b, c) = (c, b);
         }

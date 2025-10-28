@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.App", "Seaharp.App\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry", "Seaharp.Geometry\Seaharp.Geometry.csproj", "{19150A0E-7FB2-4A3A-B538-F0598E58F679}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Tests", "Seaharp.Geometry.Tests\Seaharp.Geometry.Tests.csproj", "{B90588C1-D5A3-48C0-B870-DF1678C92E2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{19150A0E-7FB2-4A3A-B538-F0598E58F679}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19150A0E-7FB2-4A3A-B538-F0598E58F679}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19150A0E-7FB2-4A3A-B538-F0598E58F679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B90588C1-D5A3-48C0-B870-DF1678C92E2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B90588C1-D5A3-48C0-B870-DF1678C92E2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B90588C1-D5A3-48C0-B870-DF1678C92E2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B90588C1-D5A3-48C0-B870-DF1678C92E2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
