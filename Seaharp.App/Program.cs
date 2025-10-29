@@ -58,38 +58,5 @@ static void PrintTriangle(string label, TriangleFace face)
     }
 }
 
-static bool TryBuildBridge(Shape lowerBox, Shape upperBox, out Shape bridge, out TriangleFace lowerFace, out TriangleFace upperFace)
-{
-    bridge = lowerBox;
-    lowerFace = default;
-    upperFace = default;
-
-    var topFaces = lowerBox.Faces(face => face.Vertices.All(v => v.Z == lowerBox.Bounds.Max.Z)).ToList();
-    var bottomFaces = upperBox.Faces(face => face.Vertices.All(v => v.Z == upperBox.Bounds.Min.Z)).ToList();
-
-    foreach (var lf in topFaces)
-    {
-        foreach (var uf in bottomFaces)
-        {
-            if (TriangleLofting.Classify(lf, uf) != LoftCase.Prism3Tets)
-            {
-                continue;
-            }
-
-            var loft = TriangleLofting.Loft(lf, uf);
-            if (loft.Count != 3)
-            {
-                continue;
-            }
-
-            bridge = lowerBox.With(new Solid(unit, loft));
-            lowerFace = lf;
-            upperFace = uf;
-            return true;
-        }
-    }
-
-    return false;
-}
 
 
