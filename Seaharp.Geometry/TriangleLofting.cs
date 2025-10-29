@@ -459,31 +459,53 @@ public static class TriangleLofting
         return result;
     }
 
-    private static IReadOnlyList<Tetrahedron> LoftPrism3(in TriangleFace t1, in TriangleFace t2)
+        private static IReadOnlyList<Tetrahedron> LoftPrism3(in TriangleFace t1, in TriangleFace t2)
     {
+        // Try both orientation directions for t2 (cycles and reversed cycles)
         var cycles = new[]
         {
             new[] { t2.A, t2.B, t2.C },
             new[] { t2.B, t2.C, t2.A },
-            new[] { t2.C, t2.A, t2.B }
+            new[] { t2.C, t2.A, t2.B },
+            new[] { t2.A, t2.C, t2.B },
+            new[] { t2.C, t2.B, t2.A },
+            new[] { t2.B, t2.A, t2.C }
         };
 
         Tetrahedron[]? bestPack = null;
         ExactScalar? bestScore = null;
+        long bestDistance = long.MaxValue;
 
         foreach (var cycle in cycles)
         {
+            // Prefer the mapping that minimises total squared distances between paired vertices
+            var dist = TotalDistanceSquared(t1.A, t1.B, t1.C, cycle[0], cycle[1], cycle[2]);
             var pack = SelectPrismPack(t1, cycle[0], cycle[1], cycle[2]);
             var score = PackMinVolume(pack);
 
-            if (bestPack is null || score > bestScore)
+            if (bestPack is null || dist < bestDistance || (dist == bestDistance && score > bestScore))
             {
                 bestPack = pack;
                 bestScore = score;
+                bestDistance = dist;
             }
         }
 
         return bestPack ?? Array.Empty<Tetrahedron>();
+    }
+
+    private static long TotalDistanceSquared(GridPoint a, GridPoint b, GridPoint c, GridPoint d, GridPoint e, GridPoint f)
+    {
+        static long DS(GridPoint p, GridPoint q)
+        {
+            var dx = p.X - q.X; var dy = p.Y - q.Y; var dz = p.Z - q.Z;
+            // coordinates are small in our use; checked avoids silent overflow in extreme cases
+            checked
+            {
+                return (long)(dx * dx + dy * dy + dz * dz);
+            }
+        }
+        return DS(a, d) + DS(b, e) + DS(c, f);
     }
 
     private static Tetrahedron[] SelectPrismPack(in TriangleFace baseTriangle, in GridPoint d, in GridPoint e, in GridPoint f)
@@ -712,3 +734,4 @@ public static class TriangleLofting
 
     private static ExactScalar Zero => default;
 }
+

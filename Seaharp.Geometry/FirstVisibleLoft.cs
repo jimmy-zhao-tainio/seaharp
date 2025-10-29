@@ -68,7 +68,7 @@ public static class FirstVisibleLoft
         return false;
     }
 
-    private static bool LoftIsClear(
+    internal static bool LoftIsClear(
         TriangleFace tA,
         TriangleFace tB,
         IReadOnlyList<Tetrahedron> tets,
@@ -161,3 +161,4 @@ public static class FirstVisibleLoft
         yield return new TriangleFace(vertices[1], vertices[3], vertices[2]);
     }
 }
+
