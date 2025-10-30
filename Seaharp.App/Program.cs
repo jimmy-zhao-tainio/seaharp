@@ -26,13 +26,12 @@ static void RunStackDemo()
     var parts = new List<Shape> { lowerBox, upperBox };
     var outputFile = "box-stack.obj";
 
-    if (BridgeExtensions.TryBridge(lowerBox, upperBox, out var bridge, out var lowerFace, out var upperFace))
-    {
-        Console.WriteLine("Bridge found between boxes:");
-        PrintTriangle("  Lower face", lowerFace);
-        PrintTriangle("  Upper face", upperFace);
-        Console.WriteLine($"  Loft tetrahedra: {bridge.Solid.Tetrahedra.Count}");
+    var bridge = BridgeExtensions.Bridge(lowerBox, upperBox);
 
+    if (bridge.Solid.Tetrahedra.Count > 0)
+    {
+        Console.WriteLine("Bridge found between boxes (prism).");
+        Console.WriteLine($"  Loft tetrahedra: {bridge.Solid.Tetrahedra.Count}");
         parts.Add(bridge);
         outputFile = "box-bridge.obj";
     }
@@ -57,6 +56,7 @@ static void PrintTriangle(string label, TriangleFace face)
         Console.WriteLine($"  ({vertex.X}, {vertex.Y}, {vertex.Z})");
     }
 }
+
 
 
 
