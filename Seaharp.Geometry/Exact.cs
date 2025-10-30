@@ -2,20 +2,11 @@ using System;
 
 namespace Seaharp.Geometry;
 
-/// <summary>
-/// Provides exact integer-based geometric predicates for grid-aligned geometry.
-/// </summary>
 public static class Exact
 {
-    /// <summary>
-    /// Computes the signed six times volume of the tetrahedron defined by four points.
-    /// </summary>
     public static Int128 Orient3D(in GridPoint p, in GridPoint q, in GridPoint r, in GridPoint s) =>
         ComputeOrient3D(p, q, r, s);
 
-    /// <summary>
-    /// Determines whether three points are collinear.
-    /// </summary>
     public static bool Collinear(in GridPoint p, in GridPoint q, in GridPoint r)
     {
         checked
@@ -36,9 +27,6 @@ public static class Exact
         }
     }
 
-    /// <summary>
-    /// Determines whether a point lies on the line segment formed by two other points.
-    /// </summary>
     public static bool OnSegment(in GridPoint a, in GridPoint b, in GridPoint x)
     {
         if (!Collinear(a, b, x))
@@ -62,9 +50,6 @@ public static class Exact
         }
     }
 
-    /// <summary>
-    /// Computes the absolute value of six times the volume of the tetrahedron defined by four points.
-    /// </summary>
     public static Int128 AbsVol6(in GridPoint a, in GridPoint b, in GridPoint c, in GridPoint d) =>
         Int128.Abs(ComputeOrient3D(a, b, c, d));
 
