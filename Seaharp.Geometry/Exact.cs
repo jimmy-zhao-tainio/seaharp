@@ -1,11 +1,4 @@
 using System;
-using System.Numerics;
-
-#if NET8_0_OR_GREATER
-using ExactScalar = System.Int128;
-#else
-using ExactScalar = System.Numerics.BigInteger;
-#endif
 
 namespace Seaharp.Geometry;
 
@@ -14,37 +7,15 @@ namespace Seaharp.Geometry;
 /// </summary>
 public static class Exact
 {
-#if NET8_0_OR_GREATER
     /// <summary>
     /// Computes the signed six times volume of the tetrahedron defined by four points.
     /// </summary>
-    /// <param name="p">The origin point.</param>
-    /// <param name="q">The first adjacent point.</param>
-    /// <param name="r">The second adjacent point.</param>
-    /// <param name="s">The third adjacent point.</param>
-    /// <returns>The signed six times volume as an <see cref="Int128"/>.</returns>
     public static Int128 Orient3D(in GridPoint p, in GridPoint q, in GridPoint r, in GridPoint s) =>
         ComputeOrient3D(p, q, r, s);
-#else
-    /// <summary>
-    /// Computes the signed six times volume of the tetrahedron defined by four points.
-    /// </summary>
-    /// <param name="p">The origin point.</param>
-    /// <param name="q">The first adjacent point.</param>
-    /// <param name="r">The second adjacent point.</param>
-    /// <param name="s">The third adjacent point.</param>
-    /// <returns>The signed six times volume as a <see cref="BigInteger"/>.</returns>
-    public static BigInteger Orient3D(in GridPoint p, in GridPoint q, in GridPoint r, in GridPoint s) =>
-        ComputeOrient3D(p, q, r, s);
-#endif
 
     /// <summary>
     /// Determines whether three points are collinear.
     /// </summary>
-    /// <param name="p">The first point.</param>
-    /// <param name="q">The second point.</param>
-    /// <param name="r">The third point.</param>
-    /// <returns><see langword="true"/> if the points lie on the same line; otherwise, <see langword="false"/>.</returns>
     public static bool Collinear(in GridPoint p, in GridPoint q, in GridPoint r)
     {
         checked
@@ -61,17 +32,13 @@ public static class Exact
             var cy = uz * vx - ux * vz;
             var cz = ux * vy - uy * vx;
 
-            return cx == Zero && cy == Zero && cz == Zero;
+            return cx == 0 && cy == 0 && cz == 0;
         }
     }
 
     /// <summary>
     /// Determines whether a point lies on the line segment formed by two other points.
     /// </summary>
-    /// <param name="a">The first endpoint of the segment.</param>
-    /// <param name="b">The second endpoint of the segment.</param>
-    /// <param name="x">The point to test.</param>
-    /// <returns><see langword="true"/> if <paramref name="x"/> lies on the segment; otherwise, <see langword="false"/>.</returns>
     public static bool OnSegment(in GridPoint a, in GridPoint b, in GridPoint x)
     {
         if (!Collinear(a, b, x))
@@ -91,35 +58,17 @@ public static class Exact
 
             var dot = ax * bx + ay * by + az * bz;
 
-            return dot <= Zero;
+            return dot <= 0;
         }
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>
     /// Computes the absolute value of six times the volume of the tetrahedron defined by four points.
     /// </summary>
-    /// <param name="a">The first point.</param>
-    /// <param name="b">The second point.</param>
-    /// <param name="c">The third point.</param>
-    /// <param name="d">The fourth point.</param>
-    /// <returns>The non-negative six times volume as an <see cref="Int128"/>.</returns>
     public static Int128 AbsVol6(in GridPoint a, in GridPoint b, in GridPoint c, in GridPoint d) =>
         Int128.Abs(ComputeOrient3D(a, b, c, d));
-#else
-    /// <summary>
-    /// Computes the absolute value of six times the volume of the tetrahedron defined by four points.
-    /// </summary>
-    /// <param name="a">The first point.</param>
-    /// <param name="b">The second point.</param>
-    /// <param name="c">The third point.</param>
-    /// <param name="d">The fourth point.</param>
-    /// <returns>The non-negative six times volume as a <see cref="BigInteger"/>.</returns>
-    public static BigInteger AbsVol6(in GridPoint a, in GridPoint b, in GridPoint c, in GridPoint d) =>
-        BigInteger.Abs(ComputeOrient3D(a, b, c, d));
-#endif
 
-    private static ExactScalar ComputeOrient3D(in GridPoint p, in GridPoint q, in GridPoint r, in GridPoint s)
+    private static Int128 ComputeOrient3D(in GridPoint p, in GridPoint q, in GridPoint r, in GridPoint s)
     {
         checked
         {
@@ -143,7 +92,5 @@ public static class Exact
         }
     }
 
-    private static ExactScalar Diff(long a, long b) => (ExactScalar)a - (ExactScalar)b;
-
-    private static ExactScalar Zero => default;
+    private static Int128 Diff(long a, long b) => (Int128)a - (Int128)b;
 }
