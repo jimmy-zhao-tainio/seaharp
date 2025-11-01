@@ -14,7 +14,7 @@ public class Shape
 
     public UnitScale Unit => Solid.Unit;
 
-    public (GridPoint Min, GridPoint Max) Bounds => Solid.GetBounds();
+    public (Point Min, Point Max) Bounds => Solid.GetBounds();
 
     public Shape Position(long dx = 0, long dy = 0, long dz = 0)
     {
@@ -42,13 +42,13 @@ public class Shape
         return new Shape(combined);
     }
 
-    public IEnumerable<TriangleFace> Faces(Func<TriangleFace, bool> predicate)
+    public IEnumerable<Triangle> Faces(Func<Triangle, bool> filter)
     {
-        if (predicate == null)
+        if (filter == null)
         {
-            throw new ArgumentNullException(nameof(predicate));
+            throw new ArgumentNullException(nameof(filter));
         }
-        return Solid.BoundaryFaces().Where(predicate);
+        return Solid.BoundaryTriangles().Where(filter);
     }
 
     public Shape With(Solid solid) => new Shape(solid);

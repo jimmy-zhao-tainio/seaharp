@@ -38,25 +38,25 @@ public static class UnitScaleExtensions
         };
 }
 
-public readonly record struct GridPoint(long X, long Y, long Z)
+public readonly record struct Point(long X, long Y, long Z)
 {
     public Vector3 ToVector3() => new(X, Y, Z);
 
     public override string ToString() => $"({X}, {Y}, {Z})";
 }
 
-public readonly record struct TriangleFace(GridPoint A, GridPoint B, GridPoint C)
+public readonly record struct Triangle(Point A, Point B, Point C)
 {
-    private static GridPoint[] SortVertices(GridPoint a, GridPoint b, GridPoint c)
+    private static Point[] SortVertices(Point a, Point b, Point c)
     {
         var array = new[] { a, b, c };
-        Array.Sort(array, GridPointComparer.Instance);
+        Array.Sort(array, PointComparer.Instance);
         return array;
     }
 
-    public IReadOnlyList<GridPoint> CanonicalVertices => SortVertices(A, B, C);
+    public IReadOnlyList<Point> CanonicalVertices => SortVertices(A, B, C);
 
-    public IEnumerable<GridPoint> Vertices
+    public IEnumerable<Point> Vertices
     {
         get
         {
@@ -66,20 +66,20 @@ public readonly record struct TriangleFace(GridPoint A, GridPoint B, GridPoint C
         }
     }
 
-    public TriangleFace Canonicalize()
+    public Triangle Canonicalize()
     {
         var sorted = SortVertices(A, B, C);
-        return new TriangleFace(sorted[0], sorted[1], sorted[2]);
+        return new Triangle(sorted[0], sorted[1], sorted[2]);
     }
 
     public override string ToString() => $"[{A}, {B}, {C}]";
 }
 
-internal sealed class GridPointComparer : IComparer<GridPoint>
+internal sealed class PointComparer : IComparer<Point>
 {
-    public static GridPointComparer Instance { get; } = new();
+    public static PointComparer Instance { get; } = new();
 
-    public int Compare(GridPoint x, GridPoint y)
+    public int Compare(Point x, Point y)
     {
         var result = x.X.CompareTo(y.X);
         if (result != 0)
@@ -95,27 +95,27 @@ internal sealed class GridPointComparer : IComparer<GridPoint>
     }
 }
 
-internal readonly record struct FaceKey(GridPoint V0, GridPoint V1, GridPoint V2)
+internal readonly record struct TriangleKey(Point V0, Point V1, Point V2)
 {
-    public static FaceKey From(TriangleFace face)
+    public static TriangleKey From(Triangle triangle)
     {
-        var sorted = face.Canonicalize();
-        return new FaceKey(sorted.A, sorted.B, sorted.C);
+        var sorted = triangle.Canonicalize();
+        return new TriangleKey(sorted.A, sorted.B, sorted.C);
     }
 
-    public static FaceKey From(GridPoint a, GridPoint b, GridPoint c)
+    public static TriangleKey From(Point a, Point b, Point c)
     {
         var sorted = new[] { a, b, c };
-        Array.Sort(sorted, GridPointComparer.Instance);
-        return new FaceKey(sorted[0], sorted[1], sorted[2]);
+        Array.Sort(sorted, PointComparer.Instance);
+        return new TriangleKey(sorted[0], sorted[1], sorted[2]);
     }
 }
 
 public sealed class Tetrahedron : IEquatable<Tetrahedron>
 {
-    private readonly GridPoint[] _vertices;
+    private readonly Point[] _vertices;
 
-    public Tetrahedron(GridPoint a, GridPoint b, GridPoint c, GridPoint d)
+    public Tetrahedron(Point a, Point b, Point c, Point d)
     {
         _vertices = new[] { a, b, c, d }
             .OrderBy(p => p.X)
@@ -124,34 +124,31 @@ public sealed class Tetrahedron : IEquatable<Tetrahedron>
             .ToArray();
     }
 
-    public IReadOnlyList<GridPoint> Vertices => _vertices;
+    public IReadOnlyList<Point> Vertices => _vertices;
 
-    public bool ContainsPointStrict(GridPoint point, double epsilon = 1e-6) =>
-        ContainsPointStrict(point.ToVector3(), epsilon);
-
-    public bool ContainsPointStrict(Vector3 point, double epsilon = 1e-6)
+    public bool ContainsPointStrict(Point point, double epsilon = 1e-6)
     {
-        var a = _vertices[0].ToVector3();
-        var b = _vertices[1].ToVector3();
-        var c = _vertices[2].ToVector3();
-        var d = _vertices[3].ToVector3();
+        var a = _vertices[0];
+        var b = _vertices[1];
+        var c = _vertices[2];
+        var d = _vertices[3];
 
-        var volume = SignedVolume(a, b, c, d);
-        if (Math.Abs(volume) < epsilon)
+        var totalVolume = (double)IntegerMath.SignedTetrahedronVolume6(a, b, c, d);
+        if (Math.Abs(totalVolume) < epsilon)
         {
             return false;
         }
 
-        var wa = SignedVolume(point, b, c, d) / volume;
-        var wb = SignedVolume(a, point, c, d) / volume;
-        var wc = SignedVolume(a, b, point, d) / volume;
-        var wd = SignedVolume(a, b, c, point) / volume;
+        var weightA = (double)IntegerMath.SignedTetrahedronVolume6(point, b, c, d) / totalVolume;
+        var weightB = (double)IntegerMath.SignedTetrahedronVolume6(a, point, c, d) / totalVolume;
+        var weightC = (double)IntegerMath.SignedTetrahedronVolume6(a, b, point, d) / totalVolume;
+        var weightD = (double)IntegerMath.SignedTetrahedronVolume6(a, b, c, point) / totalVolume;
 
         const double sumTolerance = 1e-4;
 
-        if (wa > epsilon && wb > epsilon && wc > epsilon && wd > epsilon)
+        if (weightA > epsilon && weightB > epsilon && weightC > epsilon && weightD > epsilon)
         {
-            var sum = wa + wb + wc + wd;
+            var sum = weightA + weightB + weightC + weightD;
             if (Math.Abs(sum - 1.0) <= sumTolerance)
             {
                 return true;
@@ -161,7 +158,13 @@ public sealed class Tetrahedron : IEquatable<Tetrahedron>
         return false;
     }
 
-    public IEnumerable<TriangleFace> Faces
+    public bool ContainsPointStrict(Vector3 point, double epsilon = 1e-6) =>
+        ContainsPointStrict(new Point(
+            (long)Math.Round(point.X),
+            (long)Math.Round(point.Y),
+            (long)Math.Round(point.Z)), epsilon);
+
+    public IEnumerable<Triangle> Faces
     {
         get
         {
@@ -201,43 +204,23 @@ public sealed class Tetrahedron : IEquatable<Tetrahedron>
         return hash.ToHashCode();
     }
 
-    private static double SignedVolume(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
-    {
-        var abx = (double)b.X - a.X;
-        var aby = (double)b.Y - a.Y;
-        var abz = (double)b.Z - a.Z;
-
-        var acx = (double)c.X - a.X;
-        var acy = (double)c.Y - a.Y;
-        var acz = (double)c.Z - a.Z;
-
-        var adx = (double)d.X - a.X;
-        var ady = (double)d.Y - a.Y;
-        var adz = (double)d.Z - a.Z;
-
-        var crossX = aby * acz - abz * acy;
-        var crossY = abz * acx - abx * acz;
-        var crossZ = abx * acy - aby * acx;
-
-        return crossX * adx + crossY * ady + crossZ * adz;
-    }
-
-    private TriangleFace CreateFace(int i0, int i1, int i2, int oppositeIndex)
+    private Triangle CreateFace(int i0, int i1, int i2, int oppositeIndex)
     {
         var a = _vertices[i0];
         var b = _vertices[i1];
         var c = _vertices[i2];
         var opposite = _vertices[oppositeIndex];
 
-        if (Exact.Orient3D(a, b, c, opposite) > 0)
+        var face = new Triangle(a, b, c);
+        if (GeometryChecks.IsPointOnPositiveSideOfTrianglePlane(face, opposite))
         {
-            (b, c) = (c, b);
+            face = new Triangle(face.A, face.C, face.B);
         }
 
-        return new TriangleFace(a, b, c);
+        return face;
     }
 
-    private static Vector3 ToVector(GridPoint point)
+    private static Vector3 ToVector(Point point)
         => new((float)point.X, (float)point.Y, (float)point.Z);
 }
 
@@ -247,17 +230,17 @@ public sealed class Solid
 {
     private readonly HashSet<Tetrahedron> _tetrahedra;
 
-    public Solid(UnitScale unit, IEnumerable<Tetrahedron>? tetrahedra = null)
+    public Solid(UnitScale unit, IEnumerable<Tetrahedron>? tetrahedrons = null)
     {
         Unit = unit;
-        _tetrahedra = tetrahedra != null
-            ? new HashSet<Tetrahedron>(tetrahedra)
+        _tetrahedra = tetrahedrons != null
+            ? new HashSet<Tetrahedron>(tetrahedrons)
             : new HashSet<Tetrahedron>();
     }
 
     public UnitScale Unit { get; }
 
-    public IReadOnlyCollection<Tetrahedron> Tetrahedra => _tetrahedra;
+    public IReadOnlyCollection<Tetrahedron> Tetrahedrons => _tetrahedra;
 
     public Solid Add(Tetrahedron tetra)
     {
@@ -293,7 +276,7 @@ public sealed class Solid
 
         return new Solid(Unit, translated);
 
-        GridPoint TranslatePoint(GridPoint p) => new(p.X + dx, p.Y + dy, p.Z + dz);
+        Point TranslatePoint(Point p) => new(p.X + dx, p.Y + dy, p.Z + dz);
     }
 
     public Solid Rotate(RotationAngles angles)
@@ -309,10 +292,10 @@ public sealed class Solid
 
         return new Solid(Unit, rotated);
 
-        GridPoint RotatePoint(GridPoint p)
+        Point RotatePoint(Point p)
         {
             var vector = Vector3.Transform(p.ToVector3(), rotationMatrix);
-            return new GridPoint(
+            return new Point(
                 (long)Math.Round(vector.X),
                 (long)Math.Round(vector.Y),
                 (long)Math.Round(vector.Z));
@@ -323,7 +306,7 @@ public sealed class Solid
     {
         EnsureUnitsMatch(other);
 
-        var faces = new HashSet<TriangleFace>(GetCanonicalFaces(this));
+        var faces = new HashSet<Triangle>(GetCanonicalFaces(this));
         foreach (var face in GetCanonicalFaces(other))
         {
             if (faces.Contains(face))
@@ -334,20 +317,20 @@ public sealed class Solid
         return false;
     }
 
-    public IEnumerable<TriangleFace> Faces => _tetrahedra.SelectMany(t => t.Faces);
+    public IEnumerable<Triangle> Faces => _tetrahedra.SelectMany(t => t.Faces);
 
-    public IEnumerable<TriangleFace> BoundaryFaces()
+    public IEnumerable<Triangle> BoundaryTriangles()
     {
-        var counts = new Dictionary<FaceKey, (int Count, TriangleFace Face)>();
+        var counts = new Dictionary<TriangleKey, (int Count, Triangle Triangle)>();
 
         foreach (var tetra in _tetrahedra)
         {
             foreach (var face in tetra.Faces)
             {
-                var key = FaceKey.From(face);
+                var key = TriangleKey.From(face);
                 if (counts.TryGetValue(key, out var entry))
                 {
-                    counts[key] = (entry.Count + 1, entry.Face);
+                    counts[key] = (entry.Count + 1, entry.Triangle);
                 }
                 else
                 {
@@ -360,19 +343,19 @@ public sealed class Solid
         {
             if (entry.Count == 1)
             {
-                yield return entry.Face;
+                yield return entry.Triangle;
             }
         }
     }
 
-    private static IEnumerable<TriangleFace> GetCanonicalFaces(Solid solid) =>
+    private static IEnumerable<Triangle> GetCanonicalFaces(Solid solid) =>
         solid._tetrahedra.SelectMany(t => t.Faces);
 
-    public (GridPoint Min, GridPoint Max) GetBounds()
+    public (Point Min, Point Max) GetBounds()
     {
         if (_tetrahedra.Count == 0)
         {
-            return (new GridPoint(0, 0, 0), new GridPoint(0, 0, 0));
+            return (new Point(0, 0, 0), new Point(0, 0, 0));
         }
 
         long minX = long.MaxValue, minY = long.MaxValue, minZ = long.MaxValue;
@@ -392,7 +375,7 @@ public sealed class Solid
             }
         }
 
-        return (new GridPoint(minX, minY, minZ), new GridPoint(maxX, maxY, maxZ));
+        return (new Point(minX, minY, minZ), new Point(maxX, maxY, maxZ));
     }
 
     private void EnsureUnitsMatch(Solid other)
@@ -418,21 +401,21 @@ public static class SolidFactory
 {
     public static Solid CreateCuboid(UnitScale unit, int width, int depth, int height)
     {
-        var origin = new GridPoint(0, 0, 0);
-        var tetrahedra = BoxTetrahedra(origin, width, depth, height);
-        return new Solid(unit, tetrahedra);
+        var origin = new Point(0, 0, 0);
+        var tetrahedrons = CreateBoxTetrahedrons(origin, width, depth, height);
+        return new Solid(unit, tetrahedrons);
     }
 
-    private static IEnumerable<Tetrahedron> BoxTetrahedra(GridPoint origin, int width, int depth, int height)
+    private static IEnumerable<Tetrahedron> CreateBoxTetrahedrons(Point origin, int width, int depth, int height)
     {
         var p000 = origin;
-        var p100 = new GridPoint(origin.X + width, origin.Y, origin.Z);
-        var p010 = new GridPoint(origin.X, origin.Y + depth, origin.Z);
-        var p001 = new GridPoint(origin.X, origin.Y, origin.Z + height);
-        var p110 = new GridPoint(origin.X + width, origin.Y + depth, origin.Z);
-        var p101 = new GridPoint(origin.X + width, origin.Y, origin.Z + height);
-        var p011 = new GridPoint(origin.X, origin.Y + depth, origin.Z + height);
-        var p111 = new GridPoint(origin.X + width, origin.Y + depth, origin.Z + height);
+        var p100 = new Point(origin.X + width, origin.Y, origin.Z);
+        var p010 = new Point(origin.X, origin.Y + depth, origin.Z);
+        var p001 = new Point(origin.X, origin.Y, origin.Z + height);
+        var p110 = new Point(origin.X + width, origin.Y + depth, origin.Z);
+        var p101 = new Point(origin.X + width, origin.Y, origin.Z + height);
+        var p011 = new Point(origin.X, origin.Y + depth, origin.Z + height);
+        var p111 = new Point(origin.X + width, origin.Y + depth, origin.Z + height);
 
         yield return new Tetrahedron(p000, p100, p010, p001);
         yield return new Tetrahedron(p100, p110, p010, p111);
