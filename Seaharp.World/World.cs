@@ -20,11 +20,11 @@ public sealed class World
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path required", nameof(path));
 
-        // Collect boundary triangles from each shape independently
+        // Collect surface triangles from each shape independently
         var boundary = new List<Seaharp.Geometry.Tetrahedron.Triangle>();
         foreach (var s in shapes)
         {
-            boundary.AddRange(s.GetBoundaryTriangles());
+            boundary.AddRange(s.GetSurface());
         }
 
         // Write OBJ
