@@ -11,7 +11,8 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Seaharp.World\Seaharp.World.csproj" />
     <ProjectReference Include="..\Seaharp.Geometry\Seaharp.Geometry.csproj" />
-    <ProjectReference Include="..\Seaharp.Geometry.Predicates\Seaharp.Geometry.Predicates.csproj" />
   </ItemGroup>
 </Project>
+

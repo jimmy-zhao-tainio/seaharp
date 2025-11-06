@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Tests", "Seaharp.Geometry.Tests\Seaharp.Geometry.Tests.csproj", "{E732084A-8C1D-4DD7-9013-5BFAA3F337D9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.World", "Seaharp.World\Seaharp.World.csproj", "{644EEAF2-670A-4650-BEF6-804E261CB6D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.World.Tests", "Seaharp.World.Tests\Seaharp.World.Tests.csproj", "{45EEEC1D-C573-4588-82EA-0D6883D2AF89}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,7 +38,9 @@ Global
 		{7A4598ED-26DC-4B7F-80BA-E7B94E3913E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A4598ED-26DC-4B7F-80BA-E7B94E3913E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A4598ED-26DC-4B7F-80BA-E7B94E3913E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
-
-

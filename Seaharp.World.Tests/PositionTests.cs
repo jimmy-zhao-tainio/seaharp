@@ -60,3 +60,4 @@ public class PositionTests
         return copy;
     }
 }
+
