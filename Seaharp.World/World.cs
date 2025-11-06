@@ -43,35 +43,40 @@ public sealed class World
             sw.WriteLine($"mtllib {mtlName}");
         }
 
-        var vertexIndex = new Dictionary<Seaharp.Geometry.Point, int>();
-        var normalSums = new Dictionary<Seaharp.Geometry.Point, Seaharp.Geometry.Vector>();
+        // Important: index vertices per shape to avoid merging coincident vertices
+        // across different shapes, which can create non-manifold edges in some slicers.
+        var vertexIndex = new Dictionary<(int shape, Seaharp.Geometry.Point p), int>();
+        var normalSums = new Dictionary<(int shape, Seaharp.Geometry.Point p), Seaharp.Geometry.Vector>();
         int nextIndex = 1;
         foreach (var entry in boundary)
         {
             var tri = entry.tri;
-            IndexVertex(tri.P0); IndexVertex(tri.P1); IndexVertex(tri.P2);
+            IndexVertex(entry.shapeIndex, tri.P0);
+            IndexVertex(entry.shapeIndex, tri.P1);
+            IndexVertex(entry.shapeIndex, tri.P2);
             // accumulate per-vertex normal sums (using unit face normals)
-            Accumulate(tri.P0, tri);
-            Accumulate(tri.P1, tri);
-            Accumulate(tri.P2, tri);
+            Accumulate(entry.shapeIndex, tri.P0, tri);
+            Accumulate(entry.shapeIndex, tri.P1, tri);
+            Accumulate(entry.shapeIndex, tri.P2, tri);
         }
 
         // Write vertices
         foreach (var kv in vertexIndex.OrderBy(k => k.Value))
         {
-            sw.WriteLine(string.Create(CultureInfo.InvariantCulture, $"v {kv.Key.X} {kv.Key.Y} {kv.Key.Z}"));
+            var pt = kv.Key.p;
+            sw.WriteLine(string.Create(CultureInfo.InvariantCulture, $"v {pt.X} {pt.Y} {pt.Z}"));
         }
 
         // Write vertex normals in the same index order as vertices
-        var normalIndex = new Dictionary<Seaharp.Geometry.Point, int>();
+        var normalIndex = new Dictionary<(int shape, Seaharp.Geometry.Point p), int>();
         int nextNormal = 1;
         foreach (var kv in vertexIndex.OrderBy(k => k.Value))
         {
-            var p = kv.Key;
-            if (!normalSums.TryGetValue(p, out var sum)) sum = new Seaharp.Geometry.Vector(0, 0, 0);
+            var key = kv.Key;
+            if (!normalSums.TryGetValue(key, out var sum)) sum = new Seaharp.Geometry.Vector(0, 0, 0);
             var n = sum.Normalized();
             sw.WriteLine(string.Create(CultureInfo.InvariantCulture, $"vn {n.X} {n.Y} {n.Z}"));
-            normalIndex[p] = nextNormal++;
+            normalIndex[key] = nextNormal++;
         }
 
         // Simple material palette per shape
@@ -89,27 +94,29 @@ public sealed class World
             }
 
             var tri = entry.tri;
-            var i0 = vertexIndex[tri.P0];
-            var i1 = vertexIndex[tri.P1];
-            var i2 = vertexIndex[tri.P2];
-            var n0 = normalIndex[tri.P0];
-            var n1 = normalIndex[tri.P1];
-            var n2 = normalIndex[tri.P2];
+            var i0 = vertexIndex[(entry.shapeIndex, tri.P0)];
+            var i1 = vertexIndex[(entry.shapeIndex, tri.P1)];
+            var i2 = vertexIndex[(entry.shapeIndex, tri.P2)];
+            var n0 = normalIndex[(entry.shapeIndex, tri.P0)];
+            var n1 = normalIndex[(entry.shapeIndex, tri.P1)];
+            var n2 = normalIndex[(entry.shapeIndex, tri.P2)];
             sw.WriteLine($"f {i0}//{n0} {i1}//{n1} {i2}//{n2}");
         }
 
-        void IndexVertex(Seaharp.Geometry.Point p)
+        void IndexVertex(int shapeIdx, Seaharp.Geometry.Point p)
         {
-            if (!vertexIndex.ContainsKey(p))
+            var key = (shapeIdx, p);
+            if (!vertexIndex.ContainsKey(key))
             {
-                vertexIndex[p] = nextIndex++;
+                vertexIndex[key] = nextIndex++;
             }
         }
 
-        void Accumulate(Seaharp.Geometry.Point p, in Seaharp.Geometry.Tetrahedron.Triangle tri)
+        void Accumulate(int shapeIdx, Seaharp.Geometry.Point p, in Seaharp.Geometry.Tetrahedron.Triangle tri)
         {
             var add = new Seaharp.Geometry.Vector(tri.Normal.X, tri.Normal.Y, tri.Normal.Z);
-            if (normalSums.TryGetValue(p, out var cur)) normalSums[p] = cur + add; else normalSums[p] = add;
+            var key = (shapeIdx, p);
+            if (normalSums.TryGetValue(key, out var cur)) normalSums[key] = cur + add; else normalSums[key] = add;
         }
 
         // Write MTL file with per-shape diffuse colors
