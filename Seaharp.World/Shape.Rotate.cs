@@ -1,70 +1,50 @@
 using Seaharp.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Seaharp.World;
 
-public enum Axis { X, Y, Z }
-
-// Rotation-related APIs for Shape (destructive, 90° steps)
+// Rotation-related APIs for Shape (destructive)
 public abstract partial class Shape
 {
-    // Rotates all tetrahedrons around the given axis by quarterTurns * 90 degrees (right-handed)
+    // Rotates all tetrahedrons by the given Euler angles (degrees) around X, Y, Z (in that order)
     // and replaces them with new instances.
-    public void Rotate(Axis axis, int quarterTurns)
+    public void Rotate(double xDegrees = 0, double yDegrees = 0, double zDegrees = 0)
     {
         if (tetrahedrons.Count == 0) return;
 
-        int n = Mod4(quarterTurns);
-        if (n == 0) return;
-
+        var m = BuildRotationMatrix(xDegrees, yDegrees, zDegrees);
         var updated = new List<Seaharp.Geometry.Tetrahedron>(tetrahedrons.Count);
         foreach (var t in tetrahedrons)
         {
-            var a = RotatePoint(t.A, axis, n);
-            var b = RotatePoint(t.B, axis, n);
-            var c = RotatePoint(t.C, axis, n);
-            var d = RotatePoint(t.D, axis, n);
+            var a = RotatePoint(t.A, m);
+            var b = RotatePoint(t.B, m);
+            var c = RotatePoint(t.C, m);
+            var d = RotatePoint(t.D, m);
             updated.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
         }
 
         tetrahedrons.Clear();
         tetrahedrons.AddRange(updated);
 
-        static int Mod4(int v)
+        static Matrix4x4 BuildRotationMatrix(double xDeg, double yDeg, double zDeg)
         {
-            int m = v % 4;
-            return m < 0 ? m + 4 : m;
+            float rx = (float)(xDeg * Math.PI / 180.0);
+            float ry = (float)(yDeg * Math.PI / 180.0);
+            float rz = (float)(zDeg * Math.PI / 180.0);
+            var mx = Matrix4x4.CreateRotationX(rx);
+            var my = Matrix4x4.CreateRotationY(ry);
+            var mz = Matrix4x4.CreateRotationZ(rz);
+            // Apply X then Y then Z
+            return Matrix4x4.Multiply(Matrix4x4.Multiply(mx, my), mz);
         }
 
-        static Point RotatePoint(in Point p, Axis axis, int n)
+        static Point RotatePoint(in Point p, in Matrix4x4 m)
         {
-            long x = p.X, y = p.Y, z = p.Z;
-            return axis switch
-            {
-                Axis.X => n switch
-                {
-                    1 => new Point(x, z, -y),
-                    2 => new Point(x, -y, -z),
-                    3 => new Point(x, -z, y),
-                    _ => p
-                },
-                Axis.Y => n switch
-                {
-                    1 => new Point(z, y, -x),
-                    2 => new Point(-x, y, -z),
-                    3 => new Point(-z, y, x),
-                    _ => p
-                },
-                Axis.Z => n switch
-                {
-                    1 => new Point(-y, x, z),
-                    2 => new Point(-x, -y, z),
-                    3 => new Point(y, -x, z),
-                    _ => p
-                },
-                _ => p
-            };
+            var v = new Vector3(p.X, p.Y, p.Z);
+            var r = Vector3.Transform(v, m);
+            return new Point((long)Math.Round(r.X), (long)Math.Round(r.Y), (long)Math.Round(r.Z));
         }
     }
 }
