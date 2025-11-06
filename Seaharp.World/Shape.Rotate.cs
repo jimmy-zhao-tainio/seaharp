@@ -8,6 +8,10 @@ namespace Seaharp.World;
 // Rotation-related APIs for Shape (destructive)
 public abstract partial class Shape
 {
+    // Overload: rotate using a RotationAngles record (degrees around X, Y, Z)
+    public void Rotate(RotationAngles angles)
+        => Rotate(angles.XDegrees, angles.YDegrees, angles.ZDegrees);
+
     // Rotates all tetrahedrons by the given Euler angles (degrees) around X, Y, Z (in that order)
     // and replaces them with new instances.
     public void Rotate(double xDegrees = 0, double yDegrees = 0, double zDegrees = 0)
