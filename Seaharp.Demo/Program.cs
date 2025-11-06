@@ -75,7 +75,7 @@ internal class Program
 
         // STL-only export (OBJ disabled due to non-manifold issues in slicers)
         var stlPath = Path.ChangeExtension(outPath, ".stl");
-        world.SaveStl(stlPath);
+        world.Save(stlPath);
         Console.WriteLine($"Wrote STL: {stlPath}");
     }
 }
