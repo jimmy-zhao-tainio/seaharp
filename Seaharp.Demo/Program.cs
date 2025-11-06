@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using Seaharp.World;
+using Seaharp.Geometry;
 
 internal class Program
 {
@@ -13,12 +14,12 @@ internal class Program
         var outDir = Path.GetDirectoryName(outPath);
         if (!string.IsNullOrWhiteSpace(outDir)) Directory.CreateDirectory(outDir!);
 
-        var world = new Seaharp.World.World();
+        var world = new World();
 
         // Clean solar system: sun + 8 planets, each at a different orbital phase,
         // with moons in distinct orbits (no asteroids, no extra geometry).
 
-        var sunCenter = new Seaharp.Geometry.Point(0, 0, 0);
+        var sunCenter = new Point(0, 0, 0);
         world.Add(new Sphere(radius: 180, subdivisions: 4, center: sunCenter));
 
         void AddPlanet(long orbit, int planetRadius, int pSubs, double phaseDeg,
@@ -29,7 +30,7 @@ internal class Program
             long px = sunCenter.X + (long)Math.Round(Math.Cos(ph) * orbit);
             long py = sunCenter.Y + (long)Math.Round(Math.Sin(ph) * orbit);
             long pz = (long)Math.Round(15 * Math.Sin(ph * 0.7));
-            var pc = new Seaharp.Geometry.Point(px, py, pz);
+            var pc = new Point(px, py, pz);
             world.Add(new Sphere(planetRadius, pSubs, pc));
 
             if (moonOrbits is null || moonOrbits.Length == 0) return;
@@ -39,7 +40,7 @@ internal class Program
                 long mx = pc.X + (long)Math.Round(Math.Cos(ma) * moonOrbits[i]);
                 long my = pc.Y + (long)Math.Round(Math.Sin(ma) * moonOrbits[i]);
                 long mz = pc.Z + (long)Math.Round(moonIncline * Math.Sin((i + 1) * 0.9));
-                world.Add(new Sphere(moonRadius, mSubs, new Seaharp.Geometry.Point(mx, my, mz)));
+                world.Add(new Sphere(moonRadius, mSubs, new Point(mx, my, mz)));
             }
         }
 
