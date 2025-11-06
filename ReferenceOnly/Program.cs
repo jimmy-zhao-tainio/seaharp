@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
+using Seaharp.Geometry.Bridging;
 
 const UnitScale unit = UnitScale.Millimeter;
 const int boxSize = 50;
@@ -26,13 +27,12 @@ static void RunStackDemo()
     var parts = new List<Shape> { lowerBox, upperBox };
     var outputFile = "box-stack.obj";
 
-    if (BridgeExtensions.TryBridge(lowerBox, upperBox, out var bridge, out var lowerFace, out var upperFace))
-    {
-        Console.WriteLine("Bridge found between boxes:");
-        PrintTriangle("  Lower face", lowerFace);
-        PrintTriangle("  Upper face", upperFace);
-        Console.WriteLine($"  Loft tetrahedra: {bridge.Solid.Tetrahedra.Count}");
+    var bridge = ShapeBridgeBuilder.BuildBridge(lowerBox, upperBox);
 
+    if (bridge.Solid.Tetrahedrons.Count > 0)
+    {
+        Console.WriteLine("Bridge found between boxes (prism).");
+        Console.WriteLine($"  Bridge Tetrahedrons: {bridge.Solid.Tetrahedrons.Count}");
         parts.Add(bridge);
         outputFile = "box-bridge.obj";
     }
@@ -42,20 +42,11 @@ static void RunStackDemo()
     }
 
     var assembly = Shape.Combine(parts.ToArray());
-    Console.WriteLine($"Total tetrahedra: {assembly.Solid.Tetrahedra.Count}");
+    Console.WriteLine($"Total Tetrahedrons: {assembly.Solid.Tetrahedrons.Count}");
 
     var outputPath = Path.Combine(AppContext.BaseDirectory, outputFile);
     SolidExporter.WriteObj(assembly.Solid, outputPath);
     Console.WriteLine($"OBJ saved to: {outputPath}");
-}
-
-static void PrintTriangle(string label, TriangleFace face)
-{
-    Console.WriteLine($"{label}:");
-    foreach (var vertex in face.Vertices)
-    {
-        Console.WriteLine($"  ({vertex.X}, {vertex.Y}, {vertex.Z})");
-    }
 }
 
 
