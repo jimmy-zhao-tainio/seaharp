@@ -16,6 +16,7 @@ public sealed class World
         shapes.Add(shape);
     }
 
+    [Obsolete("OBJ export may produce non-manifold meshes in some slicers; prefer SaveStl.")]
     public void Save(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path required", nameof(path));

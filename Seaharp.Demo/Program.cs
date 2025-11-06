@@ -73,19 +73,9 @@ internal class Program
             world.Add(strip);
         }
 
-        // Save OBJ + MTL + vertex normals (if .obj), and also STL
-        if (Path.GetExtension(outPath).Equals(".obj", StringComparison.OrdinalIgnoreCase))
-        {
-            world.Save(outPath);
-            Console.WriteLine($"Wrote OBJ: {outPath}");
-            var stl = Path.ChangeExtension(outPath, ".stl");
-            world.SaveStl(stl);
-            Console.WriteLine($"Wrote STL: {stl}");
-        }
-        else
-        {
-            world.SaveStl(outPath);
-            Console.WriteLine($"Wrote STL: {outPath}");
-        }
+        // STL-only export (OBJ disabled due to non-manifold issues in slicers)
+        var stlPath = Path.ChangeExtension(outPath, ".stl");
+        world.SaveStl(stlPath);
+        Console.WriteLine($"Wrote STL: {stlPath}");
     }
 }
