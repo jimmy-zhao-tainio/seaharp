@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Xunit;
 using Seaharp.World;
 using Seaharp.Geometry;
+using Seaharp.Geometry.Predicates;
 
 namespace Seaharp.World.Tests;
 
@@ -13,7 +14,9 @@ public class RotationTests
         var shape = new Box(width: 3, depth: 2, height: 4);
         var before = Snapshot(shape.Tetrahedrons);
 
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
         shape.Rotate(0, 0, 0);
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
 
         var after = shape.Tetrahedrons;
         Assert.Equal(before.Count, after.Count);
@@ -39,7 +42,9 @@ public class RotationTests
         var before = Snapshot(shape.Tetrahedrons);
 
         shape.Rotate(rx, ry, rz);
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
         shape.Rotate(-rx, -ry, -rz);
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
 
         var after = shape.Tetrahedrons;
         Assert.Equal(before.Count, after.Count);
@@ -63,7 +68,9 @@ public class RotationTests
         var before = Snapshot(shape.Tetrahedrons);
 
         shape.Rotate(rx, ry, rz);
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
         shape.Rotate(-rx, -ry, -rz);
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
 
         var after = shape.Tetrahedrons;
         Assert.Equal(before.Count, after.Count);

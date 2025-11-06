@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Xunit;
 using Seaharp.World;
 using Seaharp.Geometry;
+using Seaharp.Geometry.Predicates;
 
 namespace Seaharp.World.Tests;
 
@@ -19,9 +20,11 @@ public class RotationDecimalCoherenceTests
         var beforeTets = shape.Tetrahedrons;
 
         var adjBefore = BuildAdjacency(beforeTets);
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
         var uniqueBefore = UniqueVertices(beforeTets);
 
         shape.Rotate(rx, ry, rz);
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
 
         var afterTets = shape.Tetrahedrons;
         var adjAfter = BuildAdjacency(afterTets);
