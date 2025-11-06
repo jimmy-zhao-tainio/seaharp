@@ -45,6 +45,25 @@ public readonly record struct Point(long X, long Y, long Z)
     public override string ToString() => $"({X}, {Y}, {Z})";
 }
 
+public readonly record struct Edge(Point Start, Point End)
+{
+    public Edge Canonicalize()
+    {
+        if (PointComparer.Instance.Compare(Start, End) <= 0)
+        {
+            return this;
+        }
+
+        return new Edge(End, Start);
+    }
+}
+
+public readonly record struct VertexOnEdgeMatch(
+    Point VertexOnEdge,
+    Edge HostEdge,
+    Point OtherVertex0,
+    Point OtherVertex1);
+
 public readonly record struct Triangle(Point A, Point B, Point C)
 {
     private static Point[] SortVertices(Point a, Point b, Point c)
@@ -238,9 +257,22 @@ public sealed class Solid
             : new HashSet<Tetrahedron>();
     }
 
+    // Convenience overloads that use the global Units.Current
+    public Solid(IEnumerable<Tetrahedron>? tetrahedrons)
+        : this(Units.Current, tetrahedrons)
+    {
+    }
+
+    public Solid()
+        : this(Units.Current, null)
+    {
+    }
+
     public UnitScale Unit { get; }
 
     public IReadOnlyCollection<Tetrahedron> Tetrahedrons => _tetrahedra;
+
+    public static Solid Empty => new Solid();
 
     public Solid Add(Tetrahedron tetra)
     {

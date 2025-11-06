@@ -4,4 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Seaharp.Geometry\Seaharp.Geometry.csproj" />
+  </ItemGroup>
 </Project>

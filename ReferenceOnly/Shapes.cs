@@ -51,8 +51,6 @@ public class Shape
         return Solid.BoundaryTriangles().Where(filter);
     }
 
-    public Shape With(Solid solid) => new Shape(solid);
-
     public static Shape Combine(params Shape[] shapes)
     {
         if (shapes == null || shapes.Length == 0)
@@ -67,6 +65,8 @@ public class Shape
         }
         return new Shape(result);
     }
+
+    public static Shape Empty => new Shape(Solid.Empty);
 }
 
 public sealed class Box : Shape

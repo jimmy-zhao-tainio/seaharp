@@ -12,6 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Seaharp.Geometry\Seaharp.Geometry.csproj" />
+    <ProjectReference Include="..\Seaharp.Geometry.Predicates\Seaharp.Geometry.Predicates.csproj" />
   </ItemGroup>
 </Project>
-
