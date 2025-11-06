@@ -41,7 +41,7 @@ public class RotationDecimalCoherenceTests
         Assert.Equal(uniqueBefore.Count, uniqueAfter.Count);
     }
 
-    private static bool[] BuildAdjacency(IReadOnlyList<Tetrahedron> tets)
+    private static bool[] BuildAdjacency(IReadOnlyList<Seaharp.Geometry.Tetrahedron> tets)
     {
         int n = tets.Count;
         var adj = new bool[n * n];
@@ -57,7 +57,7 @@ public class RotationDecimalCoherenceTests
         return adj;
     }
 
-    private static bool ShareTriangle(in Tetrahedron a, in Tetrahedron b)
+    private static bool ShareTriangle(in Seaharp.Geometry.Tetrahedron a, in Seaharp.Geometry.Tetrahedron b)
     {
         var af = new[] { a.ABC, a.ABD, a.ACD, a.BCD };
         var bf = new[] { b.ABC, b.ABD, b.ACD, b.BCD };
@@ -67,11 +67,11 @@ public class RotationDecimalCoherenceTests
         return false;
     }
 
-    private static bool SameTri(in Tetrahedron.Triangle t0, in Tetrahedron.Triangle t1)
+    private static bool SameTri(in Seaharp.Geometry.Tetrahedron.Triangle t0, in Seaharp.Geometry.Tetrahedron.Triangle t1)
         => ContainsAll(t0, t1.P0, t1.P1, t1.P2);
 
     private static bool ContainsAll(
-        in Tetrahedron.Triangle tri,
+        in Seaharp.Geometry.Tetrahedron.Triangle tri,
         in Point x,
         in Point y,
         in Point z)
@@ -83,7 +83,7 @@ public class RotationDecimalCoherenceTests
         return found == 3;
     }
 
-    private static HashSet<Point> UniqueVertices(IReadOnlyList<Tetrahedron> tets)
+    private static HashSet<Point> UniqueVertices(IReadOnlyList<Seaharp.Geometry.Tetrahedron> tets)
     {
         var set = new HashSet<Point>();
         foreach (var t in tets)
@@ -96,4 +96,3 @@ public class RotationDecimalCoherenceTests
         return set;
     }
 }
-
