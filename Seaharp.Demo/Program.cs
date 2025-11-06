@@ -9,75 +9,56 @@ internal class Program
     {
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-        var outPath = args.Length > 0 ? args[0] : "demo.obj";
+        var outPath = args.Length > 0 ? args[0] : "solar_system.stl";
         var outDir = Path.GetDirectoryName(outPath);
         if (!string.IsNullOrWhiteSpace(outDir)) Directory.CreateDirectory(outDir!);
 
         var world = new Seaharp.World.World();
 
-        // Replace demo scene with an icosphere built from tetrahedra
-        // Solar system demo made of icospheres
-        string outName = Path.GetFileNameWithoutExtension(outPath);
+        // Clean solar system: sun + 8 planets, each at a different orbital phase,
+        // with moons in distinct orbits (no asteroids, no extra geometry).
 
-        // Sun
-        var sun = new Sphere(radius: 180, subdivisions: 4, center: new Seaharp.Geometry.Point(0, 0, 0));
-        world.Add(sun);
+        var sunCenter = new Seaharp.Geometry.Point(0, 0, 0);
+        world.Add(new Sphere(radius: 180, subdivisions: 4, center: sunCenter));
 
-        // Planets
-        var p1 = new Sphere(radius: 70, subdivisions: 3, center: new Seaharp.Geometry.Point(480, 0, 0));
-        var p2 = new Sphere(radius: 50, subdivisions: 3, center: new Seaharp.Geometry.Point(860, 0, 0));
-        var p3 = new Sphere(radius: 42, subdivisions: 3, center: new Seaharp.Geometry.Point(1200, 0, 0));
-        world.Add(p1);
-        world.Add(p2);
-        world.Add(p3);
-
-        // Ring of moons around planet 2
-        int moons = 18;
-        long moonRing = 140;
-        for (int i = 0; i < moons; i++)
+        void AddPlanet(long orbit, int planetRadius, int pSubs, double phaseDeg,
+                       long[]? moonOrbits = null, int moonRadius = 10, int mSubs = 2,
+                       double moonIncline = 8.0)
         {
-            double a = i * (2 * Math.PI / moons);
-            long dx = (long)Math.Round(Math.Cos(a) * moonRing);
-            long dy = (long)Math.Round(Math.Sin(a) * moonRing);
-            long dz = (long)Math.Round(12 * Math.Sin(i * 0.4));
-            var mCenter = new Seaharp.Geometry.Point(p2.Center.X + dx, p2.Center.Y + dy, p2.Center.Z + dz);
-            var moon = new Sphere(radius: 14, subdivisions: 2, center: mCenter);
-            world.Add(moon);
+            double ph = phaseDeg * Math.PI / 180.0;
+            long px = sunCenter.X + (long)Math.Round(Math.Cos(ph) * orbit);
+            long py = sunCenter.Y + (long)Math.Round(Math.Sin(ph) * orbit);
+            long pz = (long)Math.Round(15 * Math.Sin(ph * 0.7));
+            var pc = new Seaharp.Geometry.Point(px, py, pz);
+            world.Add(new Sphere(planetRadius, pSubs, pc));
+
+            if (moonOrbits is null || moonOrbits.Length == 0) return;
+            for (int i = 0; i < moonOrbits.Length; i++)
+            {
+                double ma = (phaseDeg * 2.0 + i * (360.0 / moonOrbits.Length)) * Math.PI / 180.0;
+                long mx = pc.X + (long)Math.Round(Math.Cos(ma) * moonOrbits[i]);
+                long my = pc.Y + (long)Math.Round(Math.Sin(ma) * moonOrbits[i]);
+                long mz = pc.Z + (long)Math.Round(moonIncline * Math.Sin((i + 1) * 0.9));
+                world.Add(new Sphere(moonRadius, mSubs, new Seaharp.Geometry.Point(mx, my, mz)));
+            }
         }
 
-        // Asteroid belt around the sun (tiny spheres)
-        int ast = 48;
-        long belt = 1000;
-        for (int i = 0; i < ast; i++)
-        {
-            double t = i * (2 * Math.PI / ast);
-            long x = (long)Math.Round(Math.Cos(t) * belt);
-            long y = (long)Math.Round(Math.Sin(t) * belt);
-            long z = (long)Math.Round(25 * Math.Sin(i * 0.3));
-            var aCenter = new Seaharp.Geometry.Point(x, y, z);
-            var rock = new Sphere(radius: 10, subdivisions: 1, center: aCenter);
-            world.Add(rock);
-        }
+        // Mercury, Venus, Earth(+moon), Mars(+2), Jupiter(+4), Saturn(+3), Uranus(+2), Neptune(+1)
+        AddPlanet(orbit: 350,  planetRadius: 22, pSubs: 3, phaseDeg: 10);
+        AddPlanet(orbit: 520,  planetRadius: 32, pSubs: 3, phaseDeg: 60);
+        AddPlanet(orbit: 720,  planetRadius: 34, pSubs: 3, phaseDeg: 130,
+                  moonOrbits: new long[] { 70 }, moonRadius: 12, mSubs: 2);
+        AddPlanet(orbit: 920,  planetRadius: 26, pSubs: 3, phaseDeg: 210,
+                  moonOrbits: new long[] { 55, 80 }, moonRadius: 9, mSubs: 2);
+        AddPlanet(orbit: 1250, planetRadius: 78, pSubs: 4, phaseDeg: 280,
+                  moonOrbits: new long[] { 140, 190, 260, 340 }, moonRadius: 15, mSubs: 2, moonIncline: 12);
+        AddPlanet(orbit: 1600, planetRadius: 66, pSubs: 4, phaseDeg: 330,
+                  moonOrbits: new long[] { 160, 240, 320 }, moonRadius: 13, mSubs: 2, moonIncline: 10);
+        AddPlanet(orbit: 1950, planetRadius: 54, pSubs: 3, phaseDeg: 45,
+                  moonOrbits: new long[] { 120, 180 }, moonRadius: 11, mSubs: 2);
+        AddPlanet(orbit: 2280, planetRadius: 52, pSubs: 3, phaseDeg: 95,
+                  moonOrbits: new long[] { 140 }, moonRadius: 11, mSubs: 2);
 
-        // 4) Möbius-like ring of twisted boxes
-        int twists = 1; // one half-twist along the ring
-        int segs = 48;
-        double R = 180.0; // ring radius
-        for (int i = 0; i < segs; i++)
-        {
-            double t = (double)i / segs;
-            double ang = t * 360.0;
-            long x = (long)Math.Round(Math.Cos(ang * Math.PI / 180.0) * R);
-            long y = (long)Math.Round(Math.Sin(ang * Math.PI / 180.0) * R);
-            long z = (long)Math.Round(15 * Math.Sin(t * 2 * Math.PI));
-            double twist = 180.0 * twists * t; // gradual half-twist
-            var strip = new Box(width: 10, depth: 4, height: 26);
-            strip.Rotate(10 + 10 * Math.Sin(i * 0.5), ang, twist);
-            strip.Position(x, y, z);
-            world.Add(strip);
-        }
-
-        // STL-only export (OBJ disabled due to non-manifold issues in slicers)
         var stlPath = Path.ChangeExtension(outPath, ".stl");
         world.Save(stlPath);
         Console.WriteLine($"Wrote STL: {stlPath}");
