@@ -15,60 +15,57 @@ internal class Program
         var sunCenter = new Point(0, 0, 0);
         world.Add(new Sphere(radius: 180, center: sunCenter));
 
-        // Planets and moons by name (helper in Planets.cs)
+        // Demo tuning: very thin orbit rings
+        const int RingThickness = 2;
+        const int RingHeight    = 2;
 
-        // Simple helper to add a planet by name using Planets data
+        // Math helpers kept local so the demo remains self-contained and readable
         static (double x, double y, double z) RotateXZ(double x, double y, double z, double xDeg, double zDeg)
         {
             double rx = xDeg * Math.PI / 180.0;
             double rz = zDeg * Math.PI / 180.0;
             double cx = Math.Cos(rx), sx = Math.Sin(rx);
             double cz = Math.Cos(rz), sz = Math.Sin(rz);
-            // X
             double y1 = y * cx - z * sx;
             double z1 = y * sx + z * cx;
             double x1 = x;
-            // Z
             double x2 = x1 * cz - y1 * sz;
             double y2 = x1 * sz + y1 * cz;
-            double z2 = z1;
-            return (x2, y2, z2);
+            return (x2, y2, z1);
+        }
+
+        // World helpers to keep the orchestration terse
+        void AddOrbitRing(Point center, long radius, double incDeg, double ascDeg)
+            => world.Add(new EclipticCylinder(radius: radius, thickness: RingThickness, height: RingHeight,
+                                              center: center, segments: null,
+                                              xTiltDeg: incDeg, yTiltDeg: 0, zSpinDeg: ascDeg));
+
+        static Point OffsetOnTiltedCircle(Point center, long radius, double phaseDeg, double incDeg, double ascDeg)
+        {
+            double ph = phaseDeg * Math.PI / 180.0;
+            var v = RotateXZ(Math.Cos(ph) * radius, Math.Sin(ph) * radius, 0.0, incDeg, ascDeg);
+            return new Point(center.X + (long)Math.Round(v.x),
+                             center.Y + (long)Math.Round(v.y),
+                             center.Z + (long)Math.Round(v.z));
         }
 
         void AddPlanet(in Planets.Planet p, double phaseDeg)
         {
-            // Orbit ring
-            world.Add(new EclipticCylinder(radius: p.OrbitRadius, thickness: 2, height: 2,
-                                           center: sunCenter, segments: null,
-                                           xTiltDeg: p.InclinationDeg, yTiltDeg: 0, zSpinDeg: p.AscendingNodeDeg));
-
-            // Body position on tilted orbit
-            double ph = phaseDeg * Math.PI / 180.0;
-            var pv = RotateXZ(Math.Cos(ph) * p.OrbitRadius, Math.Sin(ph) * p.OrbitRadius, 0.0,
-                               p.InclinationDeg, p.AscendingNodeDeg);
-            var pc = new Point(
-                sunCenter.X + (long)Math.Round(pv.x),
-                sunCenter.Y + (long)Math.Round(pv.y),
-                sunCenter.Z + (long)Math.Round(pv.z));
+            // Orbit ring + body on its tilted plane
+            AddOrbitRing(sunCenter, p.OrbitRadius, p.InclinationDeg, p.AscendingNodeDeg);
+            var pc = OffsetOnTiltedCircle(sunCenter, p.OrbitRadius, phaseDeg, p.InclinationDeg, p.AscendingNodeDeg);
             world.Add(new Sphere(p.Radius, pc));
 
-            // Moons
-            if (p.MoonOrbits.Length == 0) return;
+            // Moons (each with a subtle additional inclination)
             for (int i = 0; i < p.MoonOrbits.Length; i++)
             {
                 double moonAsc = p.AscendingNodeDeg + i * (360.0 / (p.MoonOrbits.Length * 3.0));
                 double moonInc = p.InclinationDeg + p.MoonExtraInclineDeg;
-                world.Add(new EclipticCylinder(radius: p.MoonOrbits[i], thickness: 2, height: 2,
-                                               center: pc, segments: null,
-                                               xTiltDeg: moonInc, yTiltDeg: 0, zSpinDeg: moonAsc));
+                AddOrbitRing(pc, p.MoonOrbits[i], moonInc, moonAsc);
 
-                double ma = (phaseDeg * 2.0 + i * (360.0 / p.MoonOrbits.Length)) * Math.PI / 180.0;
-                var mv = RotateXZ(Math.Cos(ma) * p.MoonOrbits[i], Math.Sin(ma) * p.MoonOrbits[i], 0.0,
-                                   moonInc, moonAsc);
-                long mx = pc.X + (long)Math.Round(mv.x);
-                long my = pc.Y + (long)Math.Round(mv.y);
-                long mz = pc.Z + (long)Math.Round(mv.z);
-                world.Add(new Sphere(p.MoonRadius, new Point(mx, my, mz)));
+                var mp = OffsetOnTiltedCircle(pc, p.MoonOrbits[i], phaseDeg * 2.0 + i * (360.0 / p.MoonOrbits.Length),
+                                               moonInc, moonAsc);
+                world.Add(new Sphere(p.MoonRadius, mp));
             }
         }
 
