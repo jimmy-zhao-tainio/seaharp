@@ -28,26 +28,26 @@ internal class Program
             col++;
         }
 
-        // 1) Platonic solids
+        // Row 1: Platonic solids + cube
         AddAtCol(new RegularTetra(solidRadius, new Point(-2 * spacing, 0, zBase)));
-
-        // Cube via Box centered at desired point
         {
             var b = new Box(cubeEdge, cubeEdge, cubeEdge);
-            b.Position(-cubeEdge / 2, -cubeEdge / 2, -cubeEdge / 2); // center box at origin
-            b.Position(-1 * spacing, 0, zBase);                      // move into column
+            b.Position(-cubeEdge / 2, -cubeEdge / 2, -cubeEdge / 2);
+            b.Position(-1 * spacing, 0, zBase);
             AddAtCol(b);
         }
-
         AddAtCol(new Octahedron(solidRadius, new Point(0 * spacing, 0, zBase)));
         AddAtCol(new Dodecahedron(solidRadius, new Point(1 * spacing, 0, zBase)));
         AddAtCol(new Icosahedron(solidRadius, new Point(2 * spacing, 0, zBase)));
 
-        // 2) Common shapes
+        // Row 2: Common primitives
         AddAtCol(new Sphere(solidRadius, new Point(3 * spacing, 0, zBase)));
-        AddAtCol(new Cylinder(cylRadius, ringThickness, ringHeight, new Point(4 * spacing, 0, zBase), segments: 24));
+        AddAtCol(new SolidCylinder(cylRadius, height: 280, center: new Point(4 * spacing, 0, zBase), segments: 24));
+        AddAtCol(new Cylinder(cylRadius, ringThickness, ringHeight, new Point(5 * spacing, 0, zBase), segments: 24));
+        AddAtCol(new SquarePyramid(baseEdge: 260, height: 260, center: new Point(6 * spacing, 0, zBase)));
+        AddAtCol(new TriangularPrism(edge: 240, height: 260, center: new Point(7 * spacing, 0, zBase)));
+        AddAtCol(new Cone(radius: 140, height: 280, center: new Point(8 * spacing, 0, zBase), segments: 32));
 
         world.Save("shapes_gallery.stl");
     }
 }
-
