@@ -5,6 +5,9 @@ namespace Seaharp.World;
 
 public sealed class Sphere : Shape
 {
+    public Sphere(long radius, Seaharp.Geometry.Point center) : this(radius, ChooseSubdivisions(radius), center) { }
+
+    public Sphere(long radius) : this(radius, ChooseSubdivisions(radius), new Seaharp.Geometry.Point(0, 0, 0)) { }
     public Sphere(long radius, int subdivisions, Seaharp.Geometry.Point? center = null)
     {
         if (radius <= 0) throw new ArgumentOutOfRangeException(nameof(radius));
@@ -57,6 +60,14 @@ public sealed class Sphere : Shape
     public long Radius { get; }
     public int Subdivisions { get; }
     public Seaharp.Geometry.Point Center { get; }
+
+    private static int ChooseSubdivisions(long radius)
+    {
+        if (radius <= 30) return 1;
+        if (radius <= 60) return 2;
+        if (radius <= 110) return 3;
+        return 4;
+    }
 
     private readonly struct DVec
     {
@@ -137,3 +148,6 @@ public sealed class Sphere : Shape
         verts = v;
     }
 }
+
+
+
