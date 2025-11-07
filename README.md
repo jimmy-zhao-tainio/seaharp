@@ -2,7 +2,7 @@
 
 Seaharp is a small geometry project that builds 3D shapes from integer-grid tetrahedra and exports a binary STL. The demo renders a simple solar system with a sun, eight planets, their moons, and thin tilted orbit rings.
 
-## Pure Z3, Only Tetrahedra
+## Pure Z^3, Only Tetrahedra
 
 - All vertices live on the integer lattice `Z^3` (no persistent floats).
 - Every shape is a union of tetrahedra only; surfaces are derived from boundary triangles.
