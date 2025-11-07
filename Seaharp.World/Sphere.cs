@@ -63,11 +63,9 @@ public sealed class Sphere : Shape
 
     private static int ChooseSubdivisions(long radius)
     {
-        if (radius <= 30) return 1;
-        if (radius <= 60) return 2;
-        if (radius <= 110) return 3;
-        return 4;
+        return 3;
     }
+
 
     private readonly struct DVec
     {
@@ -148,6 +146,7 @@ public sealed class Sphere : Shape
         verts = v;
     }
 }
+
 
 
 

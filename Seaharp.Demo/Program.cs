@@ -2,8 +2,8 @@ using System;
 using Seaharp.World;
 using Seaharp.Geometry;
 
-internal class Program{
-    private enum Preset { Low, Medium, High }
+internal class Program
+{
     private static void Main()
     {
         var world = new World();
@@ -12,8 +12,7 @@ internal class Program{
         // with moons in distinct orbits (no asteroids, no extra geometry).
 
         var sunCenter = new Point(0, 0, 0);
-        var preset = Preset.Medium; var (sunSubs, planetSubs, moonSubs) = preset switch { Preset.Low => (2,1,1), Preset.High => (4,3,2), _ => (3,2,1) };
-        world.Add(new Sphere(radius: 180, subdivisions: sunSubs, center: sunCenter));
+        world.Add(new Sphere(radius: 180, center: sunCenter));
 
         void AddPlanet(long orbit, int planetRadius, double phaseDeg,
                        long[]? moonOrbits = null, int moonRadius = 10,
@@ -24,7 +23,7 @@ internal class Program{
             long py = sunCenter.Y + (long)Math.Round(Math.Sin(ph) * orbit);
             long pz = (long)Math.Round(15 * Math.Sin(ph * 0.7));
             var pc = new Point(px, py, pz);
-            world.Add(new Sphere(planetRadius, planetSubs, pc));
+            world.Add(new Sphere(planetRadius, pc));
 
             if (moonOrbits is null || moonOrbits.Length == 0) return;
             for (int i = 0; i < moonOrbits.Length; i++)
@@ -33,7 +32,7 @@ internal class Program{
                 long mx = pc.X + (long)Math.Round(Math.Cos(ma) * moonOrbits[i]);
                 long my = pc.Y + (long)Math.Round(Math.Sin(ma) * moonOrbits[i]);
                 long mz = pc.Z + (long)Math.Round(moonIncline * Math.Sin((i + 1) * 0.9));
-                world.Add(new Sphere(moonRadius, moonSubs, new Point(mx, my, mz)));
+                world.Add(new Sphere(moonRadius, new Point(mx, my, mz)));
             }
         }
 
@@ -56,5 +55,7 @@ internal class Program{
         world.Save("clean_system.stl");
     }
 }
+
+
 
 
