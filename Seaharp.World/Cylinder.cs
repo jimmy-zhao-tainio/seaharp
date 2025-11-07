@@ -2,13 +2,12 @@ using System;
 
 namespace Seaharp.World;
 
-// A thin, hollow cylinder aligned to the Z axis, intended to trace
-// the ecliptic orbits in the XY plane. Built as a set of wedge prisms
-// around the circle, each decomposed into tetrahedra so only the shell
-// surface remains after surface extraction.
-public sealed class EclipticCylinder : Shape
+// A thin, hollow cylinder aligned to the Z axis.
+// Built as a ring of wedge prisms decomposed into tetrahedra,
+// leaving only the shell surface after extraction.
+public sealed class Cylinder : Shape
 {
-    public EclipticCylinder(long radius, long thickness = 2, long height = 2,
+    public Cylinder(long radius, long thickness = 2, long height = 2,
                             Seaharp.Geometry.Point? center = null,
                             int? segments = null,
                             double xTiltDeg = 0, double yTiltDeg = 0, double zSpinDeg = 0)

@@ -30,7 +30,7 @@ world.Add(new Sphere(radius: 180, center: sunCenter));
 void AddPlanet(in Planets.Planet p, double phaseDeg)
 {
     // Thin tilted orbit ring
-    world.Add(new EclipticCylinder(radius: p.OrbitRadius, thickness: 2, height: 2,
+    world.Add(new Cylinder(radius: p.OrbitRadius, thickness: 2, height: 2,
                                    center: sunCenter, segments: null,
                                    xTiltDeg: p.InclinationDeg, yTiltDeg: 0, zSpinDeg: p.AscendingNodeDeg));
 

@@ -36,7 +36,7 @@ internal class Program
 
         // World helpers to keep the orchestration terse
         void AddOrbitRing(Point center, long radius, double incDeg, double ascDeg)
-            => world.Add(new EclipticCylinder(radius: radius, thickness: RingThickness, height: RingHeight,
+            => world.Add(new Cylinder(radius: radius, thickness: RingThickness, height: RingHeight,
                                               center: center, segments: null,
                                               xTiltDeg: incDeg, yTiltDeg: 0, zSpinDeg: ascDeg));
 
