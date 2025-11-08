@@ -14,5 +14,6 @@
     <ProjectReference Include="..\Seaharp.World\Seaharp.World.csproj" />
     <ProjectReference Include="..\Seaharp.Geometry\Seaharp.Geometry.csproj" />
     <ProjectReference Include="..\Seaharp.Geometry.Predicates\Seaharp.Geometry.Predicates.csproj" />
+    <ProjectReference Include="..\Seaharp.World.Predicates\Seaharp.World.Predicates.csproj" />
   </ItemGroup>
 </Project>

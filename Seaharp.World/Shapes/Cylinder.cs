@@ -123,11 +123,16 @@ public sealed class Cylinder : Shape
             var to1 = P(to1r.X, to1r.Y, to1r.Z);
             var ti1 = P(ti1r.X, ti1r.Y, ti1r.Z);
 
-            // Triangulate the wedge base into two triangles and extrude to prisms
+            // Triangulate the wedge base into two triangles and extrude to prisms.
+            // To ensure seam-aligned diagonals on rectangular faces between adjacent wedges,
+            // alternate the prism decomposition across segments by swapping (b1,b2) <-> (t1,t2).
+            // Deterministic diagonal rule (no parity):
+            // - Outer wall diagonal: bo0 -> to1 (keep original prism A ordering)
+            // - Inner wall diagonal: bi0 -> ti1 (achieved by flipping prism B ordering)
             // Prism A: (bi0, bo0, bo1) -> (ti0, to0, to1)
             AddPrismAsTets(bi0, bo0, bo1, ti0, to0, to1);
-            // Prism B: (bi0, bo1, bi1) -> (ti0, to1, ti1)
-            AddPrismAsTets(bi0, bo1, bi1, ti0, to1, ti1);
+            // Prism B (flipped to enforce bi0 -> ti1 diagonal): (bi0, bi1, bo1) -> (ti0, ti1, to1)
+            AddPrismAsTets(bi0, bi1, bo1, ti0, ti1, to1);
         }
     }
 

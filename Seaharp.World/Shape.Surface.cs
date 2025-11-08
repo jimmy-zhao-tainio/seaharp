@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
@@ -10,49 +11,27 @@ public abstract partial class Shape
     // another tetrahedron in the same shape (vertex-set equality, order-agnostic).
     public IEnumerable<Seaharp.Geometry.Tetrahedron.Triangle> GetSurface()
     {
-        var triangles = new List<Seaharp.Geometry.Tetrahedron.Triangle>(tetrahedrons.Count * 4);
+        var map = new Dictionary<TriangleKey, (int count, Seaharp.Geometry.Tetrahedron.Triangle tri)>(tetrahedrons.Count * 4);
+
+        void Acc(in Seaharp.Geometry.Tetrahedron.Triangle t)
+        {
+            var key = TriangleKey.FromTriangle(t);
+            if (map.TryGetValue(key, out var e)) map[key] = (e.count + 1, e.tri);
+            else map[key] = (1, t);
+        }
+
         foreach (var t in tetrahedrons)
         {
-            triangles.Add(t.ABC);
-            triangles.Add(t.ABD);
-            triangles.Add(t.ACD);
-            triangles.Add(t.BCD);
+            Acc(t.ABC);
+            Acc(t.ABD);
+            Acc(t.ACD);
+            Acc(t.BCD);
         }
 
-        for (int i = 0; i < triangles.Count; i++)
+        foreach (var kv in map)
         {
-            var tri = triangles[i];
-            bool shared = false;
-            for (int j = 0; j < triangles.Count; j++)
-            {
-                if (i == j) continue;
-                if (SameTriangle(tri, triangles[j]))
-                {
-                    shared = true; break;
-                }
-            }
-            if (!shared)
-            {
-                yield return tri;
-            }
-        }
-
-        static bool SameTriangle(in Seaharp.Geometry.Tetrahedron.Triangle a, in Seaharp.Geometry.Tetrahedron.Triangle b)
-        {
-            return ContainsAll(a, b.P0, b.P1, b.P2);
-        }
-
-        static bool ContainsAll(
-            in Seaharp.Geometry.Tetrahedron.Triangle tri,
-            in Seaharp.Geometry.Point x,
-            in Seaharp.Geometry.Point y,
-            in Seaharp.Geometry.Point z)
-        {
-            int found = 0;
-            if (tri.P0.Equals(x) || tri.P1.Equals(x) || tri.P2.Equals(x)) found++;
-            if (tri.P0.Equals(y) || tri.P1.Equals(y) || tri.P2.Equals(y)) found++;
-            if (tri.P0.Equals(z) || tri.P1.Equals(z) || tri.P2.Equals(z)) found++;
-            return found == 3;
+            if (kv.Value.count == 1)
+                yield return kv.Value.tri;
         }
     }
 }

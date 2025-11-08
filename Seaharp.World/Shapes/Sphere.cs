@@ -55,6 +55,7 @@ public sealed class Sphere : Shape
                 // Degenerate after rounding; skip
             }
         }
+
     }
 
     public long Radius { get; }
