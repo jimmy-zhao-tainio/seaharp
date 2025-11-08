@@ -14,7 +14,8 @@ public sealed partial class World
         var tris = new List<Seaharp.Geometry.Tetrahedron.Triangle>();
         foreach (var s in shapes)
         {
-            tris.AddRange(s.GetSurface());
+            var surface = new Surface(s);
+            tris.AddRange(surface.Triangles);
         }
 
         using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);

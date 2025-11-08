@@ -161,6 +161,7 @@ public sealed class Cylinder : Shape
         catch (InvalidOperationException)
         {
             // Degenerate due to rounding/collinearity; skip.
+            degenerateSkips++;
         }
     }
 }

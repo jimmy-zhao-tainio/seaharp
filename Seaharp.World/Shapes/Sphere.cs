@@ -53,6 +53,7 @@ public sealed class Sphere : Shape
             catch (InvalidOperationException)
             {
                 // Degenerate after rounding; skip
+                degenerateSkips++;
             }
         }
 
