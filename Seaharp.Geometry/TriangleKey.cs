@@ -22,7 +22,7 @@ public readonly struct TriangleKey : IEquatable<TriangleKey>
     public static TriangleKey FromPoints(in Point p0, in Point p1, in Point p2)
         => new TriangleKey(p0, p1, p2);
 
-    public static TriangleKey FromTriangle(in Tetrahedron.Triangle t)
+    public static TriangleKey FromTriangle(in Triangle t)
         => new TriangleKey(t.P0, t.P1, t.P2);
 
     public bool Equals(TriangleKey other)
@@ -59,4 +59,3 @@ public readonly struct TriangleKey : IEquatable<TriangleKey>
         return p.Z > q.Z;
     }
 }
-

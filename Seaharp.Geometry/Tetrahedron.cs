@@ -85,38 +85,7 @@ public readonly struct Tetrahedron
         BCD = new Triangle(B, C, D, A);
     }
 
-    // Nested so nothing outside can construct one with an arbitrary normal.
-    public readonly struct Triangle
-    {
-        public readonly Point P0;
-        public readonly Point P1;
-        public readonly Point P2;
-        public readonly Normal Normal; // outward, unit length
-
-        internal Triangle(Point p0, Point p1, Point p2, Point missing)
-        {
-            P0 = p0;
-            P1 = p1;
-            P2 = p2;
-
-            // Compute exact integer normal direction using Int128, then normalize in double.
-            var e1 = Vector128.FromPoints(p0, p1);
-            var e2 = Vector128.FromPoints(p0, p2);
-            var nc = Vector128.Cross(e1, e2);
-            var n = new Vector((double)nc.X, (double)nc.Y, (double)nc.Z);
-            var normal = Normal.FromVector(n);
-
-            // Ensure outward: decide using exact Int128 dot to avoid floating ambiguity.
-            var missDelta = Vector128.FromPoints(p0, missing);
-            var sign = Vector128.Dot(nc, missDelta);
-            if (sign >= 0)
-            {
-                normal = Normal.FromVector(n * -1.0);
-            }
-
-            Normal = normal;
-        }
-    }
+    // Triangle type moved to Seaharp.Geometry.Triangle (standalone) for reuse.
 
     private static void ValidatePointRange(in Point p)
     {

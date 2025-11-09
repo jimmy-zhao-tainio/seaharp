@@ -5,7 +5,7 @@ namespace Seaharp.Geometry.Predicates;
 
 public static class TetrahedronPredicates
 {
-    private static bool TriangleMatchesAny(in Seaharp.Geometry.Tetrahedron.Triangle triangle, in Seaharp.Geometry.Tetrahedron t)
+    private static bool TriangleMatchesAny(in Seaharp.Geometry.Triangle triangle, in Seaharp.Geometry.Tetrahedron t)
         => TrianglePredicates.IsSame(triangle, t.ABC) ||
            TrianglePredicates.IsSame(triangle, t.ABD) ||
            TrianglePredicates.IsSame(triangle, t.ACD) ||

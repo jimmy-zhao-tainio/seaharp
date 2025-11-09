@@ -11,7 +11,7 @@ public sealed partial class World
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path required", nameof(path));
 
-        var tris = new List<Seaharp.Geometry.Tetrahedron.Triangle>();
+        var tris = new List<Seaharp.Geometry.Triangle>();
         foreach (var s in shapes)
         {
             var surface = new Surface(s);

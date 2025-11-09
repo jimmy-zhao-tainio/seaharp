@@ -7,7 +7,7 @@ namespace Seaharp.Geometry.Tests.Predicates;
 
 internal static class PredicatesTestHelpers
 {
-    public static IEnumerable<Tetrahedron.Triangle> Faces(Tetrahedron t)
+    public static IEnumerable<Triangle> Faces(Tetrahedron t)
     {
         yield return t.ABC;
         yield return t.ABD;
@@ -15,7 +15,7 @@ internal static class PredicatesTestHelpers
         yield return t.BCD;
     }
 
-    public static Tetrahedron.Triangle FaceByVertices(
+    public static Triangle FaceByVertices(
         in Tetrahedron t,
         in Point p0,
         in Point p1,
@@ -31,8 +31,8 @@ internal static class PredicatesTestHelpers
     public static bool TryFindSharedFace(
         in Tetrahedron a,
         in Tetrahedron b,
-        out Tetrahedron.Triangle faceA,
-        out Tetrahedron.Triangle faceB)
+        out Triangle faceA,
+        out Triangle faceB)
     {
         foreach (var fa in Faces(a))
         {
@@ -52,7 +52,7 @@ internal static class PredicatesTestHelpers
     }
 
     public static bool HasVertices(
-        in Tetrahedron.Triangle tri,
+        in Triangle tri,
         in Point x,
         in Point y,
         in Point z)

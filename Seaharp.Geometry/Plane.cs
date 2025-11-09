@@ -15,7 +15,7 @@ public readonly struct Plane
         Point = point;
     }
 
-    public static Plane FromTriangle(in Tetrahedron.Triangle tri)
+    public static Plane FromTriangle(in Triangle tri)
         => new Plane(tri.Normal, tri.P0);
 
     // Signed evaluation of point relative to plane.
@@ -38,4 +38,3 @@ public readonly struct Plane
         return 0;
     }
 }
-

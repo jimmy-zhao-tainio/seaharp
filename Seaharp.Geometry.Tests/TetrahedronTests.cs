@@ -276,7 +276,7 @@ public class TetrahedronTests
         Assert.True(DotToMissing(tet.BCD, tet.A) <= -tol);
     }
 
-    private static double DotToMissing(in Tetrahedron.Triangle tri, in Point missing)
+    private static double DotToMissing(in Triangle tri, in Point missing)
     {
         var p0 = new Vector(tri.P0.X, tri.P0.Y, tri.P0.Z);
         var pm = new Vector(missing.X, missing.Y, missing.Z);
@@ -291,7 +291,7 @@ public class TetrahedronTests
         AssertOrthogonal(tet.BCD, tol);
     }
 
-    private static void AssertOrthogonal(in Tetrahedron.Triangle tri, double tol)
+    private static void AssertOrthogonal(in Triangle tri, double tol)
     {
         var v0 = new Vector(tri.P0.X, tri.P0.Y, tri.P0.Z);
         var e1 = new Vector(tri.P1.X - tri.P0.X, tri.P1.Y - tri.P0.Y, tri.P1.Z - tri.P0.Z);
@@ -314,7 +314,7 @@ public class TetrahedronTests
         CheckFace(tet.ABD, tet.C);
         CheckFace(tet.ACD, tet.B);
         CheckFace(tet.BCD, tet.A);
-        void CheckFace(in Tetrahedron.Triangle tri, in Point missing)
+        void CheckFace(in Triangle tri, in Point missing)
         {
             // Use Int128 math (mirroring library) for robust normal orientation.
             Int128 e1x = (Int128)tri.P1.X - (Int128)tri.P0.X;

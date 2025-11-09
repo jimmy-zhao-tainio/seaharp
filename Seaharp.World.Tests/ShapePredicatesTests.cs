@@ -35,14 +35,4 @@ public class ShapePredicatesTests
         Assert.True(ShapePredicates.HasCoplanarEdgeConflicts(shape));
         Assert.False(ShapePredicates.IsValid(shape));
     }
-
-    private sealed class TwoTetsShareEdgeShape : Shape
-    {
-        public TwoTetsShareEdgeShape(GPoint a, GPoint b, GPoint c, GPoint d, GPoint e, GPoint f)
-        {
-            // Two tetrahedra sharing only edge AB (no shared face)
-            tetrahedrons.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
-            tetrahedrons.Add(new Seaharp.Geometry.Tetrahedron(a, b, e, f));
-        }
-    }
 }

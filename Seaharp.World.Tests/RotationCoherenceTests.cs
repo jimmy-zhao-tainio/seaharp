@@ -29,14 +29,14 @@ public class RotationCoherenceTests
         var shape = new Box(width: 4, depth: 3, height: 2);
         var beforeTets = shape.Tetrahedrons;
 
-        var adjBefore = BuildAdjacency(beforeTets);
+        var adjBefore = TestHelpers.BuildAdjacency(beforeTets);
         Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
 
         shape.Rotate(rx, ry, rz);
         Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
 
         var afterTets = shape.Tetrahedrons;
-        var adjAfter = BuildAdjacency(afterTets);
+        var adjAfter = TestHelpers.BuildAdjacency(afterTets);
 
         Assert.Equal(beforeTets.Count, afterTets.Count);
         Assert.Equal(adjBefore.Length, adjAfter.Length);
@@ -46,47 +46,5 @@ public class RotationCoherenceTests
         }
     }
 
-    private static bool[] BuildAdjacency(IReadOnlyList<Seaharp.Geometry.Tetrahedron> tets)
-    {
-        int n = tets.Count;
-        var adj = new bool[n * n];
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = i + 1; j < n; j++)
-            {
-                bool shared = ShareTriangle(tets[i], tets[j]);
-                adj[i * n + j] = shared;
-                adj[j * n + i] = shared;
-            }
-        }
-        return adj;
-    }
-
-    private static bool ShareTriangle(in Seaharp.Geometry.Tetrahedron a, in Seaharp.Geometry.Tetrahedron b)
-    {
-        var af = new[] { a.ABC, a.ABD, a.ACD, a.BCD };
-        var bf = new[] { b.ABC, b.ABD, b.ACD, b.BCD };
-        foreach (var x in af)
-            foreach (var y in bf)
-                if (SameTri(x, y)) return true;
-        return false;
-    }
-
-    private static bool SameTri(in Seaharp.Geometry.Tetrahedron.Triangle t0, in Seaharp.Geometry.Tetrahedron.Triangle t1)
-    {
-        return ContainsAll(t0, t1.P0, t1.P1, t1.P2);
-    }
-
-    private static bool ContainsAll(
-        in Seaharp.Geometry.Tetrahedron.Triangle tri,
-        in Point x,
-        in Point y,
-        in Point z)
-    {
-        int found = 0;
-        if (tri.P0.Equals(x) || tri.P1.Equals(x) || tri.P2.Equals(x)) found++;
-        if (tri.P0.Equals(y) || tri.P1.Equals(y) || tri.P2.Equals(y)) found++;
-        if (tri.P0.Equals(z) || tri.P1.Equals(z) || tri.P2.Equals(z)) found++;
-        return found == 3;
-    }
+    // Shared helpers moved to TestHelpers.
 }
