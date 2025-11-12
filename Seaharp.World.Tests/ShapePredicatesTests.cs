@@ -1,6 +1,5 @@
 using Xunit;
 using Seaharp.World;
-using Seaharp.World.Predicates;
 using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
@@ -36,3 +35,4 @@ public class ShapePredicatesTests
         Assert.False(ShapePredicates.IsValid(shape));
     }
 }
+

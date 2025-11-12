@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Xunit;
 using Seaharp.Geometry;
+using Seaharp.Surface;
 
 namespace Seaharp.Geometry.Tests;
 
@@ -48,4 +49,3 @@ public class EdgeKeyTests
     private static void Inc(Dictionary<EdgeKey, int> m, EdgeKey k)
     { if (m.TryGetValue(k, out var c)) m[k] = c + 1; else m[k] = 1; }
 }
-

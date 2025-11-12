@@ -1,33 +1,32 @@
 using Xunit;
 using Seaharp.World;
-using Seaharp.World.Predicates;
 
 namespace Seaharp.World.Tests;
 
-public class PolyhedronTests
+public class SurfaceManifoldTests
 {
     [Fact]
-    public void Box_ToPolyhedron_IsManifold()
+    public void Box_Surface_IsManifold()
     {
         var box = new Box(width: 4, depth: 3, height: 2);
-        var poly = Polyhedron.FromShape(box);
-        Assert.True(PolyhedronPredicates.IsManifold(poly));
+        var surface = Seaharp.World.SurfaceBuilder.FromShape(box);
+        Assert.True(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
-    public void Sphere_ToPolyhedron_IsManifold()
+    public void Sphere_Surface_IsManifold()
     {
         var sphere = new Sphere(radius: 5, subdivisions: 1);
-        var poly = Polyhedron.FromShape(sphere);
-        Assert.True(PolyhedronPredicates.IsManifold(poly));
+        var surface = Seaharp.World.SurfaceBuilder.FromShape(sphere);
+        Assert.True(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
-    public void Cylinder_ToPolyhedron_IsManifold()
+    public void Cylinder_Surface_IsManifold()
     {
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: 16);
-        var poly = Polyhedron.FromShape(cyl);
-        Assert.True(PolyhedronPredicates.IsManifold(poly));
+        var surface = Seaharp.World.SurfaceBuilder.FromShape(cyl);
+        Assert.True(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
     }
 }
 

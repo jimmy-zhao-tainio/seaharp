@@ -46,13 +46,13 @@ public readonly struct TriangleKey : IEquatable<TriangleKey>
     private static (Point, Point, Point) Sort3(in Point p0, in Point p1, in Point p2)
     {
         var a = p0; var b = p1; var c = p2;
-        if (Gt(a, b)) { var t = a; a = b; b = t; }
-        if (Gt(b, c)) { var t = b; b = c; c = t; }
-        if (Gt(a, b)) { var t = a; a = b; b = t; }
+        if (GreaterThan(a, b)) { var t = a; a = b; b = t; }
+        if (GreaterThan(b, c)) { var t = b; b = c; c = t; }
+        if (GreaterThan(a, b)) { var t = a; a = b; b = t; }
         return (a, b, c);
     }
 
-    private static bool Gt(in Point p, in Point q)
+    private static bool GreaterThan(in Point p, in Point q)
     {
         if (p.X != q.X) return p.X > q.X;
         if (p.Y != q.Y) return p.Y > q.Y;

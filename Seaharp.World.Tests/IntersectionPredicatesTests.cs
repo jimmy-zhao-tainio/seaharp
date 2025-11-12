@@ -1,6 +1,6 @@
 using Xunit;
 using Seaharp.World;
-using Seaharp.World.Predicates;
+using Seaharp.Surface;
 using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
@@ -16,8 +16,8 @@ public class IntersectionPredicatesTests
         var sphere = new Sphere(5, subdivisions: 1);
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: 16);
 
-        Assert.False(IntersectionPredicates.HasSelfIntersections(box));
-        Assert.False(IntersectionPredicates.HasSelfIntersections(sphere));
-        Assert.False(IntersectionPredicates.HasSelfIntersections(cyl));
+        Assert.True(Seaharp.World.ShapePredicates.IsValid(box));
+        Assert.True(Seaharp.World.ShapePredicates.IsValid(sphere));
+        Assert.True(Seaharp.World.ShapePredicates.IsValid(cyl));
     }
 }

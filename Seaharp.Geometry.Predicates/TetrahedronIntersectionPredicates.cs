@@ -9,23 +9,25 @@ public static class TetrahedronIntersectionPredicates
     // Contacts along a single face/edge/vertex are NOT counted as intersections.
     public static bool Intersects(in Tetrahedron a, in Tetrahedron b)
     {
-        if (!AabbOverlap(a, b)) return false;
+        if (!BoundingBoxOverlap(a, b)) return false;
 
         // Any vertex of A strictly inside B?
-        if (PointInsideTetStrict(b, a.A) || PointInsideTetStrict(b, a.B) ||
-            PointInsideTetStrict(b, a.C) || PointInsideTetStrict(b, a.D))
+        if (PointInsideTetrahedronStrict(b, a.A) || PointInsideTetrahedronStrict(b, a.B) ||
+            PointInsideTetrahedronStrict(b, a.C) || PointInsideTetrahedronStrict(b, a.D))
             return true;
 
         // Any vertex of B strictly inside A?
-        if (PointInsideTetStrict(a, b.A) || PointInsideTetStrict(a, b.B) ||
-            PointInsideTetStrict(a, b.C) || PointInsideTetStrict(a, b.D))
+        if (PointInsideTetrahedronStrict(a, b.A) || PointInsideTetrahedronStrict(a, b.B) ||
+            PointInsideTetrahedronStrict(a, b.C) || PointInsideTetrahedronStrict(a, b.D))
             return true;
 
+        // FIXME: Naive implementation, silent returns are dangerous!
         // Note: does not yet detect face-face crossings without vertices strictly inside.
         return false;
     }
 
-    private static bool AabbOverlap(in Tetrahedron a, in Tetrahedron b)
+    // FIXME: Use BoundingBoxPredicates.TetrahedronOverlap?
+    private static bool BoundingBoxOverlap(in Tetrahedron a, in Tetrahedron b)
     {
         (long minX, long minY, long minZ, long maxX, long maxY, long maxZ) Box(in Tetrahedron t)
         {
@@ -45,12 +47,13 @@ public static class TetrahedronIntersectionPredicates
         return true;
     }
 
-    private static bool PointInsideTetStrict(in Tetrahedron t, in Point p)
+    // FIXME: Possibly TetrahedronPredicates.IsPointInsideStrict?
+    private static bool PointInsideTetrahedronStrict(in Tetrahedron t, in Point p)
     {
-        static bool Neg(in Triangle tri, in Point q)
+        // Do not abbreviate: clearer name than "Neg".
+        static bool IsOnNegativeSide(in Triangle tri, in Point q)
             => Plane.FromTriangle(tri).Side(q, Tolerances.PlaneSideEpsilon) < 0;
 
-        return Neg(t.ABC, p) && Neg(t.ABD, p) && Neg(t.ACD, p) && Neg(t.BCD, p);
+        return IsOnNegativeSide(t.ABC, p) && IsOnNegativeSide(t.ABD, p) && IsOnNegativeSide(t.ACD, p) && IsOnNegativeSide(t.BCD, p);
     }
 }
-
