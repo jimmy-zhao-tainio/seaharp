@@ -1,6 +1,6 @@
 using System;
 
-namespace Seaharp.Geometry.Computational;
+namespace Seaharp.Geometry.Computation;
 
 // Simple double-precision ray (origin, direction unit vector)
 public readonly struct Ray
@@ -16,4 +16,5 @@ public readonly struct Ray
         Dx = dx / len; Dy = dy / len; Dz = dz / len;
     }
 }
+
 

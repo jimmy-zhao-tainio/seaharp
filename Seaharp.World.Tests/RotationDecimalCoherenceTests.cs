@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Xunit;
 using Seaharp.World;
 using Seaharp.Geometry;
-using Seaharp.Geometry.Predicates;
+using Seaharp.Geometry.Computation;
 
 namespace Seaharp.World.Tests;
 
@@ -59,3 +59,4 @@ public class RotationDecimalCoherenceTests
         return set;
     }
 }
+

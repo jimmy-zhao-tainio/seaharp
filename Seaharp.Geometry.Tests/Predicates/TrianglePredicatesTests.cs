@@ -1,6 +1,6 @@
 using Xunit;
 using Seaharp.Geometry;
-using Seaharp.Geometry.Predicates;
+using Seaharp.Geometry.Computation;
 
 namespace Seaharp.Geometry.Tests.Predicates;
 
@@ -83,3 +83,4 @@ public class TrianglePredicatesTests
         Assert.False(TrianglePredicates.IsSame(tABC, tABE));
     }
 }
+

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Seaharp.Geometry.Predicates;
+namespace Seaharp.Geometry.Computation;
 
 public static class TetrahedronPredicates
 {
@@ -17,8 +17,6 @@ public static class TetrahedronPredicates
            TriangleMatchesAny(first.ACD, second) ||
            TriangleMatchesAny(first.BCD, second);
 
-    // A list of tetrahedrons is solid if every tetrahedron shares at least one triangle
-    // with another tetrahedron in the same list.
     public static bool IsSolid(IReadOnlyList<Seaharp.Geometry.Tetrahedron> tetrahedrons)
     {
         if (tetrahedrons is null) throw new ArgumentNullException(nameof(tetrahedrons));
@@ -42,5 +40,5 @@ public static class TetrahedronPredicates
         }
         return false;
     }
-
 }
+

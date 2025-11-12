@@ -1,4 +1,4 @@
-namespace Seaharp.Geometry.Predicates;
+namespace Seaharp.Geometry.Computation;
 
 public static class TrianglePredicates
 {
@@ -21,3 +21,4 @@ public static class TrianglePredicates
         return found == 3;
     }
 }
+

@@ -1,6 +1,6 @@
 using System;
 
-namespace Seaharp.Geometry.Computational;
+namespace Seaharp.Geometry.Computation;
 
 public static class Intersections
 {
@@ -41,4 +41,5 @@ public static class Intersections
         return true;
     }
 }
+
 

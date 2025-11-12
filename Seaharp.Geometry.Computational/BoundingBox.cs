@@ -1,7 +1,7 @@
 using System;
 using Seaharp.Geometry;
 
-namespace Seaharp.Geometry.Computational;
+namespace Seaharp.Geometry.Computation;
 
 // Axis-aligned bounding box in integer grid space (long) with Point endpoints.
 public readonly struct BoundingBox
@@ -45,4 +45,5 @@ public readonly struct BoundingBox
         new Point(long.MaxValue, long.MaxValue, long.MaxValue),
         new Point(long.MinValue, long.MinValue, long.MinValue));
 }
+
 

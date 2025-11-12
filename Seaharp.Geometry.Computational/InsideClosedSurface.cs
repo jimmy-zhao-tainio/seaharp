@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
 
-namespace Seaharp.Geometry.Computational;
+namespace Seaharp.Geometry.Computation;
 
 public static class InsideClosedSurface
 {
@@ -68,3 +68,4 @@ public static class InsideClosedSurface
 
     private static double Cross2(double ax, double ay, double bx, double by) => ax * by - ay * bx;
 }
+

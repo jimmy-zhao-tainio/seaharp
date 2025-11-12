@@ -1,32 +1,25 @@
 using System;
 using Seaharp.Geometry;
 
-namespace Seaharp.Geometry.Predicates;
+namespace Seaharp.Geometry.Computation;
 
 public static class TetrahedronIntersectionPredicates
 {
-    // Strict volumetric overlap detection for tetrahedra.
-    // Contacts along a single face/edge/vertex are NOT counted as intersections.
     public static bool Intersects(in Tetrahedron a, in Tetrahedron b)
     {
         if (!BoundingBoxOverlap(a, b)) return false;
 
-        // Any vertex of A strictly inside B?
         if (PointInsideTetrahedronStrict(b, a.A) || PointInsideTetrahedronStrict(b, a.B) ||
             PointInsideTetrahedronStrict(b, a.C) || PointInsideTetrahedronStrict(b, a.D))
             return true;
 
-        // Any vertex of B strictly inside A?
         if (PointInsideTetrahedronStrict(a, b.A) || PointInsideTetrahedronStrict(a, b.B) ||
             PointInsideTetrahedronStrict(a, b.C) || PointInsideTetrahedronStrict(a, b.D))
             return true;
 
-        // FIXME: Naive implementation, silent returns are dangerous!
-        // Note: does not yet detect face-face crossings without vertices strictly inside.
         return false;
     }
 
-    // FIXME: Use BoundingBoxPredicates.TetrahedronOverlap?
     private static bool BoundingBoxOverlap(in Tetrahedron a, in Tetrahedron b)
     {
         (long minX, long minY, long minZ, long maxX, long maxY, long maxZ) Box(in Tetrahedron t)
@@ -47,13 +40,12 @@ public static class TetrahedronIntersectionPredicates
         return true;
     }
 
-    // FIXME: Possibly TetrahedronPredicates.IsPointInsideStrict?
     private static bool PointInsideTetrahedronStrict(in Tetrahedron t, in Point p)
     {
-        // Do not abbreviate: clearer name than "Neg".
         static bool IsOnNegativeSide(in Triangle tri, in Point q)
             => Plane.FromTriangle(tri).Side(q, Tolerances.PlaneSideEpsilon) < 0;
 
         return IsOnNegativeSide(t.ABC, p) && IsOnNegativeSide(t.ABD, p) && IsOnNegativeSide(t.ACD, p) && IsOnNegativeSide(t.BCD, p);
     }
 }
+

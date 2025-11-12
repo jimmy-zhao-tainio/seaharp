@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Seaharp.Geometry;
-using Seaharp.Geometry.Predicates;
+using Seaharp.Geometry.Computation;
 
 namespace Seaharp.World.Tests;
 
@@ -32,4 +32,5 @@ internal static class TestHelpers
         return false;
     }
 }
+
 

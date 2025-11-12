@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
-using Seaharp.Geometry.Predicates;
+using Seaharp.Geometry.Computation;
 
 namespace Seaharp.Geometry.Tests.Predicates;
 
@@ -64,3 +64,4 @@ internal static class PredicatesTestHelpers
         return found == 3;
     }
 }
+

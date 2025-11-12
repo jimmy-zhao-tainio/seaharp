@@ -1,6 +1,6 @@
 using Xunit;
 using Seaharp.Geometry;
-using Seaharp.Geometry.Predicates;
+using Seaharp.Geometry.Computation;
 using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.Geometry.Tests.Predicates;
@@ -59,4 +59,5 @@ public class TetrahedronIntersectionPredicatesTests
         Assert.False(TetrahedronIntersectionPredicates.Intersects(t1, t2));
     }
 }
+
 
