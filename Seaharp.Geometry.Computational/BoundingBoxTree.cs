@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
-using Seaharp.Geometry.Computational;
 
-namespace Seaharp.World;
+namespace Seaharp.Geometry.Computational;
 
-// Bounding box tree over Surface triangles.
-
-// Simple BVH over triangles of a Surface for broad-phase queries.
-internal sealed class BoundingBoxTree
+// Simple BVH over triangles for broad-phase queries.
+public sealed class BoundingBoxTree
 {
-    private readonly Seaharp.Surface.ClosedSurface _surface;
     private readonly Node _root;
 
     private readonly struct TriangleBox
@@ -25,27 +21,24 @@ internal sealed class BoundingBoxTree
         public BoundingBox Box;
         public Node? Left;
         public Node? Right;
-        public int Start; // start index into triangles
-        public int Count; // number of triangles in leaf (if Count>0)
+        public int Start;
+        public int Count;
     }
 
     private readonly TriangleBox[] _triangles;
 
-    public BoundingBoxTree(Seaharp.Surface.ClosedSurface surface)
+    public BoundingBoxTree(IReadOnlyList<Triangle> triangles)
     {
-        _surface = surface ?? throw new ArgumentNullException(nameof(surface));
-        _triangles = BuildTriangleBoxes(surface);
+        if (triangles is null) throw new ArgumentNullException(nameof(triangles));
+        _triangles = BuildTriangleBoxes(triangles);
         _root = Build(0, _triangles.Length);
     }
 
     public void Query(in BoundingBox box, List<int> results)
-    {
-        QueryNode(_root, box, results);
-    }
+        => QueryNode(_root, box, results);
 
-    private static TriangleBox[] BuildTriangleBoxes(Seaharp.Surface.ClosedSurface s)
+    private static TriangleBox[] BuildTriangleBoxes(IReadOnlyList<Triangle> tris)
     {
-        var tris = s.Triangles;
         var arr = new TriangleBox[tris.Count];
         for (int i = 0; i < tris.Count; i++)
         {
@@ -59,7 +52,6 @@ internal sealed class BoundingBoxTree
     private Node Build(int start, int end)
     {
         var node = new Node();
-        // compute bounding box for range
         long minX = long.MaxValue, minY = long.MaxValue, minZ = long.MaxValue;
         long maxX = long.MinValue, maxY = long.MinValue, maxZ = long.MinValue;
         for (int i = start; i < end; i++)
@@ -82,11 +74,9 @@ internal sealed class BoundingBoxTree
             return node;
         }
 
-        // choose split axis by extent
         long ex = maxX - minX, ey = maxY - minY, ez = maxZ - minZ;
         int axis = ex >= ey && ex >= ez ? 0 : (ey >= ez ? 1 : 2);
 
-        // sort range by centroid along axis and split in the middle
         Array.Sort(_triangles, start, count, new TriangleBoxComparer(axis));
         int mid = start + count / 2;
         node.Left = Build(start, mid);
@@ -124,3 +114,4 @@ internal sealed class BoundingBoxTree
             => axis == 0 ? (b.Min.X + b.Max.X) : axis == 1 ? (b.Min.Y + b.Max.Y) : (b.Min.Z + b.Max.Z);
     }
 }
+

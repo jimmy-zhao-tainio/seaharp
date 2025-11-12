@@ -9,3 +9,4 @@ public static class ShapePredicates
     public static bool HasCoplanarEdgeConflicts(Shape shape) => !IsValid(shape);
 }
 
+
