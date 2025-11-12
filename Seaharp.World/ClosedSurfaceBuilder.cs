@@ -4,7 +4,7 @@ using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
-public static class SurfaceBuilder
+public static class ClosedSurfaceBuilder
 {
     // Build a Surface by extracting boundary triangles from a shape.
     public static Seaharp.Surface.ClosedSurface FromShape(Shape shape)

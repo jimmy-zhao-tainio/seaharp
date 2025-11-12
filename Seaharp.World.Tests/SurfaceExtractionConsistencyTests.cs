@@ -23,7 +23,7 @@ public class SurfaceExtractionConsistencyTests
     {
         // New path: via Surface snapshot keyed by TriangleKey
         var viaKey = new HashSet<Seaharp.Surface.TriangleKey>();
-        foreach (var t in Seaharp.World.SurfaceBuilder.FromShape(shape).Triangles) viaKey.Add(Seaharp.Surface.TriangleKey.FromTriangle(t));
+        foreach (var t in Seaharp.World.ClosedSurfaceBuilder.FromShape(shape).Triangles) viaKey.Add(Seaharp.Surface.TriangleKey.FromTriangle(t));
 
         // Old path: O(n^2) pairwise equality scan using TrianglePredicates.IsSame
         var all = new List<Seaharp.Geometry.Triangle>(shape.Tetrahedrons.Count * 4);
@@ -57,5 +57,6 @@ public class SurfaceExtractionConsistencyTests
         Assert.True(viaScan.IsSubsetOf(viaKey));
     }
 }
+
 
 

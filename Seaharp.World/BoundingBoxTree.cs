@@ -10,7 +10,7 @@ namespace Seaharp.World;
 // Simple BVH over triangles of a Surface for broad-phase queries.
 internal sealed class BoundingBoxTree
 {
-    private readonly Surface _surface;
+    private readonly Seaharp.Surface.ClosedSurface _surface;
     private readonly Node _root;
 
     private readonly struct TriangleBox
@@ -31,7 +31,7 @@ internal sealed class BoundingBoxTree
 
     private readonly TriangleBox[] _triangles;
 
-    public BoundingBoxTree(Surface surface)
+    public BoundingBoxTree(Seaharp.Surface.ClosedSurface surface)
     {
         _surface = surface ?? throw new ArgumentNullException(nameof(surface));
         _triangles = BuildTriangleBoxes(surface);
@@ -43,7 +43,7 @@ internal sealed class BoundingBoxTree
         QueryNode(_root, box, results);
     }
 
-    private static TriangleBox[] BuildTriangleBoxes(Surface s)
+    private static TriangleBox[] BuildTriangleBoxes(Seaharp.Surface.ClosedSurface s)
     {
         var tris = s.Triangles;
         var arr = new TriangleBox[tris.Count];
