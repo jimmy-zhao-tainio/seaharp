@@ -1,6 +1,6 @@
 using Xunit;
 using Seaharp.World;
-using Seaharp.ClosedSurface;
+using Seaharp.CSG;
 using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
@@ -21,4 +21,5 @@ public class IntersectionPredicatesTests
         Assert.True(Seaharp.World.ShapePredicates.IsValid(cyl));
     }
 }
+
 

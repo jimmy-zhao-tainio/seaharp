@@ -12,9 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Seaharp.Geometry\Seaharp.Geometry.csproj" />
-    <ProjectReference Include="..\\Seaharp.ClosedSurface\\Seaharp.ClosedSurface.csproj" />
+    <ProjectReference Include="..\\Seaharp.CSG\\Seaharp.CSG.csproj" />
     <ProjectReference Include="..\\Seaharp.Geometry.Computation\\Seaharp.Geometry.Computation.csproj" />
   </ItemGroup>
 </Project>
+
+
 
 

@@ -1,11 +1,11 @@
 using Xunit;
 using Seaharp.World;
-using Seaharp.ClosedSurface;
+using Seaharp.CSG;
 using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
 
-public class ClosedSurfacePredicatesTests
+public class SurfacePredicatesTests
 {
     [Fact]
     public void SingleTetrahedron_SurfaceIsManifold()
@@ -16,8 +16,8 @@ public class ClosedSurfacePredicatesTests
         var d = new GPoint(0, 0, 1);
 
         var shape = new Tetrahedron(a, b, c, d);
-        var surface = shape.ToClosedSurface();
-        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
+        var surface = shape.ToSurface();
+        Assert.True(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
@@ -31,10 +31,12 @@ public class ClosedSurfacePredicatesTests
         var f = new GPoint(0, 0, -1);
 
         var shape = new TwoTetsShareEdgeShape(a, b, c, d, e, f);
-        var surface = shape.ToClosedSurface();
-        Assert.False(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
+        var surface = shape.ToSurface();
+        Assert.False(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
     }
 }
+
+
 
 
 

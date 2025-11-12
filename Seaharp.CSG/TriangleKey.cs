@@ -1,7 +1,7 @@
 using System;
 using Seaharp.Geometry;
 
-namespace Seaharp.ClosedSurface;
+namespace Seaharp.CSG;
 
 // Order-agnostic, integer-only key for a triangle defined by three grid Points.
 public readonly struct TriangleKey : IEquatable<TriangleKey>
@@ -55,3 +55,5 @@ public readonly struct TriangleKey : IEquatable<TriangleKey>
         return p.Z > q.Z;
     }
 }
+
+

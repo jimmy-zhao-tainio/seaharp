@@ -9,26 +9,28 @@ public class SurfaceManifoldTests
     public void Box_Surface_IsManifold()
     {
         var box = new Box(width: 4, depth: 3, height: 2);
-        var surface = box.ToClosedSurface();
-        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
+        var surface = box.ToSurface();
+        Assert.True(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
     public void Sphere_Surface_IsManifold()
     {
         var sphere = new Sphere(radius: 5, subdivisions: 1);
-        var surface = sphere.ToClosedSurface();
-        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
+        var surface = sphere.ToSurface();
+        Assert.True(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
     public void Cylinder_Surface_IsManifold()
     {
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: 16);
-        var surface = cyl.ToClosedSurface();
-        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
+        var surface = cyl.ToSurface();
+        Assert.True(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
     }
 }
+
+
 
 
 

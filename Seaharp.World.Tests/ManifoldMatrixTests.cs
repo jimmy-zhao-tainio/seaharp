@@ -16,11 +16,13 @@ public class ManifoldMatrixTests
     {
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: segments,
                                xTiltDeg: rx, yTiltDeg: ry, zSpinDeg: rz);
-        var surface = cyl.ToClosedSurface();
-        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
+        var surface = cyl.ToSurface();
+        Assert.True(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
         Assert.True(Seaharp.World.ShapePredicates.IsValid(cyl));
     }
 }
+
+
 
 
 
