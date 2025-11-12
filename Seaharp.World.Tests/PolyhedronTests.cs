@@ -10,7 +10,7 @@ public class SurfaceManifoldTests
     {
         var box = new Box(width: 4, depth: 3, height: 2);
         var surface = box.ToClosedSurface();
-        Assert.True(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
+        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
@@ -18,7 +18,7 @@ public class SurfaceManifoldTests
     {
         var sphere = new Sphere(radius: 5, subdivisions: 1);
         var surface = sphere.ToClosedSurface();
-        Assert.True(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
+        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
@@ -26,9 +26,10 @@ public class SurfaceManifoldTests
     {
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: 16);
         var surface = cyl.ToClosedSurface();
-        Assert.True(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
+        Assert.True(Seaharp.ClosedSurface.ClosedSurfacePredicates.IsManifold(surface));
     }
 }
+
 
 
 

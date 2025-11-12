@@ -7,13 +7,13 @@ namespace Seaharp.World;
 public static class ShapeExtensions
 {
     // Builds a ClosedSurface by extracting boundary triangles from a shape.
-    public static Seaharp.Surface.ClosedSurface ToClosedSurface(this Shape shape)
+    public static Seaharp.ClosedSurface.ClosedSurface ToClosedSurface(this Shape shape)
     {
         if (shape is null) throw new ArgumentNullException(nameof(shape));
-        var triangleOccurrences = new Dictionary<Seaharp.Surface.TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
+        var triangleOccurrences = new Dictionary<Seaharp.ClosedSurface.TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
         void Accumulate(in Triangle triangle)
         {
-            var key = Seaharp.Surface.TriangleKey.FromTriangle(triangle);
+            var key = Seaharp.ClosedSurface.TriangleKey.FromTriangle(triangle);
             if (triangleOccurrences.TryGetValue(key, out var entry))
                 triangleOccurrences[key] = (entry.count + 1, entry.triangle);
             else
@@ -31,7 +31,6 @@ public static class ShapeExtensions
         {
             if (kv.Value.count == 1) boundaryTriangles.Add(kv.Value.triangle);
         }
-        return new Seaharp.Surface.ClosedSurface(boundaryTriangles);
+        return new Seaharp.ClosedSurface.ClosedSurface(boundaryTriangles);
     }
 }
-

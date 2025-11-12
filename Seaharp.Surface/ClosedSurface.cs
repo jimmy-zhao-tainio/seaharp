@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
 
-namespace Seaharp.Surface;
+namespace Seaharp.ClosedSurface;
 
 // A lightweight collection wrapper for a set of triangles assumed to bound a closed volume.
 public sealed class ClosedSurface

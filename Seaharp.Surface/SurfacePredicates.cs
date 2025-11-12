@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
 
-namespace Seaharp.Surface;
+namespace Seaharp.ClosedSurface;
 
-public static class SurfacePredicates
+public static class ClosedSurfacePredicates
 {
     // Returns true if every undirected edge is used by exactly two triangles.
     public static bool IsManifold(ClosedSurface surface)
