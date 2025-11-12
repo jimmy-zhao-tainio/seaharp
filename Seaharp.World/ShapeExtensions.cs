@@ -4,10 +4,10 @@ using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
-public static class ClosedSurfaceBuilder
+public static class ShapeExtensions
 {
-    // Build a Surface by extracting boundary triangles from a shape.
-    public static Seaharp.Surface.ClosedSurface FromShape(Shape shape)
+    // Builds a ClosedSurface by extracting boundary triangles from a shape.
+    public static Seaharp.Surface.ClosedSurface ToClosedSurface(this Shape shape)
     {
         if (shape is null) throw new ArgumentNullException(nameof(shape));
         var triangleOccurrences = new Dictionary<Seaharp.Surface.TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
@@ -34,7 +34,4 @@ public static class ClosedSurfaceBuilder
         return new Seaharp.Surface.ClosedSurface(boundaryTriangles);
     }
 }
-
-
-
 

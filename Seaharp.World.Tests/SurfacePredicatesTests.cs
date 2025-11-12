@@ -16,7 +16,7 @@ public class SurfacePredicatesTests
         var d = new GPoint(0, 0, 1);
 
         var shape = new Tetrahedron(a, b, c, d);
-        var surface = Seaharp.World.ClosedSurfaceBuilder.FromShape(shape);
+        var surface = shape.ToClosedSurface();
         Assert.True(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
     }
 
@@ -31,9 +31,11 @@ public class SurfacePredicatesTests
         var f = new GPoint(0, 0, -1);
 
         var shape = new TwoTetsShareEdgeShape(a, b, c, d, e, f);
-        var surface = Seaharp.World.ClosedSurfaceBuilder.FromShape(shape);
+        var surface = shape.ToClosedSurface();
         Assert.False(Seaharp.Surface.SurfacePredicates.IsManifold(surface));
     }
 }
+
+
 
 

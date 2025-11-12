@@ -14,7 +14,7 @@ public sealed partial class World
         var tris = new List<Seaharp.Geometry.Triangle>();
         foreach (var s in shapes)
         {
-            var surface = Seaharp.World.ClosedSurfaceBuilder.FromShape(s);
+            var surface = s.ToClosedSurface();
             tris.AddRange(surface.Triangles);
         }
 
@@ -47,6 +47,8 @@ public sealed partial class World
         }
     }
 }
+
+
 
 
 
