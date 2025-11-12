@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Demo", "Seaharp.Dem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Computational", "Seaharp.Geometry.Computational\Seaharp.Geometry.Computational.csproj", "{33652EF2-076D-4526-83FA-365DACB89BD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Surface", "Seaharp.Surface\Seaharp.Surface.csproj", "{572FD47C-53B4-42F0-B932-D5E9F03BE2E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.ClosedSurface", "Seaharp.ClosedSurface\\Seaharp.ClosedSurface.csproj", "{572FD47C-53B4-42F0-B932-D5E9F03BE2E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,4 +60,5 @@ Global
 		{572FD47C-53B4-42F0-B932-D5E9F03BE2E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
+
 
