@@ -6,6 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Seaharp.World\Seaharp.World.csproj" />
+    <ProjectReference Include="..\Seaharp.Geometry.Computational\Seaharp.Geometry.Computational.csproj" />
   </ItemGroup>
 </Project>
-

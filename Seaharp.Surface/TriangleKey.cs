@@ -1,13 +1,9 @@
 using System;
+using Seaharp.Geometry;
 
-namespace Seaharp.Geometry;
+namespace Seaharp.Surface;
 
 // Order-agnostic, integer-only key for a triangle defined by three grid Points.
-// Purpose: fast equality and hashing of triangles without introducing floating logic.
-// Design:
-// - Immutable readonly struct storing a canonical lexicographic ordering of the three points.
-// - Equality ignores input order; two keys are equal iff the underlying point sets are equal.
-// - Hashing uses the canonicalized points to guarantee equal keys share the same hash.
 public readonly struct TriangleKey : IEquatable<TriangleKey>
 {
     public readonly Point A;
@@ -59,3 +55,4 @@ public readonly struct TriangleKey : IEquatable<TriangleKey>
         return p.Z > q.Z;
     }
 }
+

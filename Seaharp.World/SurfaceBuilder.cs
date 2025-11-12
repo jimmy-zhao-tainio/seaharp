@@ -10,10 +10,10 @@ public static class SurfaceBuilder
     public static Seaharp.Surface.ClosedSurface FromShape(Shape shape)
     {
         if (shape is null) throw new ArgumentNullException(nameof(shape));
-        var triangleOccurrences = new Dictionary<Seaharp.Geometry.TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
+        var triangleOccurrences = new Dictionary<Seaharp.Surface.TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
         void Accumulate(in Triangle triangle)
         {
-            var key = Seaharp.Geometry.TriangleKey.FromTriangle(triangle);
+            var key = Seaharp.Surface.TriangleKey.FromTriangle(triangle);
             if (triangleOccurrences.TryGetValue(key, out var entry))
                 triangleOccurrences[key] = (entry.count + 1, entry.triangle);
             else
@@ -34,3 +34,7 @@ public static class SurfaceBuilder
         return new Seaharp.Surface.ClosedSurface(boundaryTriangles);
     }
 }
+
+
+
+

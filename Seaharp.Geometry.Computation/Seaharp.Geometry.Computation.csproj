@@ -1,15 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Seaharp.Geometry\Seaharp.Geometry.csproj" />
-    <ProjectReference Include="..\Seaharp.Surface\Seaharp.Surface.csproj" />
-    <ProjectReference Include="..\Seaharp.Geometry.Computational\Seaharp.Geometry.Computational.csproj" />
   </ItemGroup>
 </Project>
-
-
 

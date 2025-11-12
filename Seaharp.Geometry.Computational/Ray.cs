@@ -1,14 +1,14 @@
 using System;
 
-namespace Seaharp.Geometry;
+namespace Seaharp.Geometry.Computational;
 
 // Simple double-precision ray (origin, direction unit vector)
-public readonly struct RayD
+public readonly struct Ray
 {
     public readonly double Ox, Oy, Oz;
     public readonly double Dx, Dy, Dz;
 
-    public RayD(double ox, double oy, double oz, double dx, double dy, double dz)
+    public Ray(double ox, double oy, double oz, double dx, double dy, double dz)
     {
         var len = Math.Sqrt(dx * dx + dy * dy + dz * dz);
         if (len == 0) throw new ArgumentException("Ray direction cannot be zero.");

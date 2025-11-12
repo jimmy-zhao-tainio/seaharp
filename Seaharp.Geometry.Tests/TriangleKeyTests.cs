@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Xunit;
 using Seaharp.Geometry;
+using Seaharp.Surface;
 
 namespace Seaharp.Geometry.Tests;
 
@@ -78,4 +79,7 @@ public class TriangleKeyTests
         if (map.TryGetValue(key, out var c)) map[key] = c + 1; else map[key] = 1;
     }
 }
+
+
+
 

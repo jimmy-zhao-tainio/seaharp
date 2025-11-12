@@ -7,27 +7,38 @@ namespace Seaharp.World;
 // A lightweight collection wrapper for a set of boundary triangles.
 public sealed class Surface
 {
-    public IReadOnlyList<Seaharp.Geometry.Triangle> Triangles => triangles;
-    private readonly List<Seaharp.Geometry.Triangle> triangles;
+    public IReadOnlyList<Triangle> Triangles => triangles;
+    private readonly List<Triangle> triangles;
 
     // Snapshot boundary triangles for the provided shape at construction.
     public Surface(Shape shape)
     {
         if (shape is null) throw new ArgumentNullException(nameof(shape));
-        var map = new Dictionary<TriangleKey, (int count, Seaharp.Geometry.Triangle tri)>(shape.Tetrahedrons.Count * 4);
-        void Acc(in Seaharp.Geometry.Triangle t)
+        var triangleOccurrences = new Dictionary<Seaharp.Surface.TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
+        void Accumulate(in Triangle triangle)
         {
-            var key = TriangleKey.FromTriangle(t);
-            if (map.TryGetValue(key, out var e)) map[key] = (e.count + 1, e.tri); else map[key] = (1, t);
+            var key = Seaharp.Surface.TriangleKey.FromTriangle(triangle);
+            if (triangleOccurrences.TryGetValue(key, out var entry))
+                triangleOccurrences[key] = (entry.count + 1, entry.triangle);
+            else
+                triangleOccurrences[key] = (1, triangle);
         }
-        foreach (var t in shape.Tetrahedrons)
+        foreach (var tetrahedron in shape.Tetrahedrons)
         {
-            Acc(t.ABC); Acc(t.ABD); Acc(t.ACD); Acc(t.BCD);
+            Accumulate(tetrahedron.ABC);
+            Accumulate(tetrahedron.ABD);
+            Accumulate(tetrahedron.ACD);
+            Accumulate(tetrahedron.BCD);
         }
-        var boundary = new List<Seaharp.Geometry.Triangle>();
-        foreach (var kv in map) if (kv.Value.count == 1) boundary.Add(kv.Value.tri);
-        triangles = boundary;
+        var boundaryTriangles = new List<Triangle>();
+        foreach (var keyValuePair in triangleOccurrences)
+        {
+            if (keyValuePair.Value.count == 1)
+                boundaryTriangles.Add(keyValuePair.Value.triangle);
+        }
+        triangles = boundaryTriangles;
     }
 
     public int Count => triangles.Count;
 }
+
