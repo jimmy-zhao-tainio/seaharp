@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Xunit;
 using Seaharp.Geometry;
-using Seaharp.CSG;
+using Seaharp.Topology;
 
 namespace Seaharp.Geometry.Tests;
 

@@ -22,8 +22,8 @@ public class SurfaceExtractionConsistencyTests
     private static void AssertConsistent(Shape shape)
     {
         // New path: via Surface snapshot keyed by TriangleKey
-        var viaKey = new HashSet<Seaharp.CSG.TriangleKey>();
-        foreach (var t in shape.ToSurface().Triangles) viaKey.Add(Seaharp.CSG.TriangleKey.FromTriangle(t));
+        var viaKey = new HashSet<Seaharp.Topology.TriangleKey>();
+        foreach (var t in shape.ExtractSurface().Triangles) viaKey.Add(Seaharp.Topology.TriangleKey.FromTriangle(t));
 
         // Old path: O(n^2) pairwise equality scan using TrianglePredicates.IsSame
         var all = new List<Seaharp.Geometry.Triangle>(shape.Tetrahedrons.Count * 4);
@@ -32,15 +32,15 @@ public class SurfaceExtractionConsistencyTests
             all.Add(tet.ABC); all.Add(tet.ABD); all.Add(tet.ACD); all.Add(tet.BCD);
         }
 
-        var counts = new Dictionary<Seaharp.CSG.TriangleKey, int>(all.Count);
+        var counts = new Dictionary<Seaharp.Topology.TriangleKey, int>(all.Count);
         for (int i = 0; i < all.Count; i++)
         {
-            var keyI = Seaharp.CSG.TriangleKey.FromTriangle(all[i]);
+            var keyI = Seaharp.Topology.TriangleKey.FromTriangle(all[i]);
             int c = 0;
             for (int j = 0; j < all.Count; j++)
             {
                 if (i == j) continue;
-                var keyJ = Seaharp.CSG.TriangleKey.FromTriangle(all[j]);
+                var keyJ = Seaharp.Topology.TriangleKey.FromTriangle(all[j]);
                 if (keyI.Equals(keyJ)) { c++; break; }
             }
             if (c == 0)
@@ -49,7 +49,7 @@ public class SurfaceExtractionConsistencyTests
             }
         }
 
-        var viaScan = new HashSet<Seaharp.CSG.TriangleKey>();
+        var viaScan = new HashSet<Seaharp.Topology.TriangleKey>();
         foreach (var kv in counts) if (kv.Value >= 1) viaScan.Add(kv.Key);
 
         Assert.Equal(viaScan.Count, viaKey.Count);

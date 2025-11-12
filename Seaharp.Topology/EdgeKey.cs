@@ -1,7 +1,7 @@
 using System;
 using Seaharp.Geometry;
 
-namespace Seaharp.CSG;
+namespace Seaharp.Topology;
 
 // Order-agnostic, integer-only key for an undirected edge defined by two grid Points.
 public readonly struct EdgeKey : IEquatable<EdgeKey>

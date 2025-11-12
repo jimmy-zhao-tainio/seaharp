@@ -1,6 +1,6 @@
 using Xunit;
 using Seaharp.World;
-using Seaharp.CSG;
+using Seaharp.Topology;
 using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
@@ -16,8 +16,8 @@ public class SurfacePredicatesTests
         var d = new GPoint(0, 0, 1);
 
         var shape = new Tetrahedron(a, b, c, d);
-        var surface = shape.ToSurface();
-        Assert.True(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
+        var surface = shape.ExtractSurface();
+        Assert.True(Seaharp.Topology.SurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
@@ -31,8 +31,8 @@ public class SurfacePredicatesTests
         var f = new GPoint(0, 0, -1);
 
         var shape = new TwoTetsShareEdgeShape(a, b, c, d, e, f);
-        var surface = shape.ToSurface();
-        Assert.False(Seaharp.CSG.SurfacePredicates.IsManifold(surface));
+        var surface = shape.ExtractSurface();
+        Assert.False(Seaharp.Topology.SurfacePredicates.IsManifold(surface));
     }
 }
 

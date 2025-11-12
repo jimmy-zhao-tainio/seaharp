@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
 
-namespace Seaharp.CSG;
+namespace Seaharp.Topology;
 
 public static class SurfacePredicates
 {

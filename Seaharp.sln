@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Demo", "Seaharp.Dem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Computation", "Seaharp.Geometry.Computation\Seaharp.Geometry.Computation.csproj", "{33652EF2-076D-4526-83FA-365DACB89BD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.CSG", "Seaharp.CSG\Seaharp.CSG.csproj", "{4B42BA46-763B-481F-940D-BB5757884E92}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Topology", "Seaharp.Topology\\Seaharp.Topology.csproj", "{4B42BA46-763B-481F-940D-BB5757884E92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
