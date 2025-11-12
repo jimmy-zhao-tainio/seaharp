@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.World.Tests", "Seah
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Demo", "Seaharp.Demo\Seaharp.Demo.csproj", "{BF6F989A-DA4E-46F1-A3AC-C7529E39DE14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Computational", "Seaharp.Geometry.Computational\Seaharp.Geometry.Computational.csproj", "{33652EF2-076D-4526-83FA-365DACB89BD6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Computation", "Seaharp.Geometry.Computation\\Seaharp.Geometry.Computation.csproj", "{33652EF2-076D-4526-83FA-365DACB89BD6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.ClosedSurface", "Seaharp.ClosedSurface\\Seaharp.ClosedSurface.csproj", "{572FD47C-53B4-42F0-B932-D5E9F03BE2E1}"
 EndProject
@@ -60,5 +60,7 @@ Global
 		{572FD47C-53B4-42F0-B932-D5E9F03BE2E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
+
+
 
 
