@@ -17,7 +17,7 @@ public class SurfacePredicatesTests
 
         var shape = new Tetrahedron(a, b, c, d);
         var surface = shape.ExtractSurface();
-        Assert.True(Seaharp.Topology.SurfacePredicates.IsManifold(surface));
+        Assert.True(SurfacePredicates.IsManifold(surface));
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class SurfacePredicatesTests
 
         var shape = new TwoTetsShareEdgeShape(a, b, c, d, e, f);
         var surface = shape.ExtractSurface();
-        Assert.False(Seaharp.Topology.SurfacePredicates.IsManifold(surface));
+        Assert.False(SurfacePredicates.IsManifold(surface));
     }
 }
 

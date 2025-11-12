@@ -1,19 +1,20 @@
 using System;
 using System.Collections.Generic;
 using Seaharp.Geometry;
+using Seaharp.Topology;
 
 namespace Seaharp.World;
 
 public static class ShapeExtensions
 {
-    // Builds a ClosedSurface by extracting boundary triangles from a shape.
-    public static Seaharp.Topology.Surface ExtractSurface(this Shape shape)
+    // Builds a Surface by extracting boundary triangles from a shape.
+    public static Surface ExtractSurface(this Shape shape)
     {
         if (shape is null) throw new ArgumentNullException(nameof(shape));
-        var triangleOccurrences = new Dictionary<Seaharp.Topology.TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
+        var triangleOccurrences = new Dictionary<TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
         void Accumulate(in Triangle triangle)
         {
-            var key = Seaharp.Topology.TriangleKey.FromTriangle(triangle);
+            var key = TriangleKey.FromTriangle(triangle);
             if (triangleOccurrences.TryGetValue(key, out var entry))
                 triangleOccurrences[key] = (entry.count + 1, entry.triangle);
             else
@@ -27,11 +28,11 @@ public static class ShapeExtensions
             Accumulate(tetrahedron.BCD);
         }
         var boundaryTriangles = new List<Triangle>();
-        foreach (var kv in triangleOccurrences)
+        foreach (var item in triangleOccurrences)
         {
-            if (kv.Value.count == 1) boundaryTriangles.Add(kv.Value.triangle);
+            if (item.Value.count == 1) boundaryTriangles.Add(item.Value.triangle);
         }
-        return new Seaharp.Topology.Surface(boundaryTriangles);
+        return new Surface(boundaryTriangles);
     }
 }
 
