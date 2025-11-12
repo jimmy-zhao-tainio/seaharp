@@ -5,7 +5,7 @@ using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
 
-public class PointInSurfaceTests
+public class InsideClosedSurfaceTests
 {
     [Fact]
     public void Box_Contains_Center_And_Excludes_Outside()
