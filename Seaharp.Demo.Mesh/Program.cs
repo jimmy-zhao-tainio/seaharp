@@ -221,19 +221,25 @@ internal static class Program
         var localBridges = IntersectionSegments.BuildLocalBridgesFromDestroyed(surfaceA, surfaceB);
         if (localBridges.A.Count + localBridges.B.Count > 0)
         {
+            // Build boundary edge sets to ensure bridges attach to the actual cracked rim
+            var boundaryEdgesA = BuildBoundaryEdgeSet(keepA);
+            var boundaryEdgesB = BuildBoundaryEdgeSet(keepB);
+
             // Filter out any local-bridge triangle that lies inside the opposite surface
             var filteredA = new List<Triangle>(localBridges.A.Count);
             foreach (var t in localBridges.A)
             {
                 var c = CentroidPoint(t);
-                if (!InsideClosedSurface.ContainsInclusive(surfaceB.Triangles, c))
+                bool attachesToBoundary = EdgeOnBoundary(t, boundaryEdgesA);
+                if (attachesToBoundary && !InsideClosedSurface.ContainsInclusive(surfaceB.Triangles, c))
                     filteredA.Add(t);
             }
             var filteredB = new List<Triangle>(localBridges.B.Count);
             foreach (var t in localBridges.B)
             {
                 var c = CentroidPoint(t);
-                if (!InsideClosedSurface.ContainsInclusive(surfaceA.Triangles, c))
+                bool attachesToBoundary = EdgeOnBoundary(t, boundaryEdgesB);
+                if (attachesToBoundary && !InsideClosedSurface.ContainsInclusive(surfaceA.Triangles, c))
                     filteredB.Add(t);
             }
 
@@ -510,6 +516,28 @@ internal static class Program
             }
         }
         void Mark(Point a, Point b) { used.Add(new EdgeKey(a, b)); }
+    }
+
+    private static HashSet<EdgeKey> BuildBoundaryEdgeSet(List<Triangle> tris)
+    {
+        var edgeCount = new Dictionary<EdgeKey, int>();
+        void Add(EdgeKey e) { if (edgeCount.TryGetValue(e, out int c)) edgeCount[e] = c + 1; else edgeCount[e] = 1; }
+        foreach (var t in tris)
+        {
+            Add(new EdgeKey(t.P0, t.P1));
+            Add(new EdgeKey(t.P1, t.P2));
+            Add(new EdgeKey(t.P2, t.P0));
+        }
+        var set = new HashSet<EdgeKey>();
+        foreach (var kv in edgeCount) if (kv.Value == 1) set.Add(kv.Key);
+        return set;
+    }
+
+    private static bool EdgeOnBoundary(in Triangle t, HashSet<EdgeKey> boundary)
+    {
+        return boundary.Contains(new EdgeKey(t.P0, t.P1))
+            || boundary.Contains(new EdgeKey(t.P1, t.P2))
+            || boundary.Contains(new EdgeKey(t.P2, t.P0));
     }
 
     private static List<Point>? ChooseClosestBoundary(List<Point> seam, List<List<Point>> boundaries)

@@ -219,11 +219,18 @@ public static class IntersectionSegments
                 var p = cut.A.P; var q = cut.B.P;
                 if (p.Equals(q)) continue;
                 int e0 = cut.A.Edge, e1 = cut.B.Edge;
-                if (e0 == e1) continue; // skip degenerate same-edge cases
-                int sv = SharedVertexIndex(e0, e1);
-                if (sv < 0) continue;
-                int vaIdx = OtherVertexOnEdge(e0, sv);
-                int vbIdx = OtherVertexOnEdge(e1, sv);
+                int vaIdx, vbIdx;
+                if (e0 == e1)
+                {
+                    EdgeVertices(e0, out vaIdx, out vbIdx);
+                }
+                else
+                {
+                    int sv = SharedVertexIndex(e0, e1);
+                    if (sv < 0) continue;
+                    vaIdx = OtherVertexOnEdge(e0, sv);
+                    vbIdx = OtherVertexOnEdge(e1, sv);
+                }
                 var va = VertexAt(tri, vaIdx);
                 var vb = VertexAt(tri, vbIdx);
                 TryAdd(outA, p, va, vb);
@@ -238,11 +245,18 @@ public static class IntersectionSegments
                 var p = cut.A.P; var q = cut.B.P;
                 if (p.Equals(q)) continue;
                 int e0 = cut.A.Edge, e1 = cut.B.Edge;
-                if (e0 == e1) continue;
-                int sv = SharedVertexIndex(e0, e1);
-                if (sv < 0) continue;
-                int vaIdx = OtherVertexOnEdge(e0, sv);
-                int vbIdx = OtherVertexOnEdge(e1, sv);
+                int vaIdx, vbIdx;
+                if (e0 == e1)
+                {
+                    EdgeVertices(e0, out vaIdx, out vbIdx);
+                }
+                else
+                {
+                    int sv = SharedVertexIndex(e0, e1);
+                    if (sv < 0) continue;
+                    vaIdx = OtherVertexOnEdge(e0, sv);
+                    vbIdx = OtherVertexOnEdge(e1, sv);
+                }
                 var va = VertexAt(tri, vaIdx);
                 var vb = VertexAt(tri, vbIdx);
                 TryAdd(outB, p, va, vb);
@@ -262,6 +276,13 @@ public static class IntersectionSegments
             if (edge == 1) return shared == 1 ? 2 : 1;
             // edge == 2
             return shared == 2 ? 0 : 2;
+        }
+
+        static void EdgeVertices(int edge, out int a, out int b)
+        {
+            if (edge == 0) { a = 0; b = 1; }
+            else if (edge == 1) { a = 1; b = 2; }
+            else { a = 2; b = 0; }
         }
 
         static void TryAdd(List<Triangle> dst, Point a0, Point a1, Point a2)
