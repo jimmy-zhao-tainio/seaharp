@@ -217,6 +217,39 @@ internal static class Program
             Console.WriteLine($"Wrote cracked shells + bridges: {System.IO.Path.GetFullPath(bridgesPath)} with {withBridges.Count} triangles (bridges={bridges.A.Count + bridges.B.Count})");
         }
 
+        // Experimental zipper between seam loops and cracked-shell boundaries (no provenance)
+        if (loops.Count > 0)
+        {
+            var boundaryA = BuildBoundaryLoops(keepA);
+            var boundaryB = BuildBoundaryLoops(keepB);
+
+            var zipTris = new List<Triangle>();
+            foreach (var seam in loops)
+            {
+                var ba = ChooseClosestBoundary(seam, boundaryA);
+                var bb = ChooseClosestBoundary(seam, boundaryB);
+                if (ba != null)
+                {
+                    ZipClosed(seam, ba, zipTris, preferA: true);
+                }
+                if (bb != null)
+                {
+                    ZipClosed(seam, bb, zipTris, preferA: false);
+                }
+            }
+
+            if (zipTris.Count > 0)
+            {
+                var withZipper = new List<Triangle>(keepA.Count + keepB.Count + zipTris.Count);
+                withZipper.AddRange(keepA);
+                withZipper.AddRange(keepB);
+                withZipper.AddRange(zipTris);
+                var zipperPath = "spheres_with_zipper.stl";
+                StlWriter.Write(withZipper, zipperPath);
+                Console.WriteLine($"Wrote cracked shells + zipper: {System.IO.Path.GetFullPath(zipperPath)} with {withZipper.Count} triangles (zipper={zipTris.Count})");
+            }
+        }
+
         // Print loop stats for reference (debug only)
         Console.WriteLine($"Intersection loops: {loops.Count}");
         if (loops.Count > 0)
@@ -336,5 +369,177 @@ internal static class Program
         double dy = (double)a.Y - b.Y;
         double dz = (double)a.Z - b.Z;
         return dx * dx + dy * dy + dz * dz;
+    }
+
+    // --- Zipper helpers ---
+    private static List<List<Point>> BuildBoundaryLoops(List<Triangle> tris)
+    {
+        var edgeCount = new Dictionary<EdgeKey, int>();
+        void AddEdge(EdgeKey e) { if (edgeCount.TryGetValue(e, out int c)) edgeCount[e] = c + 1; else edgeCount[e] = 1; }
+        for (int i = 0; i < tris.Count; i++)
+        {
+            var t = tris[i];
+            AddEdge(new EdgeKey(t.P0, t.P1));
+            AddEdge(new EdgeKey(t.P1, t.P2));
+            AddEdge(new EdgeKey(t.P2, t.P0));
+        }
+        var adj = new Dictionary<Point, List<Point>>();
+        foreach (var kv in edgeCount)
+        {
+            if (kv.Value != 1) continue; // only boundary edges
+            var a = kv.Key.A; var b = kv.Key.B;
+            if (!adj.TryGetValue(a, out var la)) { la = new List<Point>(2); adj[a] = la; }
+            if (!adj.TryGetValue(b, out var lb)) { lb = new List<Point>(2); adj[b] = lb; }
+            la.Add(b); lb.Add(a);
+        }
+
+        var used = new HashSet<EdgeKey>();
+        var loops = new List<List<Point>>();
+        foreach (var kv in adj)
+        {
+            var start = kv.Key;
+            foreach (var nb in kv.Value)
+            {
+                var e = new EdgeKey(start, nb);
+                if (used.Contains(e)) continue;
+                var loop = WalkLoop(start, nb);
+                if (loop != null && loop.Count > 2) loops.Add(loop);
+            }
+        }
+        return loops;
+
+        List<Point>? WalkLoop(Point s, Point next)
+        {
+            var loop = new List<Point>(32) { s };
+            Point prev = s; Point curr = next;
+            Mark(prev, curr);
+            while (true)
+            {
+                loop.Add(curr);
+                if (curr.Equals(s))
+                {
+                    if (!loop[^1].Equals(loop[0])) loop.Add(loop[0]);
+                    return loop;
+                }
+                if (!adj.TryGetValue(curr, out var nbrs) || nbrs.Count == 0) return null;
+                Point? chosen = null;
+                for (int i = 0; i < nbrs.Count; i++)
+                {
+                    var nb = nbrs[i];
+                    if (nb.Equals(prev)) continue;
+                    var ek = new EdgeKey(curr, nb);
+                    if (!used.Contains(ek)) { chosen = nb; break; }
+                }
+                if (chosen is null)
+                {
+                    for (int i = 0; i < nbrs.Count; i++)
+                    {
+                        var nb = nbrs[i];
+                        var ek = new EdgeKey(curr, nb);
+                        if (!used.Contains(ek)) { chosen = nb; break; }
+                    }
+                    if (chosen is null) return null;
+                }
+                prev = curr; curr = chosen.Value; Mark(prev, curr);
+            }
+        }
+        void Mark(Point a, Point b) { used.Add(new EdgeKey(a, b)); }
+    }
+
+    private static List<Point>? ChooseClosestBoundary(List<Point> seam, List<List<Point>> boundaries)
+    {
+        if (boundaries.Count == 0) return null;
+        double best = double.PositiveInfinity; int bestIdx = -1;
+        for (int i = 0; i < boundaries.Count; i++)
+        {
+            double d = MeanDistance(seam, boundaries[i]);
+            if (d < best) { best = d; bestIdx = i; }
+        }
+        return bestIdx >= 0 ? boundaries[bestIdx] : null;
+    }
+    private static double MeanDistance(List<Point> a, List<Point> b)
+    {
+        int na = a.Count - 1; if (na <= 0) return double.PositiveInfinity;
+        int nb = b.Count - 1; if (nb <= 0) return double.PositiveInfinity;
+        double sum = 0;
+        for (int i = 0; i < na; i++)
+        {
+            var p = a[i];
+            double best = double.PositiveInfinity;
+            for (int j = 0; j < nb; j++)
+            {
+                double d2 = Dist2D(p, b[j]);
+                if (d2 < best) best = d2;
+            }
+            sum += Math.Sqrt(best);
+        }
+        return sum / na;
+    }
+
+    private static void ZipClosed(List<Point> seamIn, List<Point> boundaryIn, List<Triangle> outTris, bool preferA)
+    {
+        var seam = NormalizeClosed(seamIn);
+        var boundary = NormalizeClosed(boundaryIn);
+        if (seam.Count < 3 || boundary.Count < 3) return;
+
+        int n = seam.Count - 1;
+        int m = boundary.Count - 1;
+
+        // Align boundary start to be closest to seam[0]
+        int startJ = 0; double best = double.PositiveInfinity;
+        for (int j = 0; j < m; j++)
+        {
+            var d2 = Dist2D(seam[0], boundary[j]);
+            if (d2 < best) { best = d2; startJ = j; }
+        }
+        if (startJ != 0)
+        {
+            var rotated = new List<Point>(boundary.Count);
+            for (int k = 0; k < m; k++) rotated.Add(boundary[(startJ + k) % m]);
+            rotated.Add(rotated[0]);
+            boundary = rotated;
+        }
+
+        int i = 0, j2 = 0;
+        while (i < n || j2 < m)
+        {
+            double ds = i < n ? Math.Sqrt(Dist2D(seam[i], seam[(i + 1) % n])) : double.PositiveInfinity;
+            double db = j2 < m ? Math.Sqrt(Dist2D(boundary[j2], boundary[(j2 + 1) % m])) : double.PositiveInfinity;
+            if (ds <= db)
+            {
+                TryAdd(outTris, seam[i], seam[(i + 1) % n], boundary[j2]);
+                i++;
+            }
+            else
+            {
+                TryAdd(outTris, seam[i % n], boundary[j2], boundary[(j2 + 1) % m]);
+                j2++;
+            }
+        }
+
+        static List<Point> NormalizeClosed(List<Point> loop)
+        {
+            var list = new List<Point>(loop);
+            if (list.Count > 1 && !list[^1].Equals(list[0])) list.Add(list[0]);
+            // remove consecutive duplicates
+            var outL = new List<Point>(list.Count);
+            for (int t = 0; t < list.Count; t++)
+            {
+                if (t == 0 || !list[t].Equals(list[t - 1])) outL.Add(list[t]);
+            }
+            return outL;
+        }
+        static void TryAdd(List<Triangle> dst, Point a, Point b, Point c)
+        {
+            if (a.Equals(b) || b.Equals(c) || c.Equals(a)) return;
+            double ux = (double)b.X - a.X, uy = (double)b.Y - a.Y, uz = (double)b.Z - a.Z;
+            double vx = (double)c.X - a.X, vy = (double)c.Y - a.Y, vz = (double)c.Z - a.Z;
+            double cx = uy * vz - uz * vy;
+            double cy = uz * vx - ux * vz;
+            double cz = ux * vy - uy * vx;
+            double l2 = cx * cx + cy * cy + cz * cz;
+            if (l2 <= 0) return;
+            dst.Add(Triangle.FromWinding(a, b, c));
+        }
     }
 }
