@@ -16,10 +16,8 @@ internal class Program
         var a = new Sphere(radius: r, subdivisions: 3, center: centerA);
         var b = new Sphere(radius: r, subdivisions: 3, center: centerB);
 
-        var surfaceA = ClosedSurface.FromTetrahedra(a.Tetrahedra);
-        var surfaceB = ClosedSurface.FromTetrahedra(b.Tetrahedra);
-
-        var union = MeshBoolean.Union(surfaceA, surfaceB);
+        // Use UnionShape so it can be added to World and saved via the normal pipeline
+        var unionShape = new UnionShape(a, b);
 
         // TODO: The seam in the preview looks like a "cracked egg". Track/fix in boolean pipeline:
         //  - Ensure loop orientation consistency before welding.
@@ -27,8 +25,11 @@ internal class Program
         //  - Handle coplanar overlaps and dedup slivers after snapping.
         //  - Add manifold post-check and optional repair.
 
+        var world = new World();
+        world.Add(unionShape);
+
         var path = args != null && args.Length > 0 ? args[0] : "union_spheres.stl";
-        StlWriter.Write(union, path);
-        Console.WriteLine($"Wrote union STL: {Path.GetFullPath(path)} (triangles: {union.Triangles.Count})");
+        world.Save(path);
+        Console.WriteLine($"Wrote union STL: {Path.GetFullPath(path)} (triangles: {unionShape.Mesh.Triangles.Count})");
     }
 }
