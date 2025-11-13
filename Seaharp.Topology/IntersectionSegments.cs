@@ -8,6 +8,13 @@ namespace Seaharp.Topology;
 // intersecting their constituent triangles pairwise and stitching resulting segments.
 // This is a first stepping stone toward mesh booleans: it only extracts the loops.
 // IMPORTANT: All intersection vertices are snapped to the integer grid (Point).
+//
+// TODO: Performance — current implementation checks all triangle pairs (O(n*m)).
+//       Integrate BoundingBoxTree BVH to prune non-overlapping triangle pairs.
+// TODO: Coplanar triangles are currently skipped; add explicit coplanar handling
+//       (merge or classify) to avoid missing boundary segments on overlapping sheets.
+// TODO: Robustness — review epsilon use for plane/inside checks vs integer snapping
+//       to ensure consistent behavior on grazing intersections and shared vertices.
 public static class IntersectionSegments
 {
     // Returns a list of closed loops. Each loop is expressed as an ordered list of
@@ -58,11 +65,7 @@ public static class IntersectionSegments
         for (int i = 0; i < trisA.Count; i++) cutsA[i] = new List<(Point, Point)>();
         for (int j = 0; j < trisB.Count; j++) cutsB[j] = new List<(Point, Point)>();
 
-        for (int i = 0; i < trisA.Count; i++)
-        {
-            var ta = trisA[i];
-            var planeB = Plane.FromTriangle(ta); // not used; avoid premature alloc
-        }
+        // TODO: Pre-partition triangles into spatial bins or BVH before pairwise checks.
 
         for (int i = 0; i < trisA.Count; i++)
         {
@@ -89,6 +92,8 @@ public static class IntersectionSegments
     {
         a0 = a1 = b0 = b1 = default;
         var at = a; var bt = b;
+        // TODO: Extend to return multiple segments per triangle pair (rare but possible)
+        //       when triangles intersect along two disjoint chords after snapping.
 
         static (double x, double y, double z) LerpD(in Point p, in Point q, double t)
             => (p.X + (q.X - p.X) * t, p.Y + (q.Y - p.Y) * t, p.Z + (q.Z - p.Z) * t);
@@ -171,6 +176,8 @@ public static class IntersectionSegments
     {
         var adj = new Dictionary<Point, List<Point>>();
         var edgeMulti = new Dictionary<EdgeKey, int>();
+        // TODO: Ensure consistent loop orientation (CW/CCW per surface normal) if needed
+        //       for subsequent boolean operations that depend on winding.
 
         void AddEdge(Point a, Point b)
         {
@@ -286,6 +293,8 @@ public static class IntersectionSegments
             if (s0On && s1On)
             {
                 // Coplanar edge; skip in this first pass
+                // TODO: If coplanar, we should consider overlap classification and possibly
+                //       emit boundary-aligned segments to avoid missing loops.
                 return false;
             }
 
@@ -316,6 +325,7 @@ public static class IntersectionSegments
             if (EdgePlaneHitD(e0, e1, planeOther, out var h01) && PointInTriangleD(h01, tOther, eps)) hitsD.Add(h01);
             if (EdgePlaneHitD(e1, e2, planeOther, out var h12) && PointInTriangleD(h12, tOther, eps)) hitsD.Add(h12);
             if (EdgePlaneHitD(e2, e0, planeOther, out var h20) && PointInTriangleD(h20, tOther, eps)) hitsD.Add(h20);
+            // TODO: Edge-on/vertex-on cases may duplicate points after snapping; ensure robust dedup.
         }
 
         Collect(b, planeB, pa0, pa1, pa2);

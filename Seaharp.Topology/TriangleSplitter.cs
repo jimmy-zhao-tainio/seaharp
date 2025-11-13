@@ -8,6 +8,12 @@ namespace Seaharp.Topology;
 
 // Utility to split a triangle by chord segments whose endpoints lie on the triangle edges (grid-snapped Points),
 // then classify and triangulate the resulting sub-polygons.
+//
+// TODO: Handle crossing chords within a single triangle (introduce interior vertices when two
+//       chords intersect away from edges). Current approach splits sequentially by chords that
+//       lie on the current polygon boundary.
+// TODO: Deduplicate collinear vertices introduced by snapping to keep triangulation clean.
+// TODO: Consider ear-clipping (or constrained triangulation) for complex polygons instead of a fan.
 internal static class TriangleSplitter
 {
     private struct EdgeParam
@@ -20,7 +26,7 @@ internal static class TriangleSplitter
     public static IEnumerable<IReadOnlyList<Point>> SplitIntoPolygons(Triangle t, Point s0, Point s1)
     {
         if (s0.Equals(s1)) yield break;
-
+        
         if (!TryEdgeParam(t.P0, t.P1, s0, 0, out var e0) && !TryEdgeParam(t.P1, t.P2, s0, 1, out e0) && !TryEdgeParam(t.P2, t.P0, s0, 2, out e0)) yield break;
         if (!TryEdgeParam(t.P0, t.P1, s1, 0, out var e1) && !TryEdgeParam(t.P1, t.P2, s1, 1, out e1) && !TryEdgeParam(t.P2, t.P0, s1, 2, out e1)) yield break;
         if (e0.EdgeIndex == e1.EdgeIndex && Math.Abs(e0.T - e1.T) < 1e-12) yield break;
@@ -215,6 +221,7 @@ internal static class TriangleSplitter
     {
         if (polygon.Count < 3) yield break;
         // Fan triangulation around polygon[0]; attempt to match basis normal orientation
+        // TODO: Use constrained triangulation if polygons become non-convex or contain many collinear points.
         var n = basis.Normal;
         var p0 = polygon[0];
         for (int i = 1; i + 1 < polygon.Count; i++)

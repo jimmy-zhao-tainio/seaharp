@@ -6,8 +6,15 @@ using Seaharp.Geometry.Computation;
 namespace Seaharp.Topology;
 
 // Minimal, grid-snapped boolean union over ClosedSurface using per-triangle chord cuts.
-// This is a first pass: handles typical cases where each intersected triangle is cut by
-// a single segment. Coplanar overlaps are treated as boundary and retained once.
+// Iteratively splits triangles by all chords (per triangle), triangulates the resulting
+// polygons, and classifies by centroid against the opposite surface.
+//
+// TODO: Coplanar overlaps — currently treated as boundary; add explicit merge strategy to
+//       avoid double faces and to retain outer shells deterministically.
+// TODO: Crossing chords — if multiple chords cross within a triangle, introduce interior
+//       vertices (at chord intersections) to split correctly.
+// TODO: Post-check — add manifold verification (edge degree == 2) and optional repair step
+//       for slivers or zero-area triangles produced by snapping.
 public static class MeshBoolean
 {
     public static ClosedSurface Union(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
@@ -112,6 +119,8 @@ public static class MeshBoolean
                     var cls = InsideClosedSurface.Classify(otherTris, c, epsilon);
                     bool keep1 = keepOutside ? (cls != InsideClosedSurface.Classification.Inside) : (cls == InsideClosedSurface.Classification.Inside);
                     if (keep1) emit(tt);
+                    // TODO: If centroid classification is ambiguous near the boundary,
+                    //       fall back to signed-plane tests against intersection loop.
                 }
             }
         }
@@ -127,5 +136,7 @@ public static class MeshBoolean
         var v1 = new Vector(p.X - a.X, p.Y - a.Y, p.Z - a.Z);
         var c = v0.Cross(v1);
         return c.X == 0 && c.Y == 0 && c.Z == 0;
+        // TODO: If we allow small non-axis-aligned edge segments after snapping, consider
+        //       using an epsilon-based colinearity check here.
     }
 }
