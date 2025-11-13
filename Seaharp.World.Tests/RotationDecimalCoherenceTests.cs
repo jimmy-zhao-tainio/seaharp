@@ -17,20 +17,20 @@ public class RotationDecimalCoherenceTests
     public void Box_Coherence_Preserved_Under_Decimal_Rotations(double rx, double ry, double rz)
     {
         var shape = new Box(width: 7, depth: 5, height: 3);
-        var beforeTets = shape.Tetrahedrons;
+        var beforeTets = shape.Tetrahedra;
 
         var adjBefore = TestHelpers.BuildAdjacency(beforeTets);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
         var uniqueBefore = UniqueVertices(beforeTets);
 
         shape.Rotate(rx, ry, rz);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
 
-        var afterTets = shape.Tetrahedrons;
+        var afterTets = shape.Tetrahedra;
         var adjAfter = TestHelpers.BuildAdjacency(afterTets);
         var uniqueAfter = UniqueVertices(afterTets);
 
-        // Same number of tetrahedrons
+        // Same number of tetrahedra
         Assert.Equal(beforeTets.Count, afterTets.Count);
 
         // Topological adjacency should be preserved by consistent rotation + rounding

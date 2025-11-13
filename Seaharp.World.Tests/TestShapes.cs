@@ -8,8 +8,8 @@ internal sealed class TwoTetsShareEdgeShape : Seaharp.World.Shape
     public TwoTetsShareEdgeShape(GPoint a, GPoint b, GPoint c, GPoint d, GPoint e, GPoint f)
     {
         // Two tetrahedra sharing only edge AB (no shared face)
-        tetrahedrons.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
-        tetrahedrons.Add(new Seaharp.Geometry.Tetrahedron(a, b, e, f));
+        tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
+        tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(a, b, e, f));
     }
 }
 

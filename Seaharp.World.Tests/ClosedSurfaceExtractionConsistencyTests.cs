@@ -24,11 +24,11 @@ public class ClosedSurfaceExtractionConsistencyTests
     {
         // New path: via ClosedSurface snapshot keyed by TriangleKey
         var viaKey = new HashSet<TriangleKey>();
-        foreach (var t in ClosedSurface.FromTetrahedra(shape.Tetrahedrons).Triangles) viaKey.Add(TriangleKey.FromTriangle(t));
+        foreach (var t in ClosedSurface.FromTetrahedra(shape.Tetrahedra).Triangles) viaKey.Add(TriangleKey.FromTriangle(t));
 
         // Old path: O(n^2) pairwise equality scan using TrianglePredicates.IsSame
-        var all = new List<Seaharp.Geometry.Triangle>(shape.Tetrahedrons.Count * 4);
-        foreach (var tet in shape.Tetrahedrons)
+        var all = new List<Seaharp.Geometry.Triangle>(shape.Tetrahedra.Count * 4);
+        foreach (var tet in shape.Tetrahedra)
         {
             all.Add(tet.ABC); all.Add(tet.ABD); all.Add(tet.ACD); all.Add(tet.BCD);
         }

@@ -7,7 +7,7 @@ namespace Seaharp.Geometry.Computation;
 // Simple BVH over triangles for broad-phase queries.
 public sealed class BoundingBoxTree
 {
-    private readonly Node _root;
+    private readonly Node root;
 
     private readonly struct TriangleBox
     {
@@ -25,17 +25,17 @@ public sealed class BoundingBoxTree
         public int Count;
     }
 
-    private readonly TriangleBox[] _triangles;
+    private readonly TriangleBox[] triangles;
 
     public BoundingBoxTree(IReadOnlyList<Triangle> triangles)
     {
         if (triangles is null) throw new ArgumentNullException(nameof(triangles));
-        _triangles = BuildTriangleBoxes(triangles);
-        _root = Build(0, _triangles.Length);
+        this.triangles = BuildTriangleBoxes(triangles);
+        root = Build(0, this.triangles.Length);
     }
 
     public void Query(in BoundingBox box, List<int> results)
-        => QueryNode(_root, box, results);
+        => QueryNode(root, box, results);
 
     private static TriangleBox[] BuildTriangleBoxes(IReadOnlyList<Triangle> tris)
     {
@@ -56,7 +56,7 @@ public sealed class BoundingBoxTree
         long maxX = long.MinValue, maxY = long.MinValue, maxZ = long.MinValue;
         for (int i = start; i < end; i++)
         {
-            var b = _triangles[i].Box;
+            var b = triangles[i].Box;
             if (b.Min.X < minX) minX = b.Min.X;
             if (b.Min.Y < minY) minY = b.Min.Y;
             if (b.Min.Z < minZ) minZ = b.Min.Z;
@@ -77,7 +77,7 @@ public sealed class BoundingBoxTree
         long ex = maxX - minX, ey = maxY - minY, ez = maxZ - minZ;
         int axis = ex >= ey && ex >= ez ? 0 : (ey >= ez ? 1 : 2);
 
-        Array.Sort(_triangles, start, count, new TriangleBoxComparer(axis));
+        Array.Sort(triangles, start, count, new TriangleBoxComparer(axis));
         int mid = start + count / 2;
         node.Left = Build(start, mid);
         node.Right = Build(mid, end);
@@ -91,7 +91,7 @@ public sealed class BoundingBoxTree
         {
             for (int i = 0; i < node.Count; i++)
             {
-                var tb = _triangles[node.Start + i];
+                var tb = triangles[node.Start + i];
                 if (tb.Box.Intersects(box)) results.Add(tb.Index);
             }
             return;
@@ -102,12 +102,12 @@ public sealed class BoundingBoxTree
 
     private sealed class TriangleBoxComparer : IComparer<TriangleBox>
     {
-        private readonly int _axis;
-        public TriangleBoxComparer(int axis) { _axis = axis; }
+        private readonly int axis;
+        public TriangleBoxComparer(int axis) { this.axis = axis; }
         public int Compare(TriangleBox x, TriangleBox y)
         {
-            long cx = Center(x.Box, _axis);
-            long cy = Center(y.Box, _axis);
+            long cx = Center(x.Box, axis);
+            long cy = Center(y.Box, axis);
             return cx.CompareTo(cy);
         }
         private static long Center(in BoundingBox b, int axis)

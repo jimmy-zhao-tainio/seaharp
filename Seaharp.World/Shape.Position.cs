@@ -6,13 +6,13 @@ namespace Seaharp.World;
 // Positioning-related APIs for Shape (destructive)
 public abstract partial class Shape
 {
-    // Translates all tetrahedrons by the given delta and replaces them with new instances.
+    // Translates all tetrahedra by the given delta and replaces them with new instances.
     public void Position(long dx, long dy, long dz)
     {
-        if (tetrahedrons.Count == 0) return;
+        if (tetrahedra.Count == 0) return;
 
-        var updated = new List<Seaharp.Geometry.Tetrahedron>(tetrahedrons.Count);
-        foreach (var t in tetrahedrons)
+        var updated = new List<Seaharp.Geometry.Tetrahedron>(tetrahedra.Count);
+        foreach (var t in tetrahedra)
         {
             var a = new Point(t.A.X + dx, t.A.Y + dy, t.A.Z + dz);
             var b = new Point(t.B.X + dx, t.B.Y + dy, t.B.Z + dz);
@@ -21,7 +21,7 @@ public abstract partial class Shape
             updated.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
         }
 
-        tetrahedrons.Clear();
-        tetrahedrons.AddRange(updated);
+        tetrahedra.Clear();
+        tetrahedra.AddRange(updated);
     }
 }

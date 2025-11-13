@@ -12,13 +12,13 @@ public class RotationTests
     public void Rotate_NoOp_ZeroAngles_NoChange()
     {
         var shape = new Box(width: 3, depth: 2, height: 4);
-        var before = Snapshot(shape.Tetrahedrons);
+        var before = Snapshot(shape.Tetrahedra);
 
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
         shape.Rotate(0, 0, 0);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
 
-        var after = shape.Tetrahedrons;
+        var after = shape.Tetrahedra;
         Assert.Equal(before.Count, after.Count);
         for (int i = 0; i < before.Count; i++)
         {
@@ -39,14 +39,14 @@ public class RotationTests
     public void Rotate_Orthogonal_Reversible_Exact(int rx, int ry, int rz)
     {
         var shape = new Box(width: 4, depth: 3, height: 2);
-        var before = Snapshot(shape.Tetrahedrons);
+        var before = Snapshot(shape.Tetrahedra);
 
         shape.Rotate(rx, ry, rz);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
         shape.Rotate(-rx, -ry, -rz);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
 
-        var after = shape.Tetrahedrons;
+        var after = shape.Tetrahedra;
         Assert.Equal(before.Count, after.Count);
         for (int i = 0; i < before.Count; i++)
         {
@@ -65,14 +65,14 @@ public class RotationTests
     public void Rotate_Arbitrary_Reversible_Close(int rx, int ry, int rz)
     {
         var shape = new Box(width: 5, depth: 4, height: 3);
-        var before = Snapshot(shape.Tetrahedrons);
+        var before = Snapshot(shape.Tetrahedra);
 
         shape.Rotate(rx, ry, rz);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
         shape.Rotate(-rx, -ry, -rz);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
 
-        var after = shape.Tetrahedrons;
+        var after = shape.Tetrahedra;
         Assert.Equal(before.Count, after.Count);
         for (int i = 0; i < before.Count; i++)
         {

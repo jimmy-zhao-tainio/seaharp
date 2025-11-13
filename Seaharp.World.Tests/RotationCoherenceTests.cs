@@ -25,17 +25,17 @@ public class RotationCoherenceTests
     [InlineData(90, 90, 90)]
     public void Box_CoherencePreserved_UnderOrthogonalRotations(int rx, int ry, int rz)
     {
-        // Use a rectangular box that creates 5 tetrahedrons.
+        // Use a rectangular box that creates 5 tetrahedra.
         var shape = new Box(width: 4, depth: 3, height: 2);
-        var beforeTets = shape.Tetrahedrons;
+        var beforeTets = shape.Tetrahedra;
 
         var adjBefore = TestHelpers.BuildAdjacency(beforeTets);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
 
         shape.Rotate(rx, ry, rz);
-        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedrons));
+        Assert.True(TetrahedronPredicates.IsSolid(shape.Tetrahedra));
 
-        var afterTets = shape.Tetrahedrons;
+        var afterTets = shape.Tetrahedra;
         var adjAfter = TestHelpers.BuildAdjacency(afterTets);
 
         Assert.Equal(beforeTets.Count, afterTets.Count);

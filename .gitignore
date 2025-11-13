@@ -55,3 +55,7 @@ nunit-*.xml
 
 # Windows reserved device filename that may appear due to console redirection
 CON
+ 
+# .NET local tools
+.config/dotnet-tools.json
+.dotnet-tools/

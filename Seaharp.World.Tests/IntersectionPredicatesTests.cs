@@ -16,9 +16,9 @@ public class IntersectionPredicatesTests
         var sphere = new Sphere(5, subdivisions: 1);
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: 16);
 
-        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(box.Tetrahedrons)));
-        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(sphere.Tetrahedrons)));
-        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(cyl.Tetrahedrons)));
+        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(box.Tetrahedra)));
+        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(sphere.Tetrahedra)));
+        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(cyl.Tetrahedra)));
     }
 }
 

@@ -10,7 +10,7 @@ public class ClosedSurfaceManifoldShapesTests
     public void Box_Surface_IsManifold()
     {
         var box = new Box(width: 4, depth: 3, height: 2);
-        var surface = ClosedSurface.FromTetrahedra(box.Tetrahedrons);
+        var surface = ClosedSurface.FromTetrahedra(box.Tetrahedra);
         Assert.True(ClosedSurfacePredicates.IsManifold(surface));
     }
 
@@ -18,7 +18,7 @@ public class ClosedSurfaceManifoldShapesTests
     public void Sphere_Surface_IsManifold()
     {
         var sphere = new Sphere(radius: 5, subdivisions: 1);
-        var surface = ClosedSurface.FromTetrahedra(sphere.Tetrahedrons);
+        var surface = ClosedSurface.FromTetrahedra(sphere.Tetrahedra);
         Assert.True(ClosedSurfacePredicates.IsManifold(surface));
     }
 
@@ -26,7 +26,7 @@ public class ClosedSurfaceManifoldShapesTests
     public void Cylinder_Surface_IsManifold()
     {
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: 16);
-        var surface = ClosedSurface.FromTetrahedra(cyl.Tetrahedrons);
+        var surface = ClosedSurface.FromTetrahedra(cyl.Tetrahedra);
         Assert.True(ClosedSurfacePredicates.IsManifold(surface));
     }
 }

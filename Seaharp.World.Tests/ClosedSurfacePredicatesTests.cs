@@ -16,7 +16,7 @@ public class ClosedSurfacePredicatesTests
         var d = new GPoint(0, 0, 1);
 
         var shape = new Tetrahedron(a, b, c, d);
-        var surface = ClosedSurface.FromTetrahedra(shape.Tetrahedrons);
+        var surface = ClosedSurface.FromTetrahedra(shape.Tetrahedra);
         Assert.True(ClosedSurfacePredicates.IsManifold(surface));
     }
 
@@ -31,7 +31,7 @@ public class ClosedSurfacePredicatesTests
         var f = new GPoint(0, 0, -1);
 
         var shape = new TwoTetsShareEdgeShape(a, b, c, d, e, f);
-        var surface = ClosedSurface.FromTetrahedra(shape.Tetrahedrons);
+        var surface = ClosedSurface.FromTetrahedra(shape.Tetrahedra);
         Assert.False(ClosedSurfacePredicates.IsManifold(surface));
     }
 }

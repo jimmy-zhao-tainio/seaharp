@@ -48,7 +48,7 @@ public sealed class Sphere : Shape
             if (a.Equals(b) || a.Equals(d) || b.Equals(d)) continue;
             try
             {
-                tetrahedrons.Add(new Seaharp.Geometry.Tetrahedron(c, a, b, d));
+                tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(c, a, b, d));
             }
             catch (InvalidOperationException)
             {

@@ -11,11 +11,11 @@ public class PositionTests
     public void Position_TranslatesAllVertices_Exactly()
     {
         var shape = new Box(width: 3, depth: 2, height: 4);
-        var before = Snapshot(shape.Tetrahedrons);
+        var before = Snapshot(shape.Tetrahedra);
 
         long dx = 10, dy = -5, dz = 7;
         shape.Position(dx, dy, dz);
-        var after = shape.Tetrahedrons;
+        var after = shape.Tetrahedra;
 
         Assert.Equal(before.Count, after.Count);
         for (int i = 0; i < before.Count; i++)
@@ -29,16 +29,16 @@ public class PositionTests
     }
 
     [Fact]
-    public void Position_Reversible_RestoresExactTetrahedrons()
+    public void Position_Reversible_RestoresExactTetrahedra()
     {
         var shape = new Box(width: 5, depth: 3, height: 2);
-        var before = Snapshot(shape.Tetrahedrons);
+        var before = Snapshot(shape.Tetrahedra);
 
         long dx = 123, dy = 456, dz = -789;
         shape.Position(dx, dy, dz);
         shape.Position(-dx, -dy, -dz);
 
-        var after = shape.Tetrahedrons;
+        var after = shape.Tetrahedra;
         Assert.Equal(before.Count, after.Count);
         for (int i = 0; i < before.Count; i++)
         {

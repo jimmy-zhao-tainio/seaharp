@@ -17,26 +17,26 @@ public static class TetrahedronPredicates
            TriangleMatchesAny(first.ACD, second) ||
            TriangleMatchesAny(first.BCD, second);
 
-    public static bool IsSolid(IReadOnlyList<Seaharp.Geometry.Tetrahedron> tetrahedrons)
+    public static bool IsSolid(IReadOnlyList<Seaharp.Geometry.Tetrahedron> tetrahedra)
     {
-        if (tetrahedrons is null) throw new ArgumentNullException(nameof(tetrahedrons));
-        if (tetrahedrons.Count == 0) return false;
+        if (tetrahedra is null) throw new ArgumentNullException(nameof(tetrahedra));
+        if (tetrahedra.Count == 0) return false;
 
-        for (int i = 0; i < tetrahedrons.Count; i++)
+        for (int i = 0; i < tetrahedra.Count; i++)
         {
-            var tetrahedron = tetrahedrons[i];
-            if (HasSharedTriangle(tetrahedron, tetrahedrons, i)) continue;
+            var tetrahedron = tetrahedra[i];
+            if (HasSharedTriangle(tetrahedron, tetrahedra, i)) continue;
             return false;
         }
         return true;
     }
 
-    private static bool HasSharedTriangle(in Seaharp.Geometry.Tetrahedron tetrahedron, IReadOnlyList<Seaharp.Geometry.Tetrahedron> tetrahedrons, int selfIndex)
+    private static bool HasSharedTriangle(in Seaharp.Geometry.Tetrahedron tetrahedron, IReadOnlyList<Seaharp.Geometry.Tetrahedron> tetrahedra, int selfIndex)
     {
-        for (int j = 0; j < tetrahedrons.Count; j++)
+        for (int j = 0; j < tetrahedra.Count; j++)
         {
             if (j == selfIndex) continue;
-            if (SharesTriangle(tetrahedron, tetrahedrons[j])) return true;
+            if (SharesTriangle(tetrahedron, tetrahedra[j])) return true;
         }
         return false;
     }

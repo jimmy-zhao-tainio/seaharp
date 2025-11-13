@@ -17,9 +17,9 @@ public class ManifoldMatrixTests
     {
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: segments,
                                xTiltDeg: rx, yTiltDeg: ry, zSpinDeg: rz);
-        var surface = ClosedSurface.FromTetrahedra(cyl.Tetrahedrons);
+        var surface = ClosedSurface.FromTetrahedra(cyl.Tetrahedra);
         Assert.True(ClosedSurfacePredicates.IsManifold(surface));
-        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(cyl.Tetrahedrons)));
+        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(cyl.Tetrahedra)));
     }
 }
 

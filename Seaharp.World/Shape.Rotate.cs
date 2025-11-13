@@ -7,12 +7,12 @@ namespace Seaharp.World;
 // Rotation-related APIs for Shape (destructive)
 public abstract partial class Shape
 {
-    // Rotates all tetrahedrons by the given Euler angles (degrees) around X, Y, Z (in that order)
+    // Rotates all tetrahedra by the given Euler angles (degrees) around X, Y, Z (in that order)
     // using double-precision math and integer rounding, then replaces them with new instances.
     // Also checks that no two distinct original vertices collide to the same rounded grid point.
     public void Rotate(double xDegrees = 0, double yDegrees = 0, double zDegrees = 0)
     {
-        if (tetrahedrons.Count == 0) return;
+        if (tetrahedra.Count == 0) return;
 
         // Precompute sines/cosines (radians)
         double rx = xDegrees * Math.PI / 180.0;
@@ -26,7 +26,7 @@ public abstract partial class Shape
         var origToRot = new Dictionary<Point, Point>();
         var rotToOrig = new Dictionary<Point, Point>();
 
-        foreach (var t in tetrahedrons)
+        foreach (var t in tetrahedra)
         {
             MapVertex(t.A);
             MapVertex(t.B);
@@ -34,9 +34,9 @@ public abstract partial class Shape
             MapVertex(t.D);
         }
 
-        // Rebuild tetrahedrons from mapped vertices
-        var updated = new List<Seaharp.Geometry.Tetrahedron>(tetrahedrons.Count);
-        foreach (var t in tetrahedrons)
+        // Rebuild tetrahedra from mapped vertices
+        var updated = new List<Seaharp.Geometry.Tetrahedron>(tetrahedra.Count);
+        foreach (var t in tetrahedra)
         {
             var a = origToRot[t.A];
             var b = origToRot[t.B];
@@ -45,8 +45,8 @@ public abstract partial class Shape
             updated.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
         }
 
-        tetrahedrons.Clear();
-        tetrahedrons.AddRange(updated);
+        tetrahedra.Clear();
+        tetrahedra.AddRange(updated);
 
         void MapVertex(in Point p)
         {

@@ -156,7 +156,7 @@ public sealed class Cylinder : Shape
     {
         try
         {
-            tetrahedrons.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
+            tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
         }
         catch (InvalidOperationException)
         {
