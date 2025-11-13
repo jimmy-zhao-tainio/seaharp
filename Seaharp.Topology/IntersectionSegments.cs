@@ -92,6 +92,112 @@ public static class IntersectionSegments
         return tris;
     }
 
+    public sealed class BridgeTriangles
+    {
+        public required List<Triangle> A { get; init; }
+        public required List<Triangle> B { get; init; }
+    }
+
+    // Builds zipper-like bridge strips between the intersection seam (loops) and anchor
+    // vertices from intersected triangles on each side. Does not split shells: it only
+    // emits new triangles that connect seam edges to anchors and across adjacent anchors.
+    public static BridgeTriangles BuildBridgeTriangles(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
+    {
+        if (a is null) throw new ArgumentNullException(nameof(a));
+        if (b is null) throw new ArgumentNullException(nameof(b));
+
+        var loops = BuildLoops(a, b, epsilon);
+        var prov = BuildCutsProvenance(a, b, epsilon);
+
+        var anchorA = new Dictionary<EdgeKey, Point>();
+        var anchorB = new Dictionary<EdgeKey, Point>();
+
+        // Map each snapped segment to its anchor vertex on A
+        for (int i = 0; i < prov.CutsA.Length; i++)
+        {
+            var list = prov.CutsA[i];
+            var tri = a.Triangles[i];
+            foreach (var cut in list)
+            {
+                var key = new EdgeKey(cut.A.P, cut.B.P);
+                if (!anchorA.ContainsKey(key))
+                {
+                    int sv = SharedVertexIndex(cut.A.Edge, cut.B.Edge);
+                    var v = sv switch { 0 => tri.P0, 1 => tri.P1, 2 => tri.P2, _ => ClosestVertex(tri, cut.A.P, cut.B.P) };
+                    anchorA[key] = v;
+                }
+            }
+        }
+        // And for B
+        for (int j = 0; j < prov.CutsB.Length; j++)
+        {
+            var list = prov.CutsB[j];
+            var tri = b.Triangles[j];
+            foreach (var cut in list)
+            {
+                var key = new EdgeKey(cut.A.P, cut.B.P);
+                if (!anchorB.ContainsKey(key))
+                {
+                    int sv = SharedVertexIndex(cut.A.Edge, cut.B.Edge);
+                    var v = sv switch { 0 => tri.P0, 1 => tri.P1, 2 => tri.P2, _ => ClosestVertex(tri, cut.A.P, cut.B.P) };
+                    anchorB[key] = v;
+                }
+            }
+        }
+
+        var outA = new List<Triangle>();
+        var outB = new List<Triangle>();
+
+        foreach (var loop in loops)
+        {
+            if (loop.Count < 3) continue;
+            int n = loop[^1].Equals(loop[0]) ? loop.Count - 1 : loop.Count;
+            for (int i = 0; i < n; i++)
+            {
+                var p = loop[i];
+                var q = loop[(i + 1) % n];
+                var k = new EdgeKey(p, q);
+
+                if (anchorA.TryGetValue(k, out var a0))
+                {
+                    // Triangle from seam edge to anchor
+                    TryAdd(outA, p, q, a0);
+                    // Connect to next anchor if available
+                    var kNext = new EdgeKey(q, loop[(i + 2) % n]);
+                    if (anchorA.TryGetValue(kNext, out var a1))
+                    {
+                        TryAdd(outA, q, a0, a1);
+                    }
+                }
+                if (anchorB.TryGetValue(k, out var b0))
+                {
+                    TryAdd(outB, p, q, b0);
+                    var kNext = new EdgeKey(q, loop[(i + 2) % n]);
+                    if (anchorB.TryGetValue(kNext, out var b1))
+                    {
+                        TryAdd(outB, q, b0, b1);
+                    }
+                }
+            }
+        }
+
+        return new BridgeTriangles { A = outA, B = outB };
+
+        static void TryAdd(List<Triangle> dst, Point p0, Point p1, Point p2)
+        {
+            if (p0.Equals(p1) || p1.Equals(p2) || p2.Equals(p0)) return;
+            // Skip degenerate by checking area via cross product length
+            double ux = (double)p1.X - p0.X, uy = (double)p1.Y - p0.Y, uz = (double)p1.Z - p0.Z;
+            double vx = (double)p2.X - p0.X, vy = (double)p2.Y - p0.Y, vz = (double)p2.Z - p0.Z;
+            double cx = uy * vz - uz * vy;
+            double cy = uz * vx - ux * vz;
+            double cz = ux * vy - uy * vx;
+            double l2 = cx * cx + cy * cy + cz * cz;
+            if (l2 <= 0.0) return;
+            dst.Add(Triangle.FromWinding(p0, p1, p2));
+        }
+    }
+
     public sealed class CutTriangles
     {
         public required List<Triangle> A { get; init; }

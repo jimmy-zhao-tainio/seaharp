@@ -203,6 +203,20 @@ internal static class Program
         Console.WriteLine($"Min signed distance from kept vertex to any segment: {minSigned:F6}");
         Console.WriteLine($"Min unsigned distance: {minDistance:F6}, min segment length: {minSegLen:F6}, min area(v,seg): {minArea:F6}");
 
+        // Build zipper-like bridges from seam to anchors on A and B; combine with shells
+        var bridges = IntersectionSegments.BuildBridgeTriangles(surfaceA, surfaceB);
+        if (bridges.A.Count + bridges.B.Count > 0)
+        {
+            var withBridges = new List<Triangle>(keepA.Count + keepB.Count + bridges.A.Count + bridges.B.Count);
+            withBridges.AddRange(keepA);
+            withBridges.AddRange(keepB);
+            withBridges.AddRange(bridges.A);
+            withBridges.AddRange(bridges.B);
+            var bridgesPath = "spheres_with_bridges.stl";
+            StlWriter.Write(withBridges, bridgesPath);
+            Console.WriteLine($"Wrote cracked shells + bridges: {System.IO.Path.GetFullPath(bridgesPath)} with {withBridges.Count} triangles (bridges={bridges.A.Count + bridges.B.Count})");
+        }
+
         // Print loop stats for reference (debug only)
         Console.WriteLine($"Intersection loops: {loops.Count}");
         if (loops.Count > 0)
