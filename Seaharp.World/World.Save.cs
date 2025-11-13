@@ -14,7 +14,7 @@ public sealed partial class World
         var tris = new List<Seaharp.Geometry.Triangle>();
         foreach (var s in shapes)
         {
-            var surface = s.ExtractSurface();
+            var surface = s.ExtractClosedSurface();
             tris.AddRange(surface.Triangles);
         }
 

@@ -7,8 +7,8 @@ namespace Seaharp.World;
 
 public static class ShapeExtensions
 {
-    // Builds a Surface by extracting boundary triangles from a shape.
-    public static Surface ExtractSurface(this Shape shape)
+    // Builds a ClosedSurface by extracting boundary triangles from a shape.
+    public static ClosedSurface ExtractClosedSurface(this Shape shape)
     {
         if (shape is null) throw new ArgumentNullException(nameof(shape));
         var triangleOccurrences = new Dictionary<TriangleKey, (int count, Triangle triangle)>(shape.Tetrahedrons.Count * 4);
@@ -32,8 +32,9 @@ public static class ShapeExtensions
         {
             if (item.Value.count == 1) boundaryTriangles.Add(item.Value.triangle);
         }
-        return new Surface(boundaryTriangles);
+        return new ClosedSurface(boundaryTriangles);
     }
 }
+
 
 

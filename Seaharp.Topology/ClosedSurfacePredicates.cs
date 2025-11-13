@@ -4,10 +4,10 @@ using Seaharp.Geometry;
 
 namespace Seaharp.Topology;
 
-public static class SurfacePredicates
+public static class ClosedSurfacePredicates
 {
     // Returns true if every undirected edge is used by exactly two triangles.
-    public static bool IsManifold(Surface surface)
+    public static bool IsManifold(ClosedSurface surface)
     {
         if (surface is null) throw new ArgumentNullException(nameof(surface));
         var tris = surface.Triangles;
