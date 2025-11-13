@@ -217,7 +217,7 @@ internal static class Program
             Console.WriteLine($"Wrote cracked shells + bridges: {System.IO.Path.GetFullPath(bridgesPath)} with {withBridges.Count} triangles (bridges={bridges.A.Count + bridges.B.Count})");
         }
 
-        // Experimental zipper between seam loops and cracked-shell boundaries (no provenance)
+        // Experimental zipper between seam loops and cracked-shell boundaries (greedy)
         if (loops.Count > 0)
         {
             var boundaryA = BuildBoundaryLoops(keepA);
@@ -247,6 +247,31 @@ internal static class Program
                 var zipperPath = "spheres_with_zipper.stl";
                 StlWriter.Write(withZipper, zipperPath);
                 Console.WriteLine($"Wrote cracked shells + zipper: {System.IO.Path.GetFullPath(zipperPath)} with {withZipper.Count} triangles (zipper={zipTris.Count})");
+            }
+        }
+
+        // DTW-based monotone zipper (recommended)
+        if (loops.Count > 0)
+        {
+            var boundaryA = BuildBoundaryLoops(keepA);
+            var boundaryB = BuildBoundaryLoops(keepB);
+            var zipDTW = new List<Triangle>();
+            foreach (var seam in loops)
+            {
+                var ba = ChooseClosestBoundary(seam, boundaryA);
+                var bb = ChooseClosestBoundary(seam, boundaryB);
+                if (ba != null) ZipClosedDTW(seam, ba, zipDTW);
+                if (bb != null) ZipClosedDTW(seam, bb, zipDTW);
+            }
+            if (zipDTW.Count > 0)
+            {
+                var withZipperDTW = new List<Triangle>(keepA.Count + keepB.Count + zipDTW.Count);
+                withZipperDTW.AddRange(keepA);
+                withZipperDTW.AddRange(keepB);
+                withZipperDTW.AddRange(zipDTW);
+                var zipperDTWPath = "spheres_with_zipper_dtw.stl";
+                StlWriter.Write(withZipperDTW, zipperDTWPath);
+                Console.WriteLine($"Wrote cracked shells + zipper (DTW): {System.IO.Path.GetFullPath(zipperDTWPath)} with {withZipperDTW.Count} triangles (zipper={zipDTW.Count})");
             }
         }
 
@@ -476,6 +501,129 @@ internal static class Program
         return sum / na;
     }
 
+    private static void ZipClosedDTW(List<Point> seamIn, List<Point> boundaryIn, List<Triangle> outTris)
+    {
+        var seam = NormalizeClosed(seamIn);
+        var boundary = NormalizeClosed(boundaryIn);
+        if (seam.Count < 3 || boundary.Count < 3) return;
+
+        int n = seam.Count - 1;
+        int m = boundary.Count - 1;
+
+        // Align boundary start and direction to seam[0]->seam[1]
+        int j0 = 0; double best0 = double.PositiveInfinity;
+        for (int j = 0; j < m; j++)
+        {
+            double d2 = Dist2D(seam[0], boundary[j]);
+            if (d2 < best0) { best0 = d2; j0 = j; }
+        }
+        int jPlus = (j0 + 1) % m, jMinus = (j0 - 1 + m) % m;
+        double dPlus = Dist2D(seam[1 % n], boundary[jPlus]);
+        double dMinus = Dist2D(seam[1 % n], boundary[jMinus]);
+        bool forward = dPlus <= dMinus;
+        // Build rotated boundary array b[0..m-1]
+        var b = new Point[m];
+        if (forward)
+        {
+            for (int k = 0; k < m; k++) b[k] = boundary[(j0 + k) % m];
+        }
+        else
+        {
+            for (int k = 0; k < m; k++) b[k] = boundary[(j0 - k + m) % m];
+        }
+
+        // DTW with band constraint
+        double inf = double.PositiveInfinity;
+        var dtw = new double[n + 1, m + 1];
+        var step = new byte[n + 1, m + 1]; // 1=(i-1,j),2=(i,j-1),3=(i-1,j-1)
+        for (int i = 0; i <= n; i++) for (int j = 0; j <= m; j++) { dtw[i, j] = inf; step[i, j] = 0; }
+        dtw[0, 0] = 0;
+
+        int W = Math.Max(1, (int)Math.Floor(0.25 * Math.Max(n, m)));
+        double insPenalty = 0.1; // discourage long runs of inserts/deletes
+
+        for (int i = 1; i <= n; i++)
+        {
+            int jc = (int)Math.Round((double)i * m / n);
+            int jMin = Math.Max(1, jc - W);
+            int jMax = Math.Min(m, jc + W);
+            for (int j = jMin; j <= jMax; j++)
+            {
+                double d = Dist2D(seam[i - 1], b[j - 1]);
+                double best = dtw[i - 1, j - 1]; byte bs = 3; // match
+                double v = dtw[i - 1, j] + insPenalty; if (v < best) { best = v; bs = 1; }
+                double h = dtw[i, j - 1] + insPenalty; if (h < best) { best = h; bs = 2; }
+                dtw[i, j] = d + best; step[i, j] = bs;
+            }
+        }
+
+        // Backtrack
+        int ii = n, jj = m;
+        var rev = new List<(int i, int j, byte s)>(n + m);
+        while (ii > 0 || jj > 0)
+        {
+            byte s = step[ii, jj];
+            if (s == 0)
+            {
+                // fall back to diagonal if band clipped
+                if (ii > 0 && jj > 0) { s = 3; }
+                else if (ii > 0) { s = 1; }
+                else if (jj > 0) { s = 2; }
+            }
+            rev.Add((ii, jj, s));
+            if (s == 3) { ii--; jj--; }
+            else if (s == 1) { ii--; }
+            else { jj--; }
+        }
+        rev.Reverse();
+
+        // Emit triangles from path
+        int iPrev = 0, jPrev = 0;
+        foreach (var (i, j, s) in rev)
+        {
+            if (s == 1)
+            {
+                // (i-1,j) -> (i,j): seam advanced
+                TryAdd(outTris, seam[i - 1], seam[i % n], b[jPrev % m]);
+            }
+            else if (s == 2)
+            {
+                // (i,j-1) -> (i,j): boundary advanced
+                TryAdd(outTris, seam[iPrev % n], b[jPrev % m], b[j % m]);
+            }
+            else // 3
+            {
+                // diagonal: two triangles forming a quad
+                TryAdd(outTris, seam[i - 1], seam[i % n], b[j - 1]);
+                TryAdd(outTris, seam[i % n], b[j - 1], b[j % m]);
+            }
+            iPrev = i; jPrev = j;
+        }
+
+        static List<Point> NormalizeClosed(List<Point> loop)
+        {
+            var list = new List<Point>(loop);
+            if (list.Count > 1 && !list[^1].Equals(list[0])) list.Add(list[0]);
+            var outL = new List<Point>(list.Count);
+            for (int t = 0; t < list.Count; t++)
+            {
+                if (t == 0 || !list[t].Equals(list[t - 1])) outL.Add(list[t]);
+            }
+            return outL;
+        }
+        static void TryAdd(List<Triangle> dst, Point a, Point b, Point c)
+        {
+            if (a.Equals(b) || b.Equals(c) || c.Equals(a)) return;
+            double ux = (double)b.X - a.X, uy = (double)b.Y - a.Y, uz = (double)b.Z - a.Z;
+            double vx = (double)c.X - a.X, vy = (double)c.Y - a.Y, vz = (double)c.Z - a.Z;
+            double cx = uy * vz - uz * vy;
+            double cy = uz * vx - ux * vz;
+            double cz = ux * vy - uy * vx;
+            double l2 = cx * cx + cy * cy + cz * cz;
+            if (l2 <= 0) return;
+            dst.Add(Triangle.FromWinding(a, b, c));
+        }
+    }
     private static void ZipClosed(List<Point> seamIn, List<Point> boundaryIn, List<Triangle> outTris, bool preferA)
     {
         var seam = NormalizeClosed(seamIn);
@@ -485,43 +633,45 @@ internal static class Program
         int n = seam.Count - 1;
         int m = boundary.Count - 1;
 
-        // Align boundary start to be closest to seam[0]
-        int startJ = 0; double best = double.PositiveInfinity;
-        for (int j = 0; j < m; j++)
+        // Find closest boundary start to seam[0]
+        int j = 0; double best0 = double.PositiveInfinity;
+        for (int k = 0; k < m; k++)
         {
-            var d2 = Dist2D(seam[0], boundary[j]);
-            if (d2 < best) { best = d2; startJ = j; }
+            double d2 = Dist2D(seam[0], boundary[k]);
+            if (d2 < best0) { best0 = d2; j = k; }
         }
-        if (startJ != 0)
-        {
-            var rotated = new List<Point>(boundary.Count);
-            for (int k = 0; k < m; k++) rotated.Add(boundary[(startJ + k) % m]);
-            rotated.Add(rotated[0]);
-            boundary = rotated;
-        }
+        // Choose walking direction by looking at seam[1]
+        int jPlus = (j + 1) % m, jMinus = (j - 1 + m) % m;
+        double dPlus = Dist2D(seam[1 % n], boundary[jPlus]);
+        double dMinus = Dist2D(seam[1 % n], boundary[jMinus]);
+        int dir = dPlus <= dMinus ? +1 : -1;
 
-        int i = 0, j2 = 0;
-        while (i < n || j2 < m)
+        for (int i = 0; i < n; i++)
         {
-            double ds = i < n ? Math.Sqrt(Dist2D(seam[i], seam[(i + 1) % n])) : double.PositiveInfinity;
-            double db = j2 < m ? Math.Sqrt(Dist2D(boundary[j2], boundary[(j2 + 1) % m])) : double.PositiveInfinity;
-            if (ds <= db)
+            int iNext = (i + 1) % n;
+
+            // Decide whether to advance boundary index for next seam vertex
+            int jCandidate = (j + dir + m) % m;
+            double stay = Dist2D(seam[iNext], boundary[j]);
+            double step = Dist2D(seam[iNext], boundary[jCandidate]);
+            int jNext = step < stay ? jCandidate : j;
+
+            // Triangle using current seam edge and current boundary vertex
+            TryAdd(outTris, seam[i], seam[iNext], boundary[j]);
+
+            // If boundary index advanced, close the quad with a second triangle
+            if (jNext != j)
             {
-                TryAdd(outTris, seam[i], seam[(i + 1) % n], boundary[j2]);
-                i++;
+                TryAdd(outTris, seam[iNext], boundary[j], boundary[jNext]);
             }
-            else
-            {
-                TryAdd(outTris, seam[i % n], boundary[j2], boundary[(j2 + 1) % m]);
-                j2++;
-            }
+
+            j = jNext;
         }
 
         static List<Point> NormalizeClosed(List<Point> loop)
         {
             var list = new List<Point>(loop);
             if (list.Count > 1 && !list[^1].Equals(list[0])) list.Add(list[0]);
-            // remove consecutive duplicates
             var outL = new List<Point>(list.Count);
             for (int t = 0; t < list.Count; t++)
             {
