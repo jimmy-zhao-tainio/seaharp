@@ -1,11 +1,11 @@
-using GPoint = Seaharp.Geometry.Point;
+using Seaharp.Geometry;
 
 namespace Seaharp.World.Tests;
 
 // Shared test shapes used across multiple test classes.
 internal sealed class TwoTetsShareEdgeShape : Seaharp.World.Shape
 {
-    public TwoTetsShareEdgeShape(GPoint a, GPoint b, GPoint c, GPoint d, GPoint e, GPoint f)
+    public TwoTetsShareEdgeShape(Point a, Point b, Point c, Point d, Point e, Point f)
     {
         // Two tetrahedra sharing only edge AB (no shared face)
         tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));

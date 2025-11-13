@@ -1,7 +1,7 @@
 using Xunit;
 using Seaharp.World;
 using Seaharp.Topology;
-using GPoint = Seaharp.Geometry.Point;
+using Seaharp.Geometry;
 
 namespace Seaharp.World.Tests;
 
@@ -14,9 +14,9 @@ public class InsideClosedSurfaceTests
         var surfaceShape = ClosedSurface.FromTetrahedra(box.Tetrahedra);
         Assert.True(ClosedSurfacePredicates.IsManifold(surfaceShape));
 
-        var center = new GPoint(5,5,5);
-        var outside = new GPoint(20,0,0);
-        var surface = new GPoint(0,0,0);
+        var center = new Point(5,5,5);
+        var outside = new Point(20,0,0);
+        var surface = new Point(0,0,0);
 
         Assert.True(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsStrict(surfaceShape.Triangles, center));
         Assert.False(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsStrict(surfaceShape.Triangles, surface));
@@ -30,8 +30,8 @@ public class InsideClosedSurfaceTests
         var sphere = new Sphere(radius: 10, subdivisions: 1);
         var surfaceShape = ClosedSurface.FromTetrahedra(sphere.Tetrahedra);
         Assert.True(ClosedSurfacePredicates.IsManifold(surfaceShape));
-        Assert.True(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsStrict(surfaceShape.Triangles, new GPoint(0,0,0)));
-        Assert.False(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsInclusive(surfaceShape.Triangles, new GPoint(100,0,0)));
+        Assert.True(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsStrict(surfaceShape.Triangles, new Point(0,0,0)));
+        Assert.False(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsInclusive(surfaceShape.Triangles, new Point(100,0,0)));
     }
 }
 

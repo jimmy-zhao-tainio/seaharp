@@ -1,7 +1,6 @@
 using Xunit;
 using Seaharp.World;
 using Seaharp.Topology;
-using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
 
