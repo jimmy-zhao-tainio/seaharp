@@ -217,6 +217,20 @@ internal static class Program
             Console.WriteLine($"Wrote cracked shells + bridges: {System.IO.Path.GetFullPath(bridgesPath)} with {withBridges.Count} triangles (bridges={bridges.A.Count + bridges.B.Count})");
         }
 
+        // Local, per-destroyed-triangle bridges using two anchors per segment
+        var localBridges = IntersectionSegments.BuildLocalBridgesFromDestroyed(surfaceA, surfaceB);
+        if (localBridges.A.Count + localBridges.B.Count > 0)
+        {
+            var withLocal = new List<Triangle>(keepA.Count + keepB.Count + localBridges.A.Count + localBridges.B.Count);
+            withLocal.AddRange(keepA);
+            withLocal.AddRange(keepB);
+            withLocal.AddRange(localBridges.A);
+            withLocal.AddRange(localBridges.B);
+            var localPath = "spheres_with_local_bridges.stl";
+            StlWriter.Write(withLocal, localPath);
+            Console.WriteLine($"Wrote cracked shells + local bridges: {System.IO.Path.GetFullPath(localPath)} with {withLocal.Count} triangles (bridges={localBridges.A.Count + localBridges.B.Count})");
+        }
+
         // Experimental zipper between seam loops and cracked-shell boundaries (greedy)
         if (loops.Count > 0)
         {

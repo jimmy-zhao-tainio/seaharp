@@ -198,6 +198,86 @@ public static class IntersectionSegments
         }
     }
 
+    // Builds local, per-triangle bridges: for each segment on a destroyed triangle,
+    // take the two vertices adjacent to the hit edges (excluding the shared vertex)
+    // and connect them with the segment endpoints. Emits exactly two triangles per
+    // segment: (p, va, vb) and (p, vb, q). Repeat for both surfaces.
+    public static BridgeTriangles BuildLocalBridgesFromDestroyed(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
+    {
+        if (a is null) throw new ArgumentNullException(nameof(a));
+        if (b is null) throw new ArgumentNullException(nameof(b));
+
+        var prov = BuildCutsProvenance(a, b, epsilon);
+        var outA = new List<Triangle>();
+        var outB = new List<Triangle>();
+
+        for (int i = 0; i < prov.CutsA.Length; i++)
+        {
+            var tri = a.Triangles[i];
+            foreach (var cut in prov.CutsA[i])
+            {
+                var p = cut.A.P; var q = cut.B.P;
+                if (p.Equals(q)) continue;
+                int e0 = cut.A.Edge, e1 = cut.B.Edge;
+                if (e0 == e1) continue; // skip degenerate same-edge cases
+                int sv = SharedVertexIndex(e0, e1);
+                if (sv < 0) continue;
+                int vaIdx = OtherVertexOnEdge(e0, sv);
+                int vbIdx = OtherVertexOnEdge(e1, sv);
+                var va = VertexAt(tri, vaIdx);
+                var vb = VertexAt(tri, vbIdx);
+                TryAdd(outA, p, va, vb);
+                TryAdd(outA, p, vb, q);
+            }
+        }
+        for (int j = 0; j < prov.CutsB.Length; j++)
+        {
+            var tri = b.Triangles[j];
+            foreach (var cut in prov.CutsB[j])
+            {
+                var p = cut.A.P; var q = cut.B.P;
+                if (p.Equals(q)) continue;
+                int e0 = cut.A.Edge, e1 = cut.B.Edge;
+                if (e0 == e1) continue;
+                int sv = SharedVertexIndex(e0, e1);
+                if (sv < 0) continue;
+                int vaIdx = OtherVertexOnEdge(e0, sv);
+                int vbIdx = OtherVertexOnEdge(e1, sv);
+                var va = VertexAt(tri, vaIdx);
+                var vb = VertexAt(tri, vbIdx);
+                TryAdd(outB, p, va, vb);
+                TryAdd(outB, p, vb, q);
+            }
+        }
+
+        return new BridgeTriangles { A = outA, B = outB };
+
+        static Point VertexAt(in Triangle t, int idx)
+            => idx == 0 ? t.P0 : (idx == 1 ? t.P1 : t.P2);
+
+        static int OtherVertexOnEdge(int edge, int shared)
+        {
+            // edge: 0=(0,1), 1=(1,2), 2=(2,0)
+            if (edge == 0) return shared == 0 ? 1 : 0;
+            if (edge == 1) return shared == 1 ? 2 : 1;
+            // edge == 2
+            return shared == 2 ? 0 : 2;
+        }
+
+        static void TryAdd(List<Triangle> dst, Point a0, Point a1, Point a2)
+        {
+            if (a0.Equals(a1) || a1.Equals(a2) || a2.Equals(a0)) return;
+            double ux = (double)a1.X - a0.X, uy = (double)a1.Y - a0.Y, uz = (double)a1.Z - a0.Z;
+            double vx = (double)a2.X - a0.X, vy = (double)a2.Y - a0.Y, vz = (double)a2.Z - a0.Z;
+            double cx = uy * vz - uz * vy;
+            double cy = uz * vx - ux * vz;
+            double cz = ux * vy - uy * vx;
+            double l2 = cx * cx + cy * cy + cz * cz;
+            if (l2 <= 0) return;
+            dst.Add(Triangle.FromWinding(a0, a1, a2));
+        }
+    }
+
     public sealed class CutTriangles
     {
         public required List<Triangle> A { get; init; }
