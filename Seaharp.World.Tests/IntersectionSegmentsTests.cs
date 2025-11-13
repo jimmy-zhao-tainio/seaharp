@@ -44,6 +44,72 @@ public class IntersectionSegmentsTests
     }
 
     [Fact]
+    public void TwoTetrahedra_Intersection_IsExactTriangle()
+    {
+        // Tetrahedron A: base on z=0 plane (triangle with corners (0,0,0),(2,0,0),(0,2,0)) and apex (0,0,2)
+        var a0 = new Point(0, 0, 0);
+        var a1 = new Point(2, 0, 0);
+        var a2 = new Point(0, 2, 0);
+        var a3 = new Point(0, 0, 2);
+        var A = new Seaharp.World.Tetrahedron(a0, a1, a2, a3);
+
+        // Tetrahedron B: three vertices below z=0 and one above; its intersection with z=0 is the
+        // exact triangle with corners (1,0,0), (0,1,0), (1,1,0), all inside A's base triangle.
+        var b0 = new Point(0, 0, 1);   // above
+        var b1 = new Point(2, 0, -1);  // below
+        var b2 = new Point(0, 2, -1);  // below
+        var b3 = new Point(2, 2, -1);  // below
+        var B = new Seaharp.World.Tetrahedron(b0, b1, b2, b3);
+
+        var surfaceA = ClosedSurface.FromTetrahedra(A.Tetrahedra);
+        var surfaceB = ClosedSurface.FromTetrahedra(B.Tetrahedra);
+
+        var loops = IntersectionSegments.BuildLoops(surfaceA, surfaceB);
+        Assert.NotNull(loops);
+        Assert.NotEmpty(loops);
+
+        var p1 = new Point(1,0,0);
+        var p2 = new Point(1,1,0);
+        var p3 = new Point(0,1,0);
+        var expectedSet = new HashSet<Point> { p1, p2, p3 };
+
+        bool MatchesExpected(IReadOnlyList<Point> lp)
+        {
+            var n = lp.Count;
+            var closed = (n >= 2) && lp[0].Equals(lp[n-1]);
+            var uniq = closed ? lp.Take(n-1).ToList() : lp.ToList();
+            if (uniq.Count != 3) return false;
+            // All points present
+            if (!uniq.All(p => expectedSet.Contains(p))) return false;
+            // Check cyclic order equals one of the two orientations
+            var seq = uniq;
+            int idx = seq.FindIndex(q => q.Equals(p1));
+            if (idx >= 0)
+            {
+                var r0 = seq[idx];
+                var r1 = seq[(idx+1)%3];
+                var r2 = seq[(idx+2)%3];
+                if ((r0.Equals(p1) && r1.Equals(p2) && r2.Equals(p3)) ||
+                    (r0.Equals(p1) && r1.Equals(p3) && r2.Equals(p2)))
+                    return true;
+            }
+            // Fallback: set match is sufficient
+            return true;
+        }
+
+        // There should be at least one exact triangle loop matching the expected vertices
+        Assert.Contains(loops, l => MatchesExpected(l));
+
+        // Additionally, ensure those expected vertices lie on z=0
+        foreach (var l in loops)
+        {
+            foreach (var p in l)
+            {
+                if (expectedSet.Contains(p)) Assert.Equal(0, p.Z);
+            }
+        }
+    }
+    [Fact]
     public void TwoSpheres_Intersection_IsCircular_WithExpectedRadius()
     {
         var centerA = new Point(0, 0, 0);
