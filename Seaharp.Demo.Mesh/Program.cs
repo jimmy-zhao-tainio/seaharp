@@ -28,41 +28,7 @@ internal class Program
         //  - Add manifold post-check and optional repair.
 
         var path = args != null && args.Length > 0 ? args[0] : "union_spheres.stl";
-        WriteBinaryStl(union, path);
+        StlWriter.Write(union, path);
         Console.WriteLine($"Wrote union STL: {Path.GetFullPath(path)} (triangles: {union.Triangles.Count})");
-    }
-
-    // TODO: Duplicate STL writer: World.Save writes STL for World (Shape -> ClosedSurface),
-    //       and this demo re-implements a minimal writer for ClosedSurface. Refactor to a
-    //       single utility (e.g., Seaharp.Topology.StlWriter.Write(ClosedSurface, path))
-    //       and migrate World.Save to use it. Consider lifting World.Shape from tetrahedra-
-    //       only to a generic ClosedSurface/mesh representation for IO.
-    private static void WriteBinaryStl(ClosedSurface surface, string path)
-    {
-        var tris = surface.Triangles;
-        using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-        using var bw = new BinaryWriter(fs);
-
-        var header = new byte[80];
-        var tag = System.Text.Encoding.ASCII.GetBytes("Seaharp.Demo.Mesh Union");
-        Array.Copy(tag, header, Math.Min(header.Length, tag.Length));
-        bw.Write(header);
-
-        bw.Write((uint)tris.Count);
-
-        for (int i = 0; i < tris.Count; i++)
-        {
-            var t = tris[i];
-            // normal (3 floats)
-            bw.Write((float)t.Normal.X);
-            bw.Write((float)t.Normal.Y);
-            bw.Write((float)t.Normal.Z);
-            // vertices (9 floats)
-            bw.Write((float)t.P0.X); bw.Write((float)t.P0.Y); bw.Write((float)t.P0.Z);
-            bw.Write((float)t.P1.X); bw.Write((float)t.P1.Y); bw.Write((float)t.P1.Z);
-            bw.Write((float)t.P2.X); bw.Write((float)t.P2.Y); bw.Write((float)t.P2.Z);
-            // attribute byte count
-            bw.Write((ushort)0);
-        }
     }
 }

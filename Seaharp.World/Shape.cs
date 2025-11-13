@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Seaharp.Topology; // for ClosedSurface
 
 namespace Seaharp.World;
 
@@ -17,4 +18,5 @@ public abstract partial class Shape
     // TODO: Consider evolving Shape to produce a ClosedSurface directly (or hold one),
     //       instead of mandating a tetrahedra decomposition. This would simplify IO
     //       (STL export), boolean ops, and reduce duplication between World and Topology.
+    public ClosedSurface Mesh => ClosedSurface.FromTetrahedra(tetrahedra);
 }
