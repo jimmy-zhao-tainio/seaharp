@@ -61,7 +61,10 @@ public static class MeshBoolean
                 var cx = (t.P0.X + t.P1.X + t.P2.X) / 3.0;
                 var cy = (t.P0.Y + t.P1.Y + t.P2.Y) / 3.0;
                 var cz = (t.P0.Z + t.P1.Z + t.P2.Z) / 3.0;
-                var c = new Point((long)Math.Round(cx), (long)Math.Round(cy), (long)Math.Round(cz));
+                var c = new Point(
+                    (long)Math.Round(cx, MidpointRounding.AwayFromZero),
+                    (long)Math.Round(cy, MidpointRounding.AwayFromZero),
+                    (long)Math.Round(cz, MidpointRounding.AwayFromZero));
                 var cls = InsideClosedSurface.Classify(otherTris, c, epsilon);
                 bool keep0 = keepOutside ? (cls != InsideClosedSurface.Classification.Inside) : (cls == InsideClosedSurface.Classification.Inside);
                 if (keep0) emit(t);
@@ -115,7 +118,10 @@ public static class MeshBoolean
                     var cx = (tt.P0.X + tt.P1.X + tt.P2.X) / 3.0;
                     var cy = (tt.P0.Y + tt.P1.Y + tt.P2.Y) / 3.0;
                     var cz = (tt.P0.Z + tt.P1.Z + tt.P2.Z) / 3.0;
-                    var c = new Point((long)Math.Round(cx), (long)Math.Round(cy), (long)Math.Round(cz));
+                    var c = new Point(
+                        (long)Math.Round(cx, MidpointRounding.AwayFromZero),
+                        (long)Math.Round(cy, MidpointRounding.AwayFromZero),
+                        (long)Math.Round(cz, MidpointRounding.AwayFromZero));
                     var cls = InsideClosedSurface.Classify(otherTris, c, epsilon);
                     bool keep1 = keepOutside ? (cls != InsideClosedSurface.Classification.Inside) : (cls == InsideClosedSurface.Classification.Inside);
                     if (keep1) emit(tt);

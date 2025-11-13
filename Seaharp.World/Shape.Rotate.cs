@@ -67,7 +67,10 @@ public abstract partial class Shape
             double y3 = x2 * sz + y2 * cz;
             double z3 = z2;
 
-            var r = new Point((long)Math.Round(x3), (long)Math.Round(y3), (long)Math.Round(z3));
+            var r = new Point(
+                (long)Math.Round(x3, MidpointRounding.AwayFromZero),
+                (long)Math.Round(y3, MidpointRounding.AwayFromZero),
+                (long)Math.Round(z3, MidpointRounding.AwayFromZero));
 
             if (rotToOrig.TryGetValue(r, out var existing) && !existing.Equals(p))
             {

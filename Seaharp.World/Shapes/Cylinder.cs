@@ -80,9 +80,9 @@ public sealed class Cylinder : Shape
             double y3 = x2 * szr + y2 * czr;
             double z3 = z2;
             return (
-                (long)Math.Round(cx + x3),
-                (long)Math.Round(cy + y3),
-                (long)Math.Round(cz + z3)
+                (long)Math.Round(cx + x3, MidpointRounding.AwayFromZero),
+                (long)Math.Round(cy + y3, MidpointRounding.AwayFromZero),
+                (long)Math.Round(cz + z3, MidpointRounding.AwayFromZero)
             );
         }
 
@@ -93,15 +93,15 @@ public sealed class Cylinder : Shape
 
             // Round XY to grid; duplicates can occur for small delta angles —
             // we guard by skipping degenerate tetrahedra below.
-            long i0x = (long)Math.Round(InnerRadius * Math.Cos(a0));
-            long i0y = (long)Math.Round(InnerRadius * Math.Sin(a0));
-            long i1x = (long)Math.Round(InnerRadius * Math.Cos(a1));
-            long i1y = (long)Math.Round(InnerRadius * Math.Sin(a1));
+            long i0x = (long)Math.Round(InnerRadius * Math.Cos(a0), MidpointRounding.AwayFromZero);
+            long i0y = (long)Math.Round(InnerRadius * Math.Sin(a0), MidpointRounding.AwayFromZero);
+            long i1x = (long)Math.Round(InnerRadius * Math.Cos(a1), MidpointRounding.AwayFromZero);
+            long i1y = (long)Math.Round(InnerRadius * Math.Sin(a1), MidpointRounding.AwayFromZero);
 
-            long o0x = (long)Math.Round(OuterRadius * Math.Cos(a0));
-            long o0y = (long)Math.Round(OuterRadius * Math.Sin(a0));
-            long o1x = (long)Math.Round(OuterRadius * Math.Cos(a1));
-            long o1y = (long)Math.Round(OuterRadius * Math.Sin(a1));
+            long o0x = (long)Math.Round(OuterRadius * Math.Cos(a0), MidpointRounding.AwayFromZero);
+            long o0y = (long)Math.Round(OuterRadius * Math.Sin(a0), MidpointRounding.AwayFromZero);
+            long o1x = (long)Math.Round(OuterRadius * Math.Cos(a1), MidpointRounding.AwayFromZero);
+            long o1y = (long)Math.Round(OuterRadius * Math.Sin(a1), MidpointRounding.AwayFromZero);
 
             var bi0r = R(i0x, i0y, z0);
             var bo0r = R(o0x, o0y, z0);

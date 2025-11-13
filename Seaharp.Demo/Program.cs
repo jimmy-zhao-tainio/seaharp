@@ -44,9 +44,9 @@ internal class Program
         {
             double ph = phaseDeg * Math.PI / 180.0;
             var v = RotateXZ(Math.Cos(ph) * radius, Math.Sin(ph) * radius, 0.0, incDeg, ascDeg);
-            return new Point(center.X + (long)Math.Round(v.x),
-                             center.Y + (long)Math.Round(v.y),
-                             center.Z + (long)Math.Round(v.z));
+            return new Point(center.X + (long)Math.Round(v.x, MidpointRounding.AwayFromZero),
+                             center.Y + (long)Math.Round(v.y, MidpointRounding.AwayFromZero),
+                             center.Z + (long)Math.Round(v.z, MidpointRounding.AwayFromZero));
         }
 
         void AddPlanet(in Planets.Planet p, double phaseDeg)

@@ -87,9 +87,9 @@ public sealed class Sphere : Shape
     private static Seaharp.Geometry.Point ProjectToGrid(DVec v, Seaharp.Geometry.Point center, long radius)
     {
         var n = v.Normalize().Scale(radius);
-        long x = center.X + (long)Math.Round(n.X);
-        long y = center.Y + (long)Math.Round(n.Y);
-        long z = center.Z + (long)Math.Round(n.Z);
+        long x = center.X + (long)Math.Round(n.X, MidpointRounding.AwayFromZero);
+        long y = center.Y + (long)Math.Round(n.Y, MidpointRounding.AwayFromZero);
+        long z = center.Z + (long)Math.Round(n.Z, MidpointRounding.AwayFromZero);
         return new Seaharp.Geometry.Point(x, y, z);
     }
 
