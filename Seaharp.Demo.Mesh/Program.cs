@@ -139,6 +139,32 @@ internal static class Program
             Console.WriteLine($"Wrote cracked shells + disc: {System.IO.Path.GetFullPath(discPath)} with {crackedPlusDisc.Count} triangles (disc={discTris.Count})");
         }
 
+        // Additional visualization: small boxes centered on crack-edge vertices (boundary vertices of kept shells)
+        var crackVertices = new HashSet<Point>();
+        CollectBoundaryVertices(keepA, crackVertices);
+        CollectBoundaryVertices(keepB, crackVertices);
+        if (crackVertices.Count > 0)
+        {
+            var boxesTris = new List<Triangle>(crackVertices.Count * 12);
+            const long boxSize = 4; // small, even to keep integer centering (half = 2)
+            long half = boxSize / 2;
+            foreach (var v in crackVertices)
+            {
+                var bx = new Seaharp.World.Box(boxSize, boxSize, boxSize);
+                bx.Position(v.X - half, v.Y - half, v.Z - half);
+                boxesTris.AddRange(bx.Mesh.Triangles);
+            }
+
+            // Combine shells + boxes only (no fan)
+            var shellsPlusBoxes = new List<Triangle>(keepA.Count + keepB.Count + boxesTris.Count);
+            shellsPlusBoxes.AddRange(keepA);
+            shellsPlusBoxes.AddRange(keepB);
+            shellsPlusBoxes.AddRange(boxesTris);
+            var boxesPath = "spheres_with_boxes.stl";
+            StlWriter.Write(shellsPlusBoxes, boxesPath);
+            Console.WriteLine($"Wrote cracked shells + boxes: {System.IO.Path.GetFullPath(boxesPath)} with {shellsPlusBoxes.Count} triangles (boxes={boxesTris.Count})");
+        }
+
         // Compute minimum signed distance from any kept vertex to any intersection segment
         // Sign: negative if the vertex lies inside/on the other surface (would have been destroyed)
         // segs already computed above
@@ -194,6 +220,30 @@ internal static class Program
             if (seen.Add(t.P0)) outVerts.Add((t.P0, isA));
             if (seen.Add(t.P1)) outVerts.Add((t.P1, isA));
             if (seen.Add(t.P2)) outVerts.Add((t.P2, isA));
+        }
+    }
+
+    private static void CollectBoundaryVertices(List<Triangle> tris, HashSet<Point> outVerts)
+    {
+        var edgeCount = new Dictionary<EdgeKey, int>();
+        foreach (var t in tris)
+        {
+            AddEdge(new EdgeKey(t.P0, t.P1));
+            AddEdge(new EdgeKey(t.P1, t.P2));
+            AddEdge(new EdgeKey(t.P2, t.P0));
+        }
+        foreach (var kv in edgeCount)
+        {
+            if (kv.Value == 1)
+            {
+                outVerts.Add(kv.Key.A);
+                outVerts.Add(kv.Key.B);
+            }
+        }
+
+        void AddEdge(EdgeKey e)
+        {
+            if (edgeCount.TryGetValue(e, out int c)) edgeCount[e] = c + 1; else edgeCount[e] = 1;
         }
     }
 
