@@ -17,13 +17,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Computatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Topology", "Seaharp.Topology\\Seaharp.Topology.csproj", "{4B42BA46-763B-481F-940D-BB5757884E92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Demo.Mesh", "Seaharp.Demo.Mesh\Seaharp.Demo.Mesh.csproj", "{D7E0A3A3-ABCD-4F2D-98A1-2D2E403F12A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{91C06086-50BF-41A5-9779-9B84CE443822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -58,5 +62,12 @@ Global
 		{4B42BA46-763B-481F-940D-BB5757884E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B42BA46-763B-481F-940D-BB5757884E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B42BA46-763B-481F-940D-BB5757884E92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7E0A3A3-ABCD-4F2D-98A1-2D2E403F12A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7E0A3A3-ABCD-4F2D-98A1-2D2E403F12A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7E0A3A3-ABCD-4F2D-98A1-2D2E403F12A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7E0A3A3-ABCD-4F2D-98A1-2D2E403F12A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
+
+
+
