@@ -21,11 +21,22 @@ internal class Program
 
         var union = MeshBoolean.Union(surfaceA, surfaceB);
 
+        // TODO: The seam in the preview looks like a "cracked egg". Track/fix in boolean pipeline:
+        //  - Ensure loop orientation consistency before welding.
+        //  - Apply all chords per triangle (done) and introduce interior vertices for crossing chords.
+        //  - Handle coplanar overlaps and dedup slivers after snapping.
+        //  - Add manifold post-check and optional repair.
+
         var path = args != null && args.Length > 0 ? args[0] : "union_spheres.stl";
         WriteBinaryStl(union, path);
         Console.WriteLine($"Wrote union STL: {Path.GetFullPath(path)} (triangles: {union.Triangles.Count})");
     }
 
+    // TODO: Duplicate STL writer: World.Save writes STL for World (Shape -> ClosedSurface),
+    //       and this demo re-implements a minimal writer for ClosedSurface. Refactor to a
+    //       single utility (e.g., Seaharp.Topology.StlWriter.Write(ClosedSurface, path))
+    //       and migrate World.Save to use it. Consider lifting World.Shape from tetrahedra-
+    //       only to a generic ClosedSurface/mesh representation for IO.
     private static void WriteBinaryStl(ClosedSurface surface, string path)
     {
         var tris = surface.Triangles;
@@ -55,4 +66,3 @@ internal class Program
         }
     }
 }
-

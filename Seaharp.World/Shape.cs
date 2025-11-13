@@ -13,4 +13,8 @@ public abstract partial class Shape
     // Number of tetrahedra skipped during construction due to degeneracy
     // (e.g., collinearity/coplanarity after rounding). Debug/diagnostic only.
     public int DegenerateTetrahedra => degenerateSkips;
+
+    // TODO: Consider evolving Shape to produce a ClosedSurface directly (or hold one),
+    //       instead of mandating a tetrahedra decomposition. This would simplify IO
+    //       (STL export), boolean ops, and reduce duplication between World and Topology.
 }
