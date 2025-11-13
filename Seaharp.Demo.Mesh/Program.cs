@@ -221,14 +221,30 @@ internal static class Program
         var localBridges = IntersectionSegments.BuildLocalBridgesFromDestroyed(surfaceA, surfaceB);
         if (localBridges.A.Count + localBridges.B.Count > 0)
         {
-            var withLocal = new List<Triangle>(keepA.Count + keepB.Count + localBridges.A.Count + localBridges.B.Count);
+            // Filter out any local-bridge triangle that lies inside the opposite surface
+            var filteredA = new List<Triangle>(localBridges.A.Count);
+            foreach (var t in localBridges.A)
+            {
+                var c = CentroidPoint(t);
+                if (!InsideClosedSurface.ContainsInclusive(surfaceB.Triangles, c))
+                    filteredA.Add(t);
+            }
+            var filteredB = new List<Triangle>(localBridges.B.Count);
+            foreach (var t in localBridges.B)
+            {
+                var c = CentroidPoint(t);
+                if (!InsideClosedSurface.ContainsInclusive(surfaceA.Triangles, c))
+                    filteredB.Add(t);
+            }
+
+            var withLocal = new List<Triangle>(keepA.Count + keepB.Count + filteredA.Count + filteredB.Count);
             withLocal.AddRange(keepA);
             withLocal.AddRange(keepB);
-            withLocal.AddRange(localBridges.A);
-            withLocal.AddRange(localBridges.B);
+            withLocal.AddRange(filteredA);
+            withLocal.AddRange(filteredB);
             var localPath = "spheres_with_local_bridges.stl";
             StlWriter.Write(withLocal, localPath);
-            Console.WriteLine($"Wrote cracked shells + local bridges: {System.IO.Path.GetFullPath(localPath)} with {withLocal.Count} triangles (bridges={localBridges.A.Count + localBridges.B.Count})");
+            Console.WriteLine($"Wrote cracked shells + local bridges: {System.IO.Path.GetFullPath(localPath)} with {withLocal.Count} triangles (bridges_kept={filteredA.Count + filteredB.Count}, filtered_out={localBridges.A.Count + localBridges.B.Count - filteredA.Count - filteredB.Count})");
         }
 
         // Experimental zipper between seam loops and cracked-shell boundaries (greedy)
@@ -331,6 +347,17 @@ internal static class Program
         {
             if (edgeCount.TryGetValue(e, out int c)) edgeCount[e] = c + 1; else edgeCount[e] = 1;
         }
+    }
+
+    private static Point CentroidPoint(in Triangle t)
+    {
+        double cx = (t.P0.X + t.P1.X + t.P2.X) / 3.0;
+        double cy = (t.P0.Y + t.P1.Y + t.P2.Y) / 3.0;
+        double cz = (t.P0.Z + t.P1.Z + t.P2.Z) / 3.0;
+        return new Point(
+            (long)Math.Round(cx, MidpointRounding.AwayFromZero),
+            (long)Math.Round(cy, MidpointRounding.AwayFromZero),
+            (long)Math.Round(cz, MidpointRounding.AwayFromZero));
     }
 
     private static double MinDistanceToSegments(Point v, List<(Point P, Point Q)> segs)
