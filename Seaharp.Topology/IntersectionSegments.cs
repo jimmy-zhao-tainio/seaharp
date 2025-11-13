@@ -37,6 +37,135 @@ public static class IntersectionSegments
         return BuildClosedLoopsFromSegments(segments);
     }
 
+    // Builds per-triangle cut segments: for every triangle in A (and B), collects the
+    // snapped segment that lies inside the opposite surface. Each entry is a list because
+    // a triangle may be intersected more than once in complex cases. Endpoints are on the
+    // triangle edges (snapped Points). Degenerate zero-length segments are omitted.
+    public sealed class IntersectionCutsResult
+    {
+        public required List<(Point P, Point Q)>[] CutsA { get; init; }
+        public required List<(Point P, Point Q)>[] CutsB { get; init; }
+    }
+
+    public static IntersectionCutsResult BuildCuts(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
+    {
+        if (a is null) throw new ArgumentNullException(nameof(a));
+        if (b is null) throw new ArgumentNullException(nameof(b));
+
+        var trisA = a.Triangles; var trisB = b.Triangles;
+        var cutsA = new List<(Point, Point)>[trisA.Count];
+        var cutsB = new List<(Point, Point)>[trisB.Count];
+        for (int i = 0; i < trisA.Count; i++) cutsA[i] = new List<(Point, Point)>();
+        for (int j = 0; j < trisB.Count; j++) cutsB[j] = new List<(Point, Point)>();
+
+        for (int i = 0; i < trisA.Count; i++)
+        {
+            var ta = trisA[i];
+            var planeB = Plane.FromTriangle(ta); // not used; avoid premature alloc
+        }
+
+        for (int i = 0; i < trisA.Count; i++)
+        {
+            var ta = trisA[i];
+            var planeB = Plane.FromTriangle(ta); // dummy for symmetry
+            for (int j = 0; j < trisB.Count; j++)
+            {
+                var tb = trisB[j];
+
+                if (TryEndpointsOnTriangleEdges(ta, tb, epsilon, out var a0, out var a1, out var b0, out var b1))
+                {
+                    if (!(a0.Equals(a1))) cutsA[i].Add((a0, a1));
+                    if (!(b0.Equals(b1))) cutsB[j].Add((b0, b1));
+                }
+            }
+        }
+
+        return new IntersectionCutsResult { CutsA = cutsA, CutsB = cutsB };
+    }
+
+    // For a triangle pair, returns the two endpoints on triangle A (lying on A's edges and inside B)
+    // and the two endpoints on triangle B (lying on B's edges and inside A). Points are snapped.
+    private static bool TryEndpointsOnTriangleEdges(in Triangle a, in Triangle b, double eps, out Point a0, out Point a1, out Point b0, out Point b1)
+    {
+        a0 = a1 = b0 = b1 = default;
+        var at = a; var bt = b;
+
+        static (double x, double y, double z) LerpD(in Point p, in Point q, double t)
+            => (p.X + (q.X - p.X) * t, p.Y + (q.Y - p.Y) * t, p.Z + (q.Z - p.Z) * t);
+
+        static Point Snap(double x, double y, double z)
+            => new Point((long)Math.Round(x, MidpointRounding.AwayFromZero),
+                         (long)Math.Round(y, MidpointRounding.AwayFromZero),
+                         (long)Math.Round(z, MidpointRounding.AwayFromZero));
+
+        bool EdgePlaneHitD(in Point p, in Point q, in Plane plane, out Vector hit)
+        {
+            var s0 = plane.Evaluate(p);
+            var s1 = plane.Evaluate(q);
+            hit = default;
+
+            bool s0On = Math.Abs(s0) <= eps;
+            bool s1On = Math.Abs(s1) <= eps;
+
+            if (s0On && s1On) return false; // coplanar edge: skip for cuts here
+            if (s0On) { hit = new Vector(p.X, p.Y, p.Z); return true; }
+            if (s1On) { hit = new Vector(q.X, q.Y, q.Z); return true; }
+            if ((s0 > 0 && s1 > 0) || (s0 < 0 && s1 < 0)) return false;
+            double t = s0 / (s0 - s1);
+            if (t < -1e-12 || t > 1.0 + 1e-12) return false;
+            var hd = LerpD(p, q, t);
+            hit = new Vector(hd.x, hd.y, hd.z);
+            return true;
+        }
+
+        bool CollectOnA(in Triangle tb, in Plane planeB, out List<Point> pts)
+        {
+            pts = new List<Point>(2);
+            if (EdgePlaneHitD(at.P0, at.P1, planeB, out var h01) && PointInTriangleD(h01, tb, eps)) pts.Add(Snap(h01.X, h01.Y, h01.Z));
+            if (EdgePlaneHitD(at.P1, at.P2, planeB, out var h12) && PointInTriangleD(h12, tb, eps)) pts.Add(Snap(h12.X, h12.Y, h12.Z));
+            if (EdgePlaneHitD(at.P2, at.P0, planeB, out var h20) && PointInTriangleD(h20, tb, eps)) pts.Add(Snap(h20.X, h20.Y, h20.Z));
+            // Dedup
+            if (pts.Count > 1 && pts[0].Equals(pts[1])) pts.RemoveAt(1);
+            return pts.Count >= 2;
+        }
+
+        bool CollectOnB(in Triangle ta, in Plane planeA, out List<Point> pts)
+        {
+            pts = new List<Point>(2);
+            if (EdgePlaneHitD(bt.P0, bt.P1, planeA, out var h01) && PointInTriangleD(h01, ta, eps)) pts.Add(Snap(h01.X, h01.Y, h01.Z));
+            if (EdgePlaneHitD(bt.P1, bt.P2, planeA, out var h12) && PointInTriangleD(h12, ta, eps)) pts.Add(Snap(h12.X, h12.Y, h12.Z));
+            if (EdgePlaneHitD(bt.P2, bt.P0, planeA, out var h20) && PointInTriangleD(h20, ta, eps)) pts.Add(Snap(h20.X, h20.Y, h20.Z));
+            if (pts.Count > 1 && pts[0].Equals(pts[1])) pts.RemoveAt(1);
+            return pts.Count >= 2;
+        }
+
+        var planeA = Plane.FromTriangle(at);
+        var planeB = Plane.FromTriangle(bt);
+
+        bool okA = CollectOnA(b, planeB, out var ptsA);
+        bool okB = CollectOnB(a, planeA, out var ptsB);
+
+        if (!(okA && okB)) return false;
+
+        // If more than two due to degeneracy, choose farthest two
+        (Point, Point) PickPair(List<Point> list)
+        {
+            if (list.Count == 2) return (list[0], list[1]);
+            double best = -1; int ia = 0, ib = 1;
+            for (int i = 0; i < list.Count; i++)
+                for (int j = i + 1; j < list.Count; j++)
+                {
+                    double d2 = Dist2(list[i], list[j]);
+                    if (d2 > best) { best = d2; ia = i; ib = j; }
+                }
+            return (list[ia], list[ib]);
+        }
+
+        (a0, a1) = PickPair(ptsA);
+        (b0, b1) = PickPair(ptsB);
+        return true;
+    }
+
     // --- Segment stitching helpers ---
     private static List<List<Point>> BuildClosedLoopsFromSegments(List<(Point P, Point Q)> segments)
     {
