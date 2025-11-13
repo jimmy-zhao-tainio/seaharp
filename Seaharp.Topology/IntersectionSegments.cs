@@ -44,6 +44,206 @@ public static class IntersectionSegments
         return BuildClosedLoopsFromSegments(segments);
     }
 
+    // Computes integer center for a closed loop (last equals first) by averaging
+    // unique vertices and rounding away from zero per component using Int128.
+    private static Point LoopCenter(IReadOnlyList<Point> loop)
+    {
+        int count = loop.Count;
+        if (count == 0) return default;
+        int n = loop[^1].Equals(loop[0]) ? count - 1 : count;
+        if (n <= 0) return loop[0];
+
+        Int128 sx = 0, sy = 0, sz = 0;
+        for (int i = 0; i < n; i++)
+        {
+            sx += loop[i].X; sy += loop[i].Y; sz += loop[i].Z;
+        }
+        static long RoundAway(Int128 num, Int128 den)
+        {
+            if (num >= 0) return (long)((num + (den / 2)) / den);
+            else return (long)(-((-num + (den / 2)) / den));
+        }
+        var d = (Int128)n;
+        long cx = RoundAway(sx, d);
+        long cy = RoundAway(sy, d);
+        long cz = RoundAway(sz, d);
+        return new Point(cx, cy, cz);
+    }
+
+    // Builds triangle fans (discs) from each loop to its integer center.
+    // Triangles are formed as (pi, pi+1, center) for each edge of the loop.
+    public static List<Triangle> BuildLoopDiscs(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
+    {
+        var loops = BuildLoops(a, b, epsilon);
+        var tris = new List<Triangle>();
+        foreach (var loop in loops)
+        {
+            if (loop.Count < 3) continue;
+            var center = LoopCenter(loop);
+            int n = loop[^1].Equals(loop[0]) ? loop.Count - 1 : loop.Count;
+            for (int i = 0; i < n; i++)
+            {
+                var p = loop[i];
+                var q = loop[(i + 1) % n];
+                if (p.Equals(q) || p.Equals(center) || q.Equals(center)) continue;
+                tris.Add(Triangle.FromWinding(p, q, center));
+            }
+        }
+        return tris;
+    }
+
+    public sealed class CutTriangles
+    {
+        public required List<Triangle> A { get; init; }
+        public required List<Triangle> B { get; init; }
+    }
+
+    // Builds small visualization triangles per segment using the two segment endpoints
+    // plus one vertex from the intersected triangle (the shared vertex of the two
+    // intersected edges when determinable; otherwise the closest triangle vertex).
+    public static CutTriangles BuildCutTriangles(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
+    {
+        if (a is null) throw new ArgumentNullException(nameof(a));
+        if (b is null) throw new ArgumentNullException(nameof(b));
+
+        var cuts = BuildCuts(a, b, epsilon);
+        var trisA = new List<Triangle>();
+        var trisB = new List<Triangle>();
+
+        for (int i = 0; i < a.Triangles.Count; i++)
+        {
+            var t = a.Triangles[i];
+            foreach (var seg in cuts.CutsA[i])
+            {
+                if (TryBuildTriangle(t, seg.P, seg.Q, out var tri)) trisA.Add(tri);
+            }
+        }
+        for (int j = 0; j < b.Triangles.Count; j++)
+        {
+            var t = b.Triangles[j];
+            foreach (var seg in cuts.CutsB[j])
+            {
+                if (TryBuildTriangle(t, seg.P, seg.Q, out var tri)) trisB.Add(tri);
+            }
+        }
+
+        return new CutTriangles { A = trisA, B = trisB };
+    }
+
+    // Returns the exact triangles from A and B that produced an intersection cut
+    // (i.e., triangles that were crossed). Uses the provenance variant to avoid
+    // recomputing which triangles were touched.
+    public sealed class TouchedTriangles
+    {
+        public required List<Triangle> A { get; init; }
+        public required List<Triangle> B { get; init; }
+    }
+
+    public static TouchedTriangles ExtractTouchedTriangles(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
+    {
+        if (a is null) throw new ArgumentNullException(nameof(a));
+        if (b is null) throw new ArgumentNullException(nameof(b));
+
+        // Union of two detections for coverage:
+        // 1) BuildCuts-based (same as deletion pipeline)
+        // 2) Direct tri-pair intersection test (TryTriangleTriangleSegment)
+        var cuts = BuildCuts(a, b, epsilon);
+        var hitA = new bool[a.Triangles.Count];
+        var hitB = new bool[b.Triangles.Count];
+        for (int i = 0; i < cuts.CutsA.Length; i++) if (cuts.CutsA[i].Count > 0) hitA[i] = true;
+        for (int j = 0; j < cuts.CutsB.Length; j++) if (cuts.CutsB[j].Count > 0) hitB[j] = true;
+
+        for (int i = 0; i < a.Triangles.Count; i++)
+        {
+            var ta = a.Triangles[i];
+            for (int j = 0; j < b.Triangles.Count; j++)
+            {
+                var tb = b.Triangles[j];
+                if (TryTriangleTriangleSegment(ta, tb, epsilon, out _, out _))
+                {
+                    hitA[i] = true; hitB[j] = true;
+                }
+            }
+        }
+
+        var listA = new List<Triangle>();
+        var listB = new List<Triangle>();
+        for (int i = 0; i < hitA.Length; i++) if (hitA[i]) listA.Add(a.Triangles[i]);
+        for (int j = 0; j < hitB.Length; j++) if (hitB[j]) listB.Add(b.Triangles[j]);
+        return new TouchedTriangles { A = listA, B = listB };
+    }
+
+    private static bool TryBuildTriangle(in Triangle t, in Point p, in Point q, out Triangle tri)
+    {
+        tri = default;
+        if (p.Equals(q)) return false;
+        int e1 = EdgeIndex(t, p);
+        int e2 = EdgeIndex(t, q);
+
+        Point vShared;
+        if (e1 != -1 && e2 != -1 && e1 != e2)
+        {
+            int sv = SharedVertexIndex(e1, e2);
+            vShared = sv switch { 0 => t.P0, 1 => t.P1, 2 => t.P2, _ => ClosestVertex(t, p, q) };
+        }
+        else
+        {
+            vShared = ClosestVertex(t, p, q);
+        }
+
+        if (vShared.Equals(p) || vShared.Equals(q)) return false;
+        tri = Triangle.FromWinding(p, q, vShared);
+        return true;
+    }
+
+    private static int EdgeIndex(in Triangle t, in Point p)
+    {
+        if (OnSeg(t.P0, t.P1, p)) return 0;
+        if (OnSeg(t.P1, t.P2, p)) return 1;
+        if (OnSeg(t.P2, t.P0, p)) return 2;
+        return -1;
+    }
+    private static bool OnSeg(in Point a, in Point b, in Point p)
+    {
+        long minX = Math.Min(a.X, b.X), maxX = Math.Max(a.X, b.X);
+        long minY = Math.Min(a.Y, b.Y), maxY = Math.Max(a.Y, b.Y);
+        long minZ = Math.Min(a.Z, b.Z), maxZ = Math.Max(a.Z, b.Z);
+        if (p.X < minX || p.X > maxX || p.Y < minY || p.Y > maxY || p.Z < minZ || p.Z > maxZ) return false;
+        var v0 = new Vector(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
+        var v1 = new Vector(p.X - a.X, p.Y - a.Y, p.Z - a.Z);
+        var c = v0.Cross(v1);
+        return Math.Abs(c.X) < 1e-9 && Math.Abs(c.Y) < 1e-9 && Math.Abs(c.Z) < 1e-9;
+    }
+    private static int SharedVertexIndex(int e1, int e2)
+    {
+        int[] cnt = new int[3];
+        void Add(int e)
+        {
+            if (e == 0) { cnt[0]++; cnt[1]++; }
+            else if (e == 1) { cnt[1]++; cnt[2]++; }
+            else if (e == 2) { cnt[2]++; cnt[0]++; }
+        }
+        Add(e1); Add(e2);
+        for (int i = 0; i < 3; i++) if (cnt[i] == 2) return i;
+        return -1;
+    }
+    private static Point ClosestVertex(in Triangle t, in Point p, in Point q)
+    {
+        var v0 = t.P0; var v1 = t.P1; var v2 = t.P2;
+        long d0 = Math.Min(Dist2L(v0, p), Dist2L(v0, q));
+        long d1 = Math.Min(Dist2L(v1, p), Dist2L(v1, q));
+        long d2 = Math.Min(Dist2L(v2, p), Dist2L(v2, q));
+        if (d0 <= d1 && d0 <= d2) return v0;
+        if (d1 <= d2) return v1;
+        return v2;
+    }
+
+    private static long Dist2L(in Point a, in Point b)
+    {
+        long dx = a.X - b.X; long dy = a.Y - b.Y; long dz = a.Z - b.Z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
     // Detailed cut data carrying per-endpoint edge provenance and pre-snap param.
     public readonly struct CutEndpoint
     {

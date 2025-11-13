@@ -186,4 +186,61 @@ public class IntersectionSegmentsTests
         var loops = IntersectionSegments.BuildLoops(surfaceA, surfaceB);
         Assert.Empty(loops);
     }
+
+    [Fact]
+    public void TwoSpheres_CutsAndLoops_Consistent_AndTouchedTrianglesSuperset()
+    {
+        var centerA = new Point(0, 0, 0);
+        var centerB = new Point(35, 11, -7);
+        var r = 80;
+
+        var a = new Sphere(r, subdivisions: 3, center: centerA);
+        var b = new Sphere(r, subdivisions: 3, center: centerB);
+
+        var surfaceA = ClosedSurface.FromTetrahedra(a.Tetrahedra);
+        var surfaceB = ClosedSurface.FromTetrahedra(b.Tetrahedra);
+
+        var loops = IntersectionSegments.BuildLoops(surfaceA, surfaceB);
+        var cuts = IntersectionSegments.BuildCuts(surfaceA, surfaceB);
+
+        // 1) Every cut segment should appear in the loop edge set (undirected)
+        var loopEdges = new HashSet<EdgeKey>();
+        foreach (var loop in loops)
+        {
+            int n = loop.Count;
+            if (n < 2) continue;
+            for (int i = 0; i < n - 1; i++)
+            {
+                loopEdges.Add(new EdgeKey(loop[i], loop[i + 1]));
+            }
+        }
+
+        var cutEdges = new HashSet<EdgeKey>();
+        for (int i = 0; i < cuts.CutsA.Length; i++)
+            foreach (var seg in cuts.CutsA[i]) cutEdges.Add(new EdgeKey(seg.P, seg.Q));
+        for (int j = 0; j < cuts.CutsB.Length; j++)
+            foreach (var seg in cuts.CutsB[j]) cutEdges.Add(new EdgeKey(seg.P, seg.Q));
+
+        // Loop edges must cover all cut edges (loops are built from segments)
+        Assert.True(cutEdges.Count > 0);
+        foreach (var e in cutEdges)
+            Assert.Contains(e, loopEdges);
+
+        // 2) Touched triangles must be a superset of triangles marked by BuildCuts
+        var touched = IntersectionSegments.ExtractTouchedTriangles(surfaceA, surfaceB);
+
+        // Build maps triangle -> index for original surfaces
+        var idxA = new Dictionary<Triangle, int>();
+        var idxB = new Dictionary<Triangle, int>();
+        for (int i = 0; i < surfaceA.Triangles.Count; i++) idxA[surfaceA.Triangles[i]] = i;
+        for (int j = 0; j < surfaceB.Triangles.Count; j++) idxB[surfaceB.Triangles[j]] = j;
+
+        var touchedAIdx = new HashSet<int>(touched.A.Select(t => idxA[t]));
+        var touchedBIdx = new HashSet<int>(touched.B.Select(t => idxB[t]));
+
+        for (int i = 0; i < cuts.CutsA.Length; i++)
+            if (cuts.CutsA[i].Count > 0) Assert.Contains(i, touchedAIdx);
+        for (int j = 0; j < cuts.CutsB.Length; j++)
+            if (cuts.CutsB[j].Count > 0) Assert.Contains(j, touchedBIdx);
+    }
 }

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Seaharp.Geometry\Seaharp.Geometry.csproj" />
+    <ProjectReference Include="..\Seaharp.Topology\Seaharp.Topology.csproj" />
+    <ProjectReference Include="..\Seaharp.World\Seaharp.World.csproj" />
+    <ProjectReference Include="..\Seaharp.Geometry.Computation\Seaharp.Geometry.Computation.csproj" />
+  </ItemGroup>
+</Project>
