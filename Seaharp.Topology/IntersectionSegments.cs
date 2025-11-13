@@ -44,6 +44,237 @@ public static class IntersectionSegments
         return BuildClosedLoopsFromSegments(segments);
     }
 
+    // Detailed cut data carrying per-endpoint edge provenance and pre-snap param.
+    public readonly struct CutEndpoint
+    {
+        // Snapped grid point
+        public readonly Point P;
+        // Edge index on the triangle: 0=P0->P1, 1=P1->P2, 2=P2->P0
+        public readonly int Edge;
+        // Parametric position along the edge in [0,1] before snapping
+        public readonly double T;
+        // Rational representation of T for exact ordering
+        public readonly Int128 TNum;
+        public readonly Int128 TDen; // always > 0
+        public CutEndpoint(Point p, int edge, double t)
+        {
+            P = p; Edge = edge; T = t; TNum = 0; TDen = 1;
+        }
+        public CutEndpoint(Point p, int edge, Int128 tNum, Int128 tDen)
+        {
+            P = p; Edge = edge; TNum = tNum; TDen = tDen; T = (double)tNum / (double)tDen;
+        }
+    }
+
+    public readonly struct TriangleCut
+    {
+        public readonly CutEndpoint A;
+        public readonly CutEndpoint B;
+        // Pair identity to synchronize keep/drop across surfaces
+        public readonly int AIndex;
+        public readonly int BIndex;
+        public TriangleCut(CutEndpoint a, CutEndpoint b, int aIndex, int bIndex)
+        { A = a; B = b; AIndex = aIndex; BIndex = bIndex; }
+    }
+
+    public sealed class IntersectionCutsWithProvenance
+    {
+        public required List<TriangleCut>[] CutsA { get; init; }
+        public required List<TriangleCut>[] CutsB { get; init; }
+    }
+
+    // Builds per-triangle cuts with edge provenance for both surfaces.
+    // Keeps old BuildCuts API unchanged; this richer variant will let
+    // downstream splitters avoid re-detecting which edge was hit.
+    public static IntersectionCutsWithProvenance BuildCutsProvenance(ClosedSurface a, ClosedSurface b, double epsilon = Tolerances.PlaneSideEpsilon)
+    {
+        if (a is null) throw new ArgumentNullException(nameof(a));
+        if (b is null) throw new ArgumentNullException(nameof(b));
+
+        var trisA = a.Triangles; var trisB = b.Triangles;
+        var cutsA = new List<TriangleCut>[trisA.Count];
+        var cutsB = new List<TriangleCut>[trisB.Count];
+        for (int i = 0; i < trisA.Count; i++) cutsA[i] = new List<TriangleCut>();
+        for (int j = 0; j < trisB.Count; j++) cutsB[j] = new List<TriangleCut>();
+
+        static Point SnapInt(Point p, Point q, Int128 num, Int128 den)
+        {
+            // Computes round_away(p + (q-p)*num/den) per component using Int128
+            long RoundAway(Int128 n, Int128 d)
+            {
+                if (n >= 0) return (long)((n + (d / 2)) / d);
+                else return (long)(-((-n + (d / 2)) / d));
+            }
+            var dx = (Int128)q.X - (Int128)p.X;
+            var dy = (Int128)q.Y - (Int128)p.Y;
+            var dz = (Int128)q.Z - (Int128)p.Z;
+            var nx = (Int128)p.X * den + dx * num;
+            var ny = (Int128)p.Y * den + dy * num;
+            var nz = (Int128)p.Z * den + dz * num;
+            return new Point(RoundAway(nx, den), RoundAway(ny, den), RoundAway(nz, den));
+        }
+
+        // Exact 3D orientation using Int128
+        static Int128 Orient(in Point a, in Point b, in Point c, in Point p)
+        {
+            Int128 abx = (Int128)b.X - a.X;
+            Int128 aby = (Int128)b.Y - a.Y;
+            Int128 abz = (Int128)b.Z - a.Z;
+            Int128 acx = (Int128)c.X - a.X;
+            Int128 acy = (Int128)c.Y - a.Y;
+            Int128 acz = (Int128)c.Z - a.Z;
+            // n = ab x ac
+            Int128 nx = aby * acz - abz * acy;
+            Int128 ny = abz * acx - abx * acz;
+            Int128 nz = abx * acy - aby * acx;
+            Int128 apx = (Int128)p.X - a.X;
+            Int128 apy = (Int128)p.Y - a.Y;
+            Int128 apz = (Int128)p.Z - a.Z;
+            return nx * apx + ny * apy + nz * apz;
+        }
+
+        // Returns optional rational t and snapped point for edge p->q against triangle other's plane
+        static bool EdgePlaneHitExact(in Point p, in Point q, in Triangle other, out Int128 tNum, out Int128 tDen, out Point snapped)
+        {
+            var s0 = Orient(other.P0, other.P1, other.P2, p);
+            var s1 = Orient(other.P0, other.P1, other.P2, q);
+            tNum = 0; tDen = 1; snapped = default;
+            if (s0 == 0 && s1 == 0) return false; // coplanar
+            // same sign -> no crossing
+            if ((s0 > 0 && s1 > 0) || (s0 < 0 && s1 < 0)) return false;
+            var den = s0 - s1;
+            if (den == 0) return false;
+            if (den < 0) { den = -den; s0 = -s0; }
+            // 0 <= s0/den <= 1
+            if (s0 < 0 || s0 > den) return false;
+            tNum = s0; tDen = den;
+            snapped = SnapInt(p, q, tNum, tDen);
+            return true;
+        }
+
+        for (int i = 0; i < trisA.Count; i++)
+        {
+            var ta = trisA[i]; var planeB = Plane.FromTriangle(ta); // unused; symmetry placeholder
+        }
+
+        for (int i = 0; i < trisA.Count; i++)
+        {
+            var ta = trisA[i];
+            var planeB = Plane.FromTriangle(ta); // dummy
+            for (int j = 0; j < trisB.Count; j++)
+            {
+                var tb = trisB[j];
+                var planeA = Plane.FromTriangle(tb);
+
+                // Collect endpoints on A
+                var aPts = new List<CutEndpoint>(2);
+                if (EdgePlaneHitExact(ta.P0, ta.P1, tb, out var n01, out var d01, out var p01))
+                { aPts.Add(new CutEndpoint(p01, 0, n01, d01)); }
+                if (EdgePlaneHitExact(ta.P1, ta.P2, tb, out var n12, out var d12, out var p12))
+                { aPts.Add(new CutEndpoint(p12, 1, n12, d12)); }
+                if (EdgePlaneHitExact(ta.P2, ta.P0, tb, out var n20, out var d20, out var p20))
+                { aPts.Add(new CutEndpoint(p20, 2, n20, d20)); }
+
+                // Filter: only keep endpoints that fall inside the other triangle
+                var aIn = new List<CutEndpoint>(2);
+                foreach (var ep in aPts)
+                {
+                    if (PointInTriangleInt(tb, ep.P)) aIn.Add(ep);
+                }
+                // Dedup by snapped point
+                if (aIn.Count > 1 && aIn[0].P.Equals(aIn[1].P)) aIn.RemoveAt(1);
+                if (aIn.Count >= 2)
+                {
+                    var (ia, ib) = FarthestPair(aIn);
+                    cutsA[i].Add(new TriangleCut(aIn[ia], aIn[ib], aIndex: i, bIndex: j));
+                }
+
+                // Collect endpoints on B
+                var bPts = new List<CutEndpoint>(2);
+                if (EdgePlaneHitExact(tb.P0, tb.P1, ta, out var bn01, out var bd01, out var bp01))
+                { bPts.Add(new CutEndpoint(bp01, 0, bn01, bd01)); }
+                if (EdgePlaneHitExact(tb.P1, tb.P2, ta, out var bn12, out var bd12, out var bp12))
+                { bPts.Add(new CutEndpoint(bp12, 1, bn12, bd12)); }
+                if (EdgePlaneHitExact(tb.P2, tb.P0, ta, out var bn20, out var bd20, out var bp20))
+                { bPts.Add(new CutEndpoint(bp20, 2, bn20, bd20)); }
+
+                var bIn = new List<CutEndpoint>(2);
+                foreach (var ep in bPts)
+                {
+                    if (PointInTriangleInt(ta, ep.P)) bIn.Add(ep);
+                }
+                if (bIn.Count > 1 && bIn[0].P.Equals(bIn[1].P)) bIn.RemoveAt(1);
+                if (bIn.Count >= 2)
+                {
+                    var (ja, jb) = FarthestPair(bIn);
+                    cutsB[j].Add(new TriangleCut(bIn[ja], bIn[jb], aIndex: i, bIndex: j));
+                }
+            }
+        }
+
+        return new IntersectionCutsWithProvenance { CutsA = cutsA, CutsB = cutsB };
+
+        static (int ia, int ib) FarthestPair(List<CutEndpoint> pts)
+        {
+            if (pts.Count == 2) return (0, 1);
+            double best = -1; int ia = 0, ib = 1;
+            for (int i = 0; i < pts.Count; i++)
+                for (int j = i + 1; j < pts.Count; j++)
+                {
+                    double d2 = Dist2(pts[i].P, pts[j].P);
+                    if (d2 > best) { best = d2; ia = i; ib = j; }
+                }
+            return (ia, ib);
+        }
+
+        static bool PointInTriangleInt(in Triangle t, in Point p)
+        {
+            // Choose dominant axis of normal to project to 2D
+            Int128 abx = (Int128)t.P1.X - t.P0.X;
+            Int128 aby = (Int128)t.P1.Y - t.P0.Y;
+            Int128 abz = (Int128)t.P1.Z - t.P0.Z;
+            Int128 acx = (Int128)t.P2.X - t.P0.X;
+            Int128 acy = (Int128)t.P2.Y - t.P0.Y;
+            Int128 acz = (Int128)t.P2.Z - t.P0.Z;
+            Int128 nx = aby * acz - abz * acy;
+            Int128 ny = abz * acx - abx * acz;
+            Int128 nz = abx * acy - aby * acx;
+            Int128 ax = nx >= 0 ? nx : -nx;
+            Int128 ay = ny >= 0 ? ny : -ny;
+            Int128 az = nz >= 0 ? nz : -nz;
+            int axis = (ax >= ay && ax >= az) ? 0 : (ay >= az ? 1 : 2);
+
+            static void Proj(in Point s, int axis, out Int128 u, out Int128 v)
+            {
+                if (axis == 0) { u = s.Y; v = s.Z; }
+                else if (axis == 1) { u = s.X; v = s.Z; }
+                else { u = s.X; v = s.Y; }
+            }
+            static Int128 Cross2(Int128 ux, Int128 uy, Int128 vx, Int128 vy) => ux * vy - uy * vx;
+
+            Proj(t.P0, axis, out var a0x, out var a0y);
+            Proj(t.P1, axis, out var a1x, out var a1y);
+            Proj(t.P2, axis, out var a2x, out var a2y);
+            Proj(p,    axis, out var px,  out var py);
+
+            var v0x = a1x - a0x; var v0y = a1y - a0y;
+            var v1x = a2x - a1x; var v1y = a2y - a1y;
+            var v2x = a0x - a2x; var v2y = a0y - a2y;
+
+            var w0x = px - a0x; var w0y = py - a0y;
+            var w1x = px - a1x; var w1y = py - a1y;
+            var w2x = px - a2x; var w2y = py - a2y;
+
+            var c0 = Cross2(v0x, v0y, w0x, w0y);
+            var c1 = Cross2(v1x, v1y, w1x, w1y);
+            var c2 = Cross2(v2x, v2y, w2x, w2y);
+
+            bool pos = c0 >= 0 && c1 >= 0 && c2 >= 0;
+            bool neg = c0 <= 0 && c1 <= 0 && c2 <= 0;
+            return pos || neg;
+        }
+    }
+
     // Builds per-triangle cut segments: for every triangle in A (and B), collects the
     // snapped segment that lies inside the opposite surface. Each entry is a list because
     // a triangle may be intersected more than once in complex cases. Endpoints are on the
