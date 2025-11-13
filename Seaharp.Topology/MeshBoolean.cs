@@ -55,6 +55,12 @@ public static class MeshBoolean
         {
             var t = tris[i];
             var cuts = cutsPerTri[i];
+            var seamEdges = new HashSet<EdgeKey>(cuts.Count);
+            for (int ce = 0; ce < cuts.Count; ce++)
+            {
+                var seg = cuts[ce];
+                if (!seg.P.Equals(seg.Q)) seamEdges.Add(new EdgeKey(seg.P, seg.Q));
+            }
             if (cuts.Count == 0)
             {
                 // Classify triangle by centroid
@@ -124,7 +130,10 @@ public static class MeshBoolean
                         (long)Math.Round(cz, MidpointRounding.AwayFromZero));
                     var cls = InsideClosedSurface.Classify(otherTris, c, epsilon);
                     bool keep1 = keepOutside ? (cls != InsideClosedSurface.Classification.Inside) : (cls == InsideClosedSurface.Classification.Inside);
-                    if (keep1) emit(tt);
+                    bool touchesSeam = seamEdges.Contains(new EdgeKey(tt.P0, tt.P1)) ||
+                                       seamEdges.Contains(new EdgeKey(tt.P1, tt.P2)) ||
+                                       seamEdges.Contains(new EdgeKey(tt.P2, tt.P0));
+                    if (keep1 || touchesSeam) emit(tt);
                     // TODO: If centroid classification is ambiguous near the boundary,
                     //       fall back to signed-plane tests against intersection loop.
                 }

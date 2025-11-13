@@ -150,8 +150,6 @@ public static class IntersectionSegments
         bool okA = CollectOnA(b, planeB, out var ptsA);
         bool okB = CollectOnB(a, planeA, out var ptsB);
 
-        if (!(okA && okB)) return false;
-
         // If more than two due to degeneracy, choose farthest two
         (Point, Point) PickPair(List<Point> list)
         {
@@ -166,9 +164,21 @@ public static class IntersectionSegments
             return (list[ia], list[ib]);
         }
 
-        (a0, a1) = PickPair(ptsA);
-        (b0, b1) = PickPair(ptsB);
-        return true;
+        // Decouple A/B collection: record available endpoints independently to avoid
+        // dropping segments when one side barely fails an inside test.
+        a0 = a1 = b0 = b1 = default;
+        bool any = false;
+        if (okA)
+        {
+            (a0, a1) = PickPair(ptsA);
+            any = true;
+        }
+        if (okB)
+        {
+            (b0, b1) = PickPair(ptsB);
+            any = true;
+        }
+        return any;
     }
 
     // --- Segment stitching helpers ---
