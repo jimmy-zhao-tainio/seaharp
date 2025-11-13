@@ -6,7 +6,7 @@ using Seaharp.Topology;
 
 namespace Seaharp.World.Tests;
 
-public class SurfaceExtractionConsistencyTests
+public class ClosedSurfaceExtractionConsistencyTests
 {
     [Fact]
     public void Box_Surface_Matches_OldEqualityScan()
@@ -22,9 +22,9 @@ public class SurfaceExtractionConsistencyTests
 
     private static void AssertConsistent(Shape shape)
     {
-        // New path: via Surface snapshot keyed by TriangleKey
+        // New path: via ClosedSurface snapshot keyed by TriangleKey
         var viaKey = new HashSet<TriangleKey>();
-        foreach (var t in shape.ExtractSurface().Triangles) viaKey.Add(TriangleKey.FromTriangle(t));
+        foreach (var t in ClosedSurface.FromTetrahedra(shape.Tetrahedrons).Triangles) viaKey.Add(TriangleKey.FromTriangle(t));
 
         // Old path: O(n^2) pairwise equality scan using TrianglePredicates.IsSame
         var all = new List<Seaharp.Geometry.Triangle>(shape.Tetrahedrons.Count * 4);

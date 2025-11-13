@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Seaharp.Topology;
 
 namespace Seaharp.World;
 
@@ -14,7 +15,7 @@ public sealed partial class World
         var tris = new List<Seaharp.Geometry.Triangle>();
         foreach (var s in shapes)
         {
-            var surface = s.ExtractSurface();
+            var surface = ClosedSurface.FromTetrahedra(s.Tetrahedrons);
             tris.AddRange(surface.Triangles);
         }
 

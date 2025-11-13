@@ -11,8 +11,8 @@ public class InsideClosedSurfaceTests
     public void Box_Contains_Center_And_Excludes_Outside()
     {
         var box = new Box(10, 10, 10);
-        var surfaceShape = box.ExtractSurface();
-        Assert.True(SurfacePredicates.IsManifold(surfaceShape));
+        var surfaceShape = ClosedSurface.FromTetrahedra(box.Tetrahedrons);
+        Assert.True(ClosedSurfacePredicates.IsManifold(surfaceShape));
 
         var center = new GPoint(5,5,5);
         var outside = new GPoint(20,0,0);
@@ -28,8 +28,8 @@ public class InsideClosedSurfaceTests
     public void Sphere_Contains_Center()
     {
         var sphere = new Sphere(radius: 10, subdivisions: 1);
-        var surfaceShape = sphere.ExtractSurface();
-        Assert.True(SurfacePredicates.IsManifold(surfaceShape));
+        var surfaceShape = ClosedSurface.FromTetrahedra(sphere.Tetrahedrons);
+        Assert.True(ClosedSurfacePredicates.IsManifold(surfaceShape));
         Assert.True(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsStrict(surfaceShape.Triangles, new GPoint(0,0,0)));
         Assert.False(Seaharp.Geometry.Computation.InsideClosedSurface.ContainsInclusive(surfaceShape.Triangles, new GPoint(100,0,0)));
     }

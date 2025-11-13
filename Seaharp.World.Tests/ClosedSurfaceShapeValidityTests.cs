@@ -1,10 +1,11 @@
 using Xunit;
 using Seaharp.World;
+using Seaharp.Topology;
 using GPoint = Seaharp.Geometry.Point;
 
 namespace Seaharp.World.Tests;
 
-public class ShapePredicatesTests
+public class ClosedSurfaceShapeValidityTests
 {
     [Fact]
     public void BuiltInShapes_AreValid()
@@ -13,9 +14,9 @@ public class ShapePredicatesTests
         var sphere = new Sphere(radius: 5, subdivisions: 1);
         var cyl = new Cylinder(radius: 6, thickness: 2, height: 6, segments: 16);
 
-        Assert.True(ShapePredicates.IsValid(box));
-        Assert.True(ShapePredicates.IsValid(sphere));
-        Assert.True(ShapePredicates.IsValid(cyl));
+        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(box.Tetrahedrons)));
+        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(sphere.Tetrahedrons)));
+        Assert.True(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(cyl.Tetrahedrons)));
     }
 
     [Fact]
@@ -31,8 +32,7 @@ public class ShapePredicatesTests
         var f = new GPoint(0, 0, -1);
 
         var shape = new TwoTetsShareEdgeShape(a, b, c, d, e, f);
-        Assert.True(ShapePredicates.HasCoplanarEdgeConflicts(shape));
-        Assert.False(ShapePredicates.IsValid(shape));
-    }
+        Assert.False(ClosedSurfacePredicates.IsManifold(ClosedSurface.FromTetrahedra(shape.Tetrahedrons)));
+}
 }
 
