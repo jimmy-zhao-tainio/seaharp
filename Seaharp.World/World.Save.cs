@@ -6,24 +6,17 @@ using Seaharp.IO;
 namespace Seaharp.World;
 
 public sealed partial class World
-{
-    // Binary STL export (little-endian).
-    public void Save(string path)
+{    public void Save(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path required", nameof(path));
 
         var triangles = new List<Seaharp.Geometry.Triangle>();
         foreach (var shape in Shapes)
-        {
-            // Use the unified ClosedSurface pipeline via Shape.Mesh
-            var surface = shape.Mesh;
-            triangles.AddRange(surface.Triangles);
-        }
-
-        // Delegate to shared STL writer
-        StlWriter.Write(triangles, path);
+        {            triangles.AddRange(shape.Mesh.Triangles);
+        }        StlWriter.Write(triangles, path);
     }
 }
+
 
 
 
