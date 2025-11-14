@@ -22,7 +22,7 @@ public sealed class Box : Shape
         var p011 = new Seaharp.Geometry.Point(origin.X, origin.Y + Depth, origin.Z + Height);
         var p111 = new Seaharp.Geometry.Point(origin.X + Width, origin.Y + Depth, origin.Z + Height);
 
-        var tets = new List<Seaharp.Geometry.Tetrahedron>(5)
+        var tetrahedra = new List<Seaharp.Geometry.Tetrahedron>(5)
         {
             new Seaharp.Geometry.Tetrahedron(p000, p100, p010, p001),
             new Seaharp.Geometry.Tetrahedron(p100, p110, p010, p111),
@@ -31,7 +31,7 @@ public sealed class Box : Shape
             new Seaharp.Geometry.Tetrahedron(p100, p001, p101, p111)
         };
 
-        Mesh = ClosedSurface.FromTetrahedra(tets);
+        Mesh = ClosedSurface.FromTetrahedra(tetrahedra);
     }
 
     public long Width { get; }

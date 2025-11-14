@@ -37,16 +37,16 @@ public sealed class BoundingBoxTree
     public void Query(in BoundingBox box, List<int> results)
         => QueryNode(root, box, results);
 
-    private static TriangleBox[] BuildTriangleBoxes(IReadOnlyList<Triangle> tris)
+    private static TriangleBox[] BuildTriangleBoxes(IReadOnlyList<Triangle> triangles)
     {
-        var arr = new TriangleBox[tris.Count];
-        for (int i = 0; i < tris.Count; i++)
+        var triangleBoxes = new TriangleBox[triangles.Count];
+        for (int i = 0; i < triangles.Count; i++)
         {
-            var t = tris[i];
-            var box = BoundingBox.FromPoints(t.P0, t.P1, t.P2);
-            arr[i] = new TriangleBox(i, box);
+            var triangle = triangles[i];
+            var box = BoundingBox.FromPoints(triangle.P0, triangle.P1, triangle.P2);
+            triangleBoxes[i] = new TriangleBox(i, box);
         }
-        return arr;
+        return triangleBoxes;
     }
 
     private Node Build(int start, int end)

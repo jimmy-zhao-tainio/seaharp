@@ -24,10 +24,10 @@ public static class InsideClosedSurface
         // Quick boundary check
         for (int i = 0; i < triangles.Count; i++)
         {
-            var tri = triangles[i];
-            var plane = Plane.FromTriangle(tri);
+            var triangle = triangles[i];
+            var plane = Plane.FromTriangle(triangle);
             var s = plane.Side(p, epsilon);
-            if (s == 0 && PointOnTriangle(p, tri, epsilon)) return Classification.Boundary;
+            if (s == 0 && PointOnTriangle(p, triangle, epsilon)) return Classification.Boundary;
         }
 
         // Non-axis-aligned ray casting to avoid degeneracies
@@ -36,20 +36,20 @@ public static class InsideClosedSurface
         int hits = 0;
         for (int i = 0; i < triangles.Count; i++)
         {
-            var tri = triangles[i];
-            if (Intersections.RayTriangle(ray, tri, epsilon, out var t, out var u, out var v)) hits++;
+            var triangle = triangles[i];
+            if (Intersections.RayTriangle(ray, triangle, epsilon, out var t, out var u, out var v)) hits++;
         }
         return (hits & 1) == 1 ? Classification.Inside : Classification.Outside;
     }
 
-    private static bool PointOnTriangle(in Point p, in Triangle tri, double epsilon)
+    private static bool PointOnTriangle(in Point p, in Triangle triangle, double epsilon)
     {
-        var ax = (double)tri.P0.X; var ay = (double)tri.P0.Y; var az = (double)tri.P0.Z;
-        var bx = (double)tri.P1.X; var by = (double)tri.P1.Y; var bz = (double)tri.P1.Z;
-        var cx = (double)tri.P2.X; var cy = (double)tri.P2.Y; var cz = (double)tri.P2.Z;
+        var ax = (double)triangle.P0.X; var ay = (double)triangle.P0.Y; var az = (double)triangle.P0.Z;
+        var bx = (double)triangle.P1.X; var by = (double)triangle.P1.Y; var bz = (double)triangle.P1.Z;
+        var cx = (double)triangle.P2.X; var cy = (double)triangle.P2.Y; var cz = (double)triangle.P2.Z;
         var px = (double)p.X; var py = (double)p.Y; var pz = (double)p.Z;
 
-        var nx = tri.Normal.X; var ny = tri.Normal.Y; var nz = tri.Normal.Z;
+        var nx = triangle.Normal.X; var ny = triangle.Normal.Y; var nz = triangle.Normal.Z;
         double ax0, ay0, bx0, by0, cx0, cy0, px0, py0;
         if (Math.Abs(nx) >= Math.Abs(ny) && Math.Abs(nx) >= Math.Abs(nz))
         { ax0 = ay; ay0 = az; bx0 = by; by0 = bz; cx0 = cy; cy0 = cz; px0 = py; py0 = pz; }

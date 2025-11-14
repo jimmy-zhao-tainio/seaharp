@@ -32,17 +32,17 @@ public sealed class ClosedSurface
             else map[key] = (1, t);
         }
 
-        foreach (var tet in tetrahedra)
+        foreach (var tetrahedron in tetrahedra)
         {
-            Accumulate(ref triangleOccurrences, tet.ABC);
-            Accumulate(ref triangleOccurrences, tet.ABD);
-            Accumulate(ref triangleOccurrences, tet.ACD);
-            Accumulate(ref triangleOccurrences, tet.BCD);
+            Accumulate(ref triangleOccurrences, tetrahedron.ABC);
+            Accumulate(ref triangleOccurrences, tetrahedron.ABD);
+            Accumulate(ref triangleOccurrences, tetrahedron.ACD);
+            Accumulate(ref triangleOccurrences, tetrahedron.BCD);
         }
 
         var boundary = new List<Triangle>();
-        foreach (var kv in triangleOccurrences)
-            if (kv.Value.count == 1) boundary.Add(kv.Value.tri);
+        foreach (var pair in triangleOccurrences)
+            if (pair.Value.count == 1) boundary.Add(pair.Value.tri);
 
         return new ClosedSurface(boundary);
     }

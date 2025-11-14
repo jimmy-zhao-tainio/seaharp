@@ -42,8 +42,8 @@ public static class TetrahedronIntersectionPredicates
 
     private static bool PointInsideTetrahedronStrict(in Tetrahedron t, in Point p)
     {
-        static bool IsOnNegativeSide(in Triangle tri, in Point q)
-            => Plane.FromTriangle(tri).Side(q, Tolerances.PlaneSideEpsilon) < 0;
+        static bool IsOnNegativeSide(in Triangle triangle, in Point q)
+            => Plane.FromTriangle(triangle).Side(q, Tolerances.PlaneSideEpsilon) < 0;
 
         return IsOnNegativeSide(t.ABC, p) && IsOnNegativeSide(t.ABD, p) && IsOnNegativeSide(t.ACD, p) && IsOnNegativeSide(t.BCD, p);
     }

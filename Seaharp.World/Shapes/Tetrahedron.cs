@@ -7,8 +7,8 @@ public sealed class Tetrahedron : Shape
     public Tetrahedron(Seaharp.Geometry.Point a, Seaharp.Geometry.Point b, Seaharp.Geometry.Point c, Seaharp.Geometry.Point d)
     {
         A = a; B = b; C = c; D = d;
-        var tet = new Seaharp.Geometry.Tetrahedron(A, B, C, D);
-        Mesh = ClosedSurface.FromTetrahedra(new[] { tet });
+        var tetrahedron = new Seaharp.Geometry.Tetrahedron(A, B, C, D);
+        Mesh = ClosedSurface.FromTetrahedra(new[] { tetrahedron });
     }
 
     public Seaharp.Geometry.Point A { get; }
