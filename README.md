@@ -1,16 +1,16 @@
 # Seaharp
 
-Seaharp is a small geometry project that builds 3D shapes from integer-grid tetrahedra and exports a binary STL. The demo renders a simple solar system with a sun, eight planets, their moons, and thin tilted orbit rings.
+Seaharp is a small geometry project that builds 3D shapes on the integer grid (Z^3) and exports binary STL. The demo renders a simple solar system with a sun, eight planets, their moons, and thin tilted orbit rings.
 
 Note: This repository is a fully GPT-5 Codex experiment. All code and documentation were produced end-to-end by the agent in Codex CLI (no hands-on coding).
 
-## Pure ℤ³, Only Tetrahedra
+## Pure Z^3, Mesh-First
 
-- All vertices live on the integer lattice ℤ³ (no persistent floats).
-- Every shape is a union of tetrahedra only; surfaces are derived from boundary triangles.
+- All vertices live on the integer lattice Z^3 (no persistent floats).
+- Shapes expose closed-surface meshes; many are built internally via tetra decompositions.
 - Construction uses double math only transiently (e.g., rotations), then rounds back to the grid.
-- Tetrahedra are immutable and orientation-correct; degenerate tets are rejected.
-- Higher-level shapes (sphere, cylinder shell, etc.) are produced by decomposing into tetrahedra (e.g., prism → 3 tets).
+- Integer-only topology; rounding returns to Z^3 after transient double math.
+- Higher-level shapes (sphere, cylinder shell, etc.) may decompose to tetrahedra internally.
 
 ![Clean Solar System](clean_system.png)
 
