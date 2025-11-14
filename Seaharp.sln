@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Tests", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.World", "Seaharp.World\Seaharp.World.csproj", "{644EEAF2-670A-4650-BEF6-804E261CB6D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.World.Tests", "Seaharp.World.Tests\Seaharp.World.Tests.csproj", "{45EEEC1D-C573-4588-82EA-0D6883D2AF89}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Demo", "Seaharp.Demo\Seaharp.Demo.csproj", "{BF6F989A-DA4E-46F1-A3AC-C7529E39DE14}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Geometry.Computation", "Seaharp.Geometry.Computation\Seaharp.Geometry.Computation.csproj", "{33652EF2-076D-4526-83FA-365DACB89BD6}"
@@ -18,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Topology", "Seaharp.Topology\\Seaharp.Topology.csproj", "{4B42BA46-763B-481F-940D-BB5757884E92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.Demo.Mesh", "Seaharp.Demo.Mesh\Seaharp.Demo.Mesh.csproj", "{A1E4C9B6-5D7F-4BD3-9E64-9A3B40B16E0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaharp.IO", "Seaharp.IO\Seaharp.IO.csproj", "{7A4598ED-26DC-4B7F-80BA-E7B94E3913E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,10 +46,6 @@ Global
 		{7A4598ED-26DC-4B7F-80BA-E7B94E3913E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A4598ED-26DC-4B7F-80BA-E7B94E3913E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A4598ED-26DC-4B7F-80BA-E7B94E3913E2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{45EEEC1D-C573-4588-82EA-0D6883D2AF89}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF6F989A-DA4E-46F1-A3AC-C7529E39DE14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF6F989A-DA4E-46F1-A3AC-C7529E39DE14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF6F989A-DA4E-46F1-A3AC-C7529E39DE14}.Release|Any CPU.ActiveCfg = Release|Any CPU

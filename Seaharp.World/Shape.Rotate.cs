@@ -1,18 +1,19 @@
-using Seaharp.Geometry;
 using System;
 using System.Collections.Generic;
+using Seaharp.Geometry;
+using Seaharp.Topology;
 
 namespace Seaharp.World;
 
 // Rotation-related APIs for Shape (destructive)
 public abstract partial class Shape
 {
-    // Rotates all tetrahedra by the given Euler angles (degrees) around X, Y, Z (in that order)
-    // using double-precision math and integer rounding, then replaces them with new instances.
-    // Also checks that no two distinct original vertices collide to the same rounded grid point.
+    // Rotates all mesh vertices by Euler angles (degrees) around X, Y, Z (in that order)
+    // using double-precision math and integer rounding. Throws if two distinct original
+    // vertices collide to the same rounded grid point.
     public void Rotate(double xDegrees = 0, double yDegrees = 0, double zDegrees = 0)
     {
-        if (tetrahedra.Count == 0) return;
+        if (Mesh is null || Mesh.Count == 0) return;
 
         // Precompute sines/cosines (radians)
         double rx = xDegrees * Math.PI / 180.0;
@@ -26,31 +27,9 @@ public abstract partial class Shape
         var origToRot = new Dictionary<Point, Point>();
         var rotToOrig = new Dictionary<Point, Point>();
 
-        foreach (var t in tetrahedra)
+        Point MapVertex(in Point p)
         {
-            MapVertex(t.A);
-            MapVertex(t.B);
-            MapVertex(t.C);
-            MapVertex(t.D);
-        }
-
-        // Rebuild tetrahedra from mapped vertices
-        var updated = new List<Seaharp.Geometry.Tetrahedron>(tetrahedra.Count);
-        foreach (var t in tetrahedra)
-        {
-            var a = origToRot[t.A];
-            var b = origToRot[t.B];
-            var c = origToRot[t.C];
-            var d = origToRot[t.D];
-            updated.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
-        }
-
-        tetrahedra.Clear();
-        tetrahedra.AddRange(updated);
-
-        void MapVertex(in Point p)
-        {
-            if (origToRot.ContainsKey(p)) return;
+            if (origToRot.TryGetValue(p, out var r)) return r;
 
             // Apply X then Y then Z rotations using double precision
             double x = p.X, y = p.Y, z = p.Z;
@@ -67,17 +46,32 @@ public abstract partial class Shape
             double y3 = x2 * sz + y2 * cz;
             double z3 = z2;
 
-            var r = new Point(
+            var rot = new Point(
                 (long)Math.Round(x3, MidpointRounding.AwayFromZero),
                 (long)Math.Round(y3, MidpointRounding.AwayFromZero),
                 (long)Math.Round(z3, MidpointRounding.AwayFromZero));
 
-            if (rotToOrig.TryGetValue(r, out var existing) && !existing.Equals(p))
+            if (rotToOrig.TryGetValue(rot, out var existing) && !existing.Equals(p))
             {
-                throw new InvalidOperationException($"Rotation maps distinct vertices {existing} and {p} to the same grid point {r}.");
+                throw new InvalidOperationException($"Rotation maps distinct vertices {existing} and {p} to the same grid point {rot}.");
             }
-            rotToOrig[r] = p;
-            origToRot[p] = r;
+            rotToOrig[rot] = p;
+            origToRot[p] = rot;
+            return rot;
         }
+
+        var tris = Mesh.Triangles;
+        var updated = new List<Triangle>(tris.Count);
+        for (int i = 0; i < tris.Count; i++)
+        {
+            var t = tris[i];
+            var a = MapVertex(t.P0);
+            var b = MapVertex(t.P1);
+            var c = MapVertex(t.P2);
+            // Preserve winding; rigid rotation preserves orientation (rounding may throw if degenerate)
+            updated.Add(Triangle.FromWinding(a, b, c));
+        }
+
+        Mesh = new ClosedSurface(updated);
     }
 }

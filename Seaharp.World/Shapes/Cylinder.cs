@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Seaharp.Topology;
 
 namespace Seaharp.World;
 
@@ -7,6 +9,7 @@ namespace Seaharp.World;
 // leaving only the shell surface after extraction.
 public sealed class Cylinder : Shape
 {
+    private readonly List<Seaharp.Geometry.Tetrahedron> tets = new();
     public Cylinder(long radius, long thickness = 2, long height = 2,
                             Seaharp.Geometry.Point? center = null,
                             int? segments = null,
@@ -28,6 +31,7 @@ public sealed class Cylinder : Shape
         if (Segments < 8) Segments = 8;
 
         BuildShell(xTiltDeg, yTiltDeg, zSpinDeg);
+        Mesh = ClosedSurface.FromTetrahedra(tets);
     }
 
     public long InnerRadius { get; }
@@ -156,12 +160,11 @@ public sealed class Cylinder : Shape
     {
         try
         {
-            tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
+            tets.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
         }
         catch (InvalidOperationException)
         {
             // Degenerate due to rounding/collinearity; skip.
-            degenerateSkips++;
         }
     }
 }

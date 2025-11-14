@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Seaharp.Geometry;
+using Seaharp.Topology;
 
-namespace Seaharp.Topology;
+namespace Seaharp.IO;
 
 // Shared STL writer for ClosedSurface and triangle collections (binary little-endian)
 public static class StlWriter

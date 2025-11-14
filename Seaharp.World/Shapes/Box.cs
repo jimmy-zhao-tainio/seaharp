@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Seaharp.Topology;
 
 namespace Seaharp.World;
 
@@ -21,11 +22,16 @@ public sealed class Box : Shape
         var p011 = new Seaharp.Geometry.Point(origin.X, origin.Y + Depth, origin.Z + Height);
         var p111 = new Seaharp.Geometry.Point(origin.X + Width, origin.Y + Depth, origin.Z + Height);
 
-        tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(p000, p100, p010, p001));
-        tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(p100, p110, p010, p111));
-        tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(p100, p010, p001, p111));
-        tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(p010, p001, p011, p111));
-        tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(p100, p001, p101, p111));
+        var tets = new List<Seaharp.Geometry.Tetrahedron>(5)
+        {
+            new Seaharp.Geometry.Tetrahedron(p000, p100, p010, p001),
+            new Seaharp.Geometry.Tetrahedron(p100, p110, p010, p111),
+            new Seaharp.Geometry.Tetrahedron(p100, p010, p001, p111),
+            new Seaharp.Geometry.Tetrahedron(p010, p001, p011, p111),
+            new Seaharp.Geometry.Tetrahedron(p100, p001, p101, p111)
+        };
+
+        Mesh = ClosedSurface.FromTetrahedra(tets);
     }
 
     public long Width { get; }

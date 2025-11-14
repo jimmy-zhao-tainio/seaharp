@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Seaharp.Topology;
 
 namespace Seaharp.World;
 
@@ -38,6 +39,7 @@ public sealed class Sphere : Shape
 
         // Create star tetrahedra (center + each boundary triangle)
         var c = Center;
+        var tets = new List<Seaharp.Geometry.Tetrahedron>(faces.Count);
         for (int i = 0; i < faces.Count; i++)
         {
             var (aIdx, bIdx, cIdx) = faces[i];
@@ -48,14 +50,15 @@ public sealed class Sphere : Shape
             if (a.Equals(b) || a.Equals(d) || b.Equals(d)) continue;
             try
             {
-                tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(c, a, b, d));
+                tets.Add(new Seaharp.Geometry.Tetrahedron(c, a, b, d));
             }
             catch (InvalidOperationException)
             {
                 // Degenerate after rounding; skip
-                degenerateSkips++;
             }
         }
+
+        Mesh = ClosedSurface.FromTetrahedra(tets);
 
     }
 

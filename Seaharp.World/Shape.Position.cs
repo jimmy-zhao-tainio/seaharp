@@ -1,27 +1,39 @@
-using Seaharp.Geometry;
 using System.Collections.Generic;
+using Seaharp.Geometry;
+using Seaharp.Topology;
 
 namespace Seaharp.World;
 
 // Positioning-related APIs for Shape (destructive)
 public abstract partial class Shape
 {
-    // Translates all tetrahedra by the given delta and replaces them with new instances.
+    // Translates all mesh vertices by the given delta and rebuilds the mesh.
     public void Position(long dx, long dy, long dz)
     {
-        if (tetrahedra.Count == 0) return;
+        if (Mesh is null || Mesh.Count == 0) return;
 
-        var updated = new List<Seaharp.Geometry.Tetrahedron>(tetrahedra.Count);
-        foreach (var t in tetrahedra)
+        var tris = Mesh.Triangles;
+        var vertexMap = new Dictionary<Point, Point>();
+
+        Point Map(Point p)
         {
-            var a = new Point(t.A.X + dx, t.A.Y + dy, t.A.Z + dz);
-            var b = new Point(t.B.X + dx, t.B.Y + dy, t.B.Z + dz);
-            var c = new Point(t.C.X + dx, t.C.Y + dy, t.C.Z + dz);
-            var d = new Point(t.D.X + dx, t.D.Y + dy, t.D.Z + dz);
-            updated.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
+            if (vertexMap.TryGetValue(p, out var q)) return q;
+            var t = new Point(p.X + dx, p.Y + dy, p.Z + dz);
+            vertexMap[p] = t;
+            return t;
         }
 
-        tetrahedra.Clear();
-        tetrahedra.AddRange(updated);
+        var updated = new List<Triangle>(tris.Count);
+        for (int i = 0; i < tris.Count; i++)
+        {
+            var t = tris[i];
+            var p0 = Map(t.P0);
+            var p1 = Map(t.P1);
+            var p2 = Map(t.P2);
+            // Preserve winding; translation cannot introduce degeneracy
+            updated.Add(Triangle.FromWinding(p0, p1, p2));
+        }
+
+        Mesh = new ClosedSurface(updated);
     }
 }
