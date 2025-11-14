@@ -5,7 +5,9 @@ namespace Seaharp.World;
 
 public sealed partial class World
 {
-    private readonly List<Shape> shapes = new();\n\n    public IReadOnlyList<Shape> Shapes => shapes;
+    private readonly List<Shape> shapes = new();
+
+    public IReadOnlyList<Shape> Shapes => shapes;
 
     public void Add(Shape shape)
     {
@@ -15,4 +17,5 @@ public sealed partial class World
 
     // Saving moved to World.Save.cs (STL only)
 }
+
 
