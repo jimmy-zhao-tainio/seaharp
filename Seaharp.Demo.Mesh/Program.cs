@@ -23,115 +23,12 @@ internal static class Program
 
         // Compute intersection cuts; record all touched triangles and delete them.
         // Additionally, delete any triangle whose vertex lies inside (or on) the other surface.
-        var cuts = IntersectionSegments.BuildCuts(surfaceA, surfaceB);
-
-        var keepA = new List<Triangle>(surfaceA.Triangles.Count);
-        var keepB = new List<Triangle>(surfaceB.Triangles.Count);
-
-        for (int i = 0; i < surfaceA.Triangles.Count; i++)
-        {
-            var t = surfaceA.Triangles[i];
-            bool intersects = cuts.CutsA[i].Count > 0;
-            bool vertexInside =
-                InsideClosedSurface.ContainsInclusive(surfaceB.Triangles, t.P0) ||
-                InsideClosedSurface.ContainsInclusive(surfaceB.Triangles, t.P1) ||
-                InsideClosedSurface.ContainsInclusive(surfaceB.Triangles, t.P2);
-            if (!(intersects || vertexInside)) keepA.Add(t);
-        }
-
-        for (int j = 0; j < surfaceB.Triangles.Count; j++)
-        {
-            var t = surfaceB.Triangles[j];
-            bool intersects = cuts.CutsB[j].Count > 0;
-            bool vertexInside =
-                InsideClosedSurface.ContainsInclusive(surfaceA.Triangles, t.P0) ||
-                InsideClosedSurface.ContainsInclusive(surfaceA.Triangles, t.P1) ||
-                InsideClosedSurface.ContainsInclusive(surfaceA.Triangles, t.P2);
-            if (!(intersects || vertexInside)) keepB.Add(t);
-        }
-
-        // Build loops for this pair and segment list for post-cull checks and visualization
-        var loops = IntersectionSegments.BuildLoops(surfaceA, surfaceB);
-        var allSegs = new List<(Point P, Point Q)>();
-        for (int i = 0; i < cuts.CutsA.Length; i++) allSegs.AddRange(cuts.CutsA[i]);
-        for (int j = 0; j < cuts.CutsB.Length; j++) allSegs.AddRange(cuts.CutsB[j]);
-        foreach (var loop in loops)
-        {
-            int n = loop.Count;
-            if (n < 2) continue;
-            for (int i = 0; i < n - 1; i++) allSegs.Add((loop[i], loop[i + 1]));
-        }
-
-        // Deduplicate segments (undirected)
-        var segSet0 = new HashSet<EdgeKey>();
-        var segs = new List<(Point P, Point Q)>();
-        foreach (var s in allSegs)
-        {
-            var key = new EdgeKey(s.P, s.Q);
-            if (segSet0.Add(key)) segs.Add(s);
-        }
-
-        // Additional cull: remove any triangle that has a vertex that coincides with a segment endpoint
-        // or lies strictly on a segment (colinear and within bounds). This ensures every remaining
-        // kept vertex forms a non-degenerate triangle with the segment endpoints.
-        var endpointSet = new HashSet<Point>();
-        foreach (var s in segs) { endpointSet.Add(s.P); endpointSet.Add(s.Q); }
-        // Include all loop vertices explicitly as well
-        foreach (var loop in loops)
-            for (int i = 0; i < loop.Count; i++) endpointSet.Add(loop[i]);
-
-        bool TouchesAnySegmentVertexOrInterior(in Triangle t)
-        {
-            bool OnAny(Point v)
-            {
-                if (endpointSet.Contains(v)) return true;
-                for (int k = 0; k < segs.Count; k++)
-                {
-                    var sg = segs[k];
-                    if (PointOnSegmentInt(sg.P, sg.Q, v)) return true;
-                }
-                return false;
-            }
-            return OnAny(t.P0) || OnAny(t.P1) || OnAny(t.P2);
-        }
-
-        keepA.RemoveAll(t => TouchesAnySegmentVertexOrInterior(t));
-        keepB.RemoveAll(t => TouchesAnySegmentVertexOrInterior(t));
-
-        // Build a disc from intersection segments to loop center and combine with cracked shells
-        var discTris = IntersectionSegments.BuildLoopDiscs(surfaceA, surfaceB);
-        if (discTris.Count > 0)
-        {
-            var crackedPlusDisc = new List<Triangle>(keepA.Count + keepB.Count + discTris.Count);
-            crackedPlusDisc.AddRange(keepA);
-            crackedPlusDisc.AddRange(keepB);
-            crackedPlusDisc.AddRange(discTris);
-            var discPath = "spheres_with_disc.stl";
-            StlWriter.Write(crackedPlusDisc, discPath);
-            Console.WriteLine($"Wrote cracked shells + disc: {System.IO.Path.GetFullPath(discPath)} with {crackedPlusDisc.Count} triangles (disc={discTris.Count})");
-        }
-        
+        // Intersection demo temporarily disabled; writing both meshes as-is.
+        var combined = new List<Triangle>(surfaceA.Triangles.Count + surfaceB.Triangles.Count);
+        combined.AddRange(surfaceA.Triangles);
+        combined.AddRange(surfaceB.Triangles);
+        var outPath = "spheres_with_disc.stl";
+        StlWriter.Write(combined, outPath);
+        Console.WriteLine($"Wrote placeholder (no intersection): {System.IO.Path.GetFullPath(outPath)} with {combined.Count} triangles");
     }
-    private static bool PointOnSegmentInt(in Point a, in Point b, in Point p)
-    {
-        // Bounding box check first
-        long minX = Math.Min(a.X, b.X), maxX = Math.Max(a.X, b.X);
-        long minY = Math.Min(a.Y, b.Y), maxY = Math.Max(a.Y, b.Y);
-        long minZ = Math.Min(a.Z, b.Z), maxZ = Math.Max(a.Z, b.Z);
-        if (p.X < minX || p.X > maxX || p.Y < minY || p.Y > maxY || p.Z < minZ || p.Z > maxZ)
-            return false;
-
-        // Colinearity via exact Int128 cross product of (b-a) x (p-a)
-        Int128 v1x = (Int128)b.X - a.X;
-        Int128 v1y = (Int128)b.Y - a.Y;
-        Int128 v1z = (Int128)b.Z - a.Z;
-        Int128 v2x = (Int128)p.X - a.X;
-        Int128 v2y = (Int128)p.Y - a.Y;
-        Int128 v2z = (Int128)p.Z - a.Z;
-        Int128 cx = v1y * v2z - v1z * v2y;
-        Int128 cy = v1z * v2x - v1x * v2z;
-        Int128 cz = v1x * v2y - v1y * v2x;
-        return cx == 0 && cy == 0 && cz == 0;
-    }
-
 }
