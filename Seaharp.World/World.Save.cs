@@ -17,13 +17,14 @@ public sealed partial class World
         {
             // Use the unified ClosedSurface pipeline via Shape.Mesh
             var surface = shape.Mesh;
-            tris.AddRange(surface.Triangles);
+            triangles.AddRange(surface.Triangles);
         }
 
         // Delegate to shared STL writer
         StlWriter.Write(triangles, path);
     }
 }
+
 
 
 
