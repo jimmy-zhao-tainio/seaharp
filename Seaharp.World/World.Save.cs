@@ -12,18 +12,19 @@ public sealed partial class World
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path required", nameof(path));
 
-        var tris = new List<Seaharp.Geometry.Triangle>();
-        foreach (var s in shapes)
+        var triangles = new List<Seaharp.Geometry.Triangle>();
+        foreach (var shape in Shapes)
         {
             // Use the unified ClosedSurface pipeline via Shape.Mesh
-            var surface = s.Mesh;
+            var surface = shape.Mesh;
             tris.AddRange(surface.Triangles);
         }
 
         // Delegate to shared STL writer
-        StlWriter.Write(tris, path);
+        StlWriter.Write(triangles, path);
     }
 }
+
 
 
 
