@@ -1,5 +1,3 @@
-using System;
-
 namespace Seaharp.Geometry.Computation;
 
 public static class Intersections
@@ -20,20 +18,20 @@ public static class Intersections
 
         // det = e1 . pvec
         var det = e1x * pvx + e1y * pvy + e1z * pvz;
-        var epsilon = Tolerances.PlaneSideEpsilon; if (det > -epsilon && det < epsilon) { t = u = v = 0; return false; } // parallel / nearly parallel
+        if (det > -Tolerances.PlaneSideEpsilon && det < Tolerances.PlaneSideEpsilon) { t = u = v = 0; return false; } // parallel / nearly parallel
 
         var invDet = 1.0 / det;
         // tvec = O - P0
         var tvx = ray.Ox - p0x; var tvy = ray.Oy - p0y; var tvz = ray.Oz - p0z;
         u = (tvx * pvx + tvy * pvy + tvz * pvz) * invDet;
-        if (u < -epsilon || u > 1.0 + epsilon) { t = v = 0; return false; }
+        if (u < -Tolerances.PlaneSideEpsilon || u > 1.0 + Tolerances.PlaneSideEpsilon) { t = v = 0; return false; }
 
         // qvec = tvec x e1
         var qvx = tvy * e1z - tvz * e1y;
         var qvy = tvz * e1x - tvx * e1z;
         var qvz = tvx * e1y - tvy * e1x;
         v = (ray.Dx * qvx + ray.Dy * qvy + ray.Dz * qvz) * invDet;
-        if (v < -epsilon || u + v > 1.0 + epsilon) { t = 0; return false; }
+        if (v < -Tolerances.PlaneSideEpsilon || u + v > 1.0 + Tolerances.PlaneSideEpsilon) { t = 0; return false; }
 
         t = (e2x * qvx + e2y * qvy + e2z * qvz) * invDet;
         if (t < 0) return false; // opposite direction
