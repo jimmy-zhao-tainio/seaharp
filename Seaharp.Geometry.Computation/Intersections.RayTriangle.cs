@@ -7,11 +7,11 @@ public static class Intersections
     // Möller–Trumbore ray-triangle intersection in double with epsilon.
     // Returns true if ray intersects front or back face; t = distance along ray (>=0).
     // Excludes very grazing hits using epsilon to stabilize even-odd counts.
-    public static bool RayTriangle(in Ray ray, in Triangle tri, double epsilon, out double t, out double u, out double v)
+    public static bool RayTriangle(in Ray ray, in Triangle triangle, out double t, out double u, out double v)
     {
-        var p0x = (double)tri.P0.X; var p0y = (double)tri.P0.Y; var p0z = (double)tri.P0.Z;
-        var e1x = (double)tri.P1.X - p0x; var e1y = (double)tri.P1.Y - p0y; var e1z = (double)tri.P1.Z - p0z;
-        var e2x = (double)tri.P2.X - p0x; var e2y = (double)tri.P2.Y - p0y; var e2z = (double)tri.P2.Z - p0z;
+        var p0x = (double)triangle.P0.X; var p0y = (double)triangle.P0.Y; var p0z = (double)triangle.P0.Z;
+        var e1x = (double)triangle.P1.X - p0x; var e1y = (double)triangle.P1.Y - p0y; var e1z = (double)triangle.P1.Z - p0z;
+        var e2x = (double)triangle.P2.X - p0x; var e2y = (double)triangle.P2.Y - p0y; var e2z = (double)triangle.P2.Z - p0z;
 
         // pvec = D x e2
         var pvx = ray.Dy * e2z - ray.Dz * e2y;
@@ -20,7 +20,7 @@ public static class Intersections
 
         // det = e1 . pvec
         var det = e1x * pvx + e1y * pvy + e1z * pvz;
-        if (det > -epsilon && det < epsilon) { t = u = v = 0; return false; } // parallel / nearly parallel
+        var epsilon = Tolerances.PlaneSideEpsilon; if (det > -epsilon && det < epsilon) { t = u = v = 0; return false; } // parallel / nearly parallel
 
         var invDet = 1.0 / det;
         // tvec = O - P0
@@ -41,5 +41,6 @@ public static class Intersections
         return true;
     }
 }
+
 
 
