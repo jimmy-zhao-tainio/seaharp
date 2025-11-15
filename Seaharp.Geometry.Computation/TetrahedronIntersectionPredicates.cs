@@ -1,6 +1,3 @@
-using System;
-using Seaharp.Geometry;
-
 namespace Seaharp.Geometry.Computation;
 
 public static class TetrahedronIntersectionPredicates
@@ -9,12 +6,12 @@ public static class TetrahedronIntersectionPredicates
     {
         if (!BoundingBoxOverlap(a, b)) return false;
 
-        if (PointInsideTetrahedronStrict(b, a.A) || PointInsideTetrahedronStrict(b, a.B) ||
-            PointInsideTetrahedronStrict(b, a.C) || PointInsideTetrahedronStrict(b, a.D))
+        if (TetrahedronPredicates.IsPointInsideStrict(b, a.A) || TetrahedronPredicates.IsPointInsideStrict(b, a.B) ||
+            TetrahedronPredicates.IsPointInsideStrict(b, a.C) || TetrahedronPredicates.IsPointInsideStrict(b, a.D))
             return true;
 
-        if (PointInsideTetrahedronStrict(a, b.A) || PointInsideTetrahedronStrict(a, b.B) ||
-            PointInsideTetrahedronStrict(a, b.C) || PointInsideTetrahedronStrict(a, b.D))
+        if (TetrahedronPredicates.IsPointInsideStrict(a, b.A) || TetrahedronPredicates.IsPointInsideStrict(a, b.B) ||
+            TetrahedronPredicates.IsPointInsideStrict(a, b.C) || TetrahedronPredicates.IsPointInsideStrict(a, b.D))
             return true;
 
         return false;
@@ -40,12 +37,6 @@ public static class TetrahedronIntersectionPredicates
         return true;
     }
 
-    private static bool PointInsideTetrahedronStrict(in Tetrahedron t, in Point p)
-    {
-        static bool IsOnNegativeSide(in Triangle triangle, in Point q)
-            => Plane.FromTriangle(triangle).Side(q, Tolerances.PlaneSideEpsilon) < 0;
-
-        return IsOnNegativeSide(t.ABC, p) && IsOnNegativeSide(t.ABD, p) && IsOnNegativeSide(t.ACD, p) && IsOnNegativeSide(t.BCD, p);
-    }
+    // Point-inside helper moved to TetrahedronPredicates.IsPointInsideStrict
 }
 

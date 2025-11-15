@@ -1,23 +1,31 @@
-using System;
-using System.Collections.Generic;
-
 namespace Seaharp.Geometry.Computation;
 
 public static class TetrahedronPredicates
 {
-    private static bool TriangleMatchesAny(in Seaharp.Geometry.Triangle triangle, in Seaharp.Geometry.Tetrahedron t)
+    public static bool IsPointInsideStrict(in Tetrahedron tetrahedron, in Point point)
+    {
+        static bool IsOnNegativeSide(in Triangle triangle, in Point q)
+            => Plane.FromTriangle(triangle).Side(q, Tolerances.PlaneSideEpsilon) < 0;
+
+        return IsOnNegativeSide(tetrahedron.ABC, point)
+            && IsOnNegativeSide(tetrahedron.ABD, point)
+            && IsOnNegativeSide(tetrahedron.ACD, point)
+            && IsOnNegativeSide(tetrahedron.BCD, point);
+    }
+
+    private static bool TriangleMatchesAny(in Triangle triangle, in Tetrahedron t)
         => TrianglePredicates.IsSame(triangle, t.ABC) ||
            TrianglePredicates.IsSame(triangle, t.ABD) ||
            TrianglePredicates.IsSame(triangle, t.ACD) ||
            TrianglePredicates.IsSame(triangle, t.BCD);
 
-    public static bool SharesTriangle(in Seaharp.Geometry.Tetrahedron first, in Seaharp.Geometry.Tetrahedron second)
+    public static bool SharesTriangle(in Tetrahedron first, in Tetrahedron second)
         => TriangleMatchesAny(first.ABC, second) ||
            TriangleMatchesAny(first.ABD, second) ||
            TriangleMatchesAny(first.ACD, second) ||
            TriangleMatchesAny(first.BCD, second);
 
-    public static bool IsSolid(IReadOnlyList<Seaharp.Geometry.Tetrahedron> tetrahedra)
+    public static bool IsSolid(IReadOnlyList<Tetrahedron> tetrahedra)
     {
         if (tetrahedra is null) throw new ArgumentNullException(nameof(tetrahedra));
         if (tetrahedra.Count == 0) return false;
@@ -31,7 +39,7 @@ public static class TetrahedronPredicates
         return true;
     }
 
-    private static bool HasSharedTriangle(in Seaharp.Geometry.Tetrahedron tetrahedron, IReadOnlyList<Seaharp.Geometry.Tetrahedron> tetrahedra, int selfIndex)
+    private static bool HasSharedTriangle(in Tetrahedron tetrahedron, IReadOnlyList<Tetrahedron> tetrahedra, int selfIndex)
     {
         for (int j = 0; j < tetrahedra.Count; j++)
         {
@@ -41,4 +49,3 @@ public static class TetrahedronPredicates
         return false;
     }
 }
-
