@@ -1,4 +1,3 @@
-using System;
 using Seaharp.World;
 using Seaharp.Geometry;
 using Seaharp.Demo;
@@ -82,7 +81,3 @@ internal class Program
         world.Save("clean_system.stl");
     }
 }
-
-
-
-

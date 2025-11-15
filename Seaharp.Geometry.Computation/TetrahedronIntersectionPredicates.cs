@@ -36,7 +36,4 @@ public static class TetrahedronIntersectionPredicates
         if (ab.maxZ <= bb.minZ || bb.maxZ <= ab.minZ) return false;
         return true;
     }
-
-    // Point-inside helper moved to TetrahedronPredicates.IsPointInsideStrict
 }
-

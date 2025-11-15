@@ -1,4 +1,3 @@
-using System;
 using Seaharp.Geometry;
 
 namespace Seaharp.Topology;

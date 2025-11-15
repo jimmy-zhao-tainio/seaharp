@@ -1,5 +1,3 @@
-using System;
-
 namespace Seaharp.Geometry.Computation;
 
 // Simple double-precision ray (origin, direction unit vector)

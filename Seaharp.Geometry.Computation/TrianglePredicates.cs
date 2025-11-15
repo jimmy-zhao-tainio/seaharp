@@ -3,8 +3,8 @@ namespace Seaharp.Geometry.Computation;
 public static class TrianglePredicates
 {
     public static bool IsSame(
-        in Seaharp.Geometry.Triangle a,
-        in Seaharp.Geometry.Triangle b)
+        in Triangle a,
+        in Triangle b)
     {
         int found = 0;
         var a0 = a.P0; var a1 = a.P1; var a2 = a.P2;

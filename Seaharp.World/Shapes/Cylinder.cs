@@ -1,20 +1,15 @@
-using System;
-using System.Collections.Generic;
 using Seaharp.Topology;
 using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
-// A thin, hollow cylinder aligned to the Z axis.
-// Built as a ring of wedge prisms decomposed into tetrahedra,
-// leaving only the shell surface after extraction.
 public sealed class Cylinder : Shape
 {
-    private readonly List<Seaharp.Geometry.Tetrahedron> tetrahedra = new();
+    private readonly List<Geometry.Tetrahedron> tetrahedra = new();
     public Cylinder(long radius, long thickness = 2, long height = 2,
-                            Point? center = null,
-                            int? segments = null,
-                            double xTiltDeg = 0, double yTiltDeg = 0, double zSpinDeg = 0)
+                    Point? center = null,
+                    int? segments = null,
+                    double xTiltDeg = 0, double yTiltDeg = 0, double zSpinDeg = 0)
     {
         if (radius <= 0) throw new ArgumentOutOfRangeException(nameof(radius));
         if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
@@ -142,26 +137,26 @@ public sealed class Cylinder : Shape
     }
 
     // Standard triangular prism decomposition into 3 tetrahedra.
-    private void AddPrismAsTets(in Seaharp.Geometry.Point b0,
-                                in Seaharp.Geometry.Point b1,
-                                in Seaharp.Geometry.Point b2,
-                                in Seaharp.Geometry.Point t0,
-                                in Seaharp.Geometry.Point t1,
-                                in Seaharp.Geometry.Point t2)
+    private void AddPrismAsTets(in Point b0,
+                                in Point b1,
+                                in Point b2,
+                                in Point t0,
+                                in Point t1,
+                                in Point t2)
     {
         TryAdd(b0, b1, b2, t2);
         TryAdd(b0, b1, t1, t2);
         TryAdd(b0, t0, t1, t2);
     }
 
-    private void TryAdd(in Seaharp.Geometry.Point a,
-                        in Seaharp.Geometry.Point b,
-                        in Seaharp.Geometry.Point c,
-                        in Seaharp.Geometry.Point d)
+    private void TryAdd(in Point a,
+                        in Point b,
+                        in Point c,
+                        in Point d)
     {
         try
         {
-            tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(a, b, c, d));
+            tetrahedra.Add(new Geometry.Tetrahedron(a, b, c, d));
         }
         catch (InvalidOperationException)
         {

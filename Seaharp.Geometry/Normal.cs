@@ -1,5 +1,3 @@
-using System;
-
 namespace Seaharp.Geometry;
 
 // Normal = unit vector for surfaces

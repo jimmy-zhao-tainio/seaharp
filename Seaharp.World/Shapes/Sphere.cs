@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Seaharp.Topology;
 using Seaharp.Geometry;
 
@@ -40,7 +38,7 @@ public sealed class Sphere : Shape
 
         // Create star tetrahedra (center + each boundary triangle)
         var c = Center;
-        var tetrahedra = new List<Seaharp.Geometry.Tetrahedron>(faces.Count);
+        var tetrahedra = new List<Geometry.Tetrahedron>(faces.Count);
         for (int i = 0; i < faces.Count; i++)
         {
             var (aIdx, bIdx, cIdx) = faces[i];
@@ -51,7 +49,7 @@ public sealed class Sphere : Shape
             if (a.Equals(b) || a.Equals(d) || b.Equals(d)) continue;
             try
             {
-                tetrahedra.Add(new Seaharp.Geometry.Tetrahedron(c, a, b, d));
+                tetrahedra.Add(new Geometry.Tetrahedron(c, a, b, d));
             }
             catch (InvalidOperationException)
             {
@@ -65,7 +63,7 @@ public sealed class Sphere : Shape
 
     public long Radius { get; }
     public int Subdivisions { get; }
-    public Seaharp.Geometry.Point Center { get; }
+    public Point Center { get; }
 
     private static int ChooseSubdivisions(long radius)
     {

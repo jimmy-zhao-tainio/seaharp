@@ -1,7 +1,5 @@
 using Xunit;
-using Seaharp.Geometry;
 using Seaharp.Geometry.Computation;
-using System.Collections.Generic;
 
 namespace Seaharp.Geometry.Tests.Predicates;
 
@@ -120,4 +118,3 @@ public class TetrahedronPredicatesTests
     private static (Point A, Point B, Point C, Point D) UnitBase()
         => (new Point(0, 0, 0), new Point(1, 0, 0), new Point(0, 1, 0), new Point(0, 0, 1));
 }
-

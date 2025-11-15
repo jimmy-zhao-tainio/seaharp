@@ -1,5 +1,4 @@
 using Xunit;
-using Seaharp.Geometry;
 using Seaharp.Geometry.Computation;
 
 namespace Seaharp.Geometry.Tests.Predicates;

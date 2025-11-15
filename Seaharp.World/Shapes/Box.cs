@@ -23,13 +23,13 @@ public sealed class Box : Shape
         var p011 = new Point(origin.X, origin.Y + Depth, origin.Z + Height);
         var p111 = new Point(origin.X + Width, origin.Y + Depth, origin.Z + Height);
 
-        var tetrahedra = new List<Seaharp.Geometry.Tetrahedron>(5)
+        var tetrahedra = new List<Geometry.Tetrahedron>(5)
         {
-            new Seaharp.Geometry.Tetrahedron(p000, p100, p010, p001),
-            new Seaharp.Geometry.Tetrahedron(p100, p110, p010, p111),
-            new Seaharp.Geometry.Tetrahedron(p100, p010, p001, p111),
-            new Seaharp.Geometry.Tetrahedron(p010, p001, p011, p111),
-            new Seaharp.Geometry.Tetrahedron(p100, p001, p101, p111)
+            new Geometry.Tetrahedron(p000, p100, p010, p001),
+            new Geometry.Tetrahedron(p100, p110, p010, p111),
+            new Geometry.Tetrahedron(p100, p010, p001, p111),
+            new Geometry.Tetrahedron(p010, p001, p011, p111),
+            new Geometry.Tetrahedron(p100, p001, p101, p111)
         };
 
         Mesh = ClosedSurface.FromTetrahedra(tetrahedra);

@@ -1,5 +1,3 @@
-using System;
-
 namespace Seaharp.Geometry;
 
 // Standalone triangle with outward unit normal in grid space.

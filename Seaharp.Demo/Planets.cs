@@ -1,5 +1,3 @@
-using System;
-
 namespace Seaharp.Demo;
 
 // Quick data-only lookup for sizes, orbits, and basic orbital parameters.

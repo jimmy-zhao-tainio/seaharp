@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Seaharp.Geometry;
 using Seaharp.Geometry.Computation;
 
 namespace Seaharp.Geometry.Tests.Predicates;

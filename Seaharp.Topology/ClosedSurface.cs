@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Seaharp.Geometry;
 
 namespace Seaharp.Topology;

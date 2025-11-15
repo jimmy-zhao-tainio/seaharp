@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Seaharp.Geometry;
-
 namespace Seaharp.Geometry.Computation;
 
 // Simple BVH over triangles for broad-phase queries.
@@ -114,5 +110,3 @@ public sealed class BoundingBoxTree
             => axis == 0 ? (b.Min.X + b.Max.X) : axis == 1 ? (b.Min.Y + b.Max.Y) : (b.Min.Z + b.Max.Z);
     }
 }
-
-

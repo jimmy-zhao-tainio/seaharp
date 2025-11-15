@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Seaharp.Geometry;
 using Seaharp.Topology;
 
@@ -37,4 +34,3 @@ public static class StlWriter
         }
     }
 }
-

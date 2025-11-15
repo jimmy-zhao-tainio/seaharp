@@ -1,5 +1,3 @@
-using System;
-
 namespace Seaharp.Geometry;
 
 internal readonly record struct Vector128(Int128 X, Int128 Y, Int128 Z)

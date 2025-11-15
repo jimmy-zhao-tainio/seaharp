@@ -1,4 +1,3 @@
-using System;
 using Seaharp.Geometry; // for Triangle
 using Seaharp.Topology; // for ClosedSurface
 

@@ -1,10 +1,5 @@
-using System;
-
 namespace Seaharp.Geometry;
 
-// Vector = floating direction / displacement
-
-// Vector is now properly a real 3D vector in world space (double), not a grid coordinate:
 public readonly struct Vector
 {
     public readonly double X;
@@ -46,5 +41,3 @@ public readonly struct Vector
         return len == 0 ? this : this * (1.0 / len);
     }
 }
-
-// You’ll usually create Vector from Point + UnitScale, e.g. for OBJ export or geometric tests.

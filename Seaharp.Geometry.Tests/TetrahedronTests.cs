@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Xunit;
-using Seaharp.Geometry;
 
 namespace Seaharp.Geometry.Tests;
 
