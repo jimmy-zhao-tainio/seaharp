@@ -23,13 +23,13 @@ public sealed class ClosedSurface
     public static ClosedSurface FromTetrahedra(IEnumerable<Tetrahedron> tetrahedra)
     {
         if (tetrahedra is null) throw new ArgumentNullException(nameof(tetrahedra));
-        var triangleOccurrences = new Dictionary<TriangleKey, (int count, Triangle tri)>();
+        var triangleOccurrences = new Dictionary<TriangleKey, (int count, Triangle triangle)>();
 
-        static void Accumulate(ref Dictionary<TriangleKey, (int count, Triangle tri)> map, in Triangle t)
+        static void Accumulate(ref Dictionary<TriangleKey, (int count, Triangle triangle)> map, in Triangle triangle)
         {
-            var key = TriangleKey.FromTriangle(t);
-            if (map.TryGetValue(key, out var entry)) map[key] = (entry.count + 1, entry.tri);
-            else map[key] = (1, t);
+            var key = TriangleKey.FromTriangle(triangle);
+            if (map.TryGetValue(key, out var entry)) map[key] = (entry.count + 1, entry.triangle);
+            else map[key] = (1, triangle);
         }
 
         foreach (var tetrahedron in tetrahedra)
@@ -42,7 +42,7 @@ public sealed class ClosedSurface
 
         var boundary = new List<Triangle>();
         foreach (var pair in triangleOccurrences)
-            if (pair.Value.count == 1) boundary.Add(pair.Value.tri);
+            if (pair.Value.count == 1) boundary.Add(pair.Value.triangle);
 
         return new ClosedSurface(boundary);
     }
