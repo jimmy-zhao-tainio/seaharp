@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Seaharp.Topology;
+using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
@@ -11,7 +12,7 @@ public sealed class Cylinder : Shape
 {
     private readonly List<Seaharp.Geometry.Tetrahedron> tetrahedra = new();
     public Cylinder(long radius, long thickness = 2, long height = 2,
-                            Seaharp.Geometry.Point? center = null,
+                            Point? center = null,
                             int? segments = null,
                             double xTiltDeg = 0, double yTiltDeg = 0, double zSpinDeg = 0)
     {
@@ -21,7 +22,7 @@ public sealed class Cylinder : Shape
         // Ensure odd/even thickness creates two distinct radii.
         if (thickness < 2) thickness = 2; // enforce at least a one-unit shell on each side
 
-        Center = center ?? new Seaharp.Geometry.Point(0, 0, 0);
+        Center = center ?? new Point(0, 0, 0);
         InnerRadius = Math.Max(1, radius - thickness / 2);
         OuterRadius = radius + (thickness - thickness / 2);
         HalfHeight = height / 2; // integer division acceptable for grid rounding; ensures non-negative
@@ -38,7 +39,7 @@ public sealed class Cylinder : Shape
     public long OuterRadius { get; }
     public long HalfHeight { get; }
     public int Segments { get; }
-    public Seaharp.Geometry.Point Center { get; }
+    public Point Center { get; }
 
     private static int ChooseSegments(long radius)
     {
@@ -50,8 +51,8 @@ public sealed class Cylinder : Shape
         return n;
     }
 
-    private static Seaharp.Geometry.Point P(long x, long y, long z)
-        => new Seaharp.Geometry.Point(x, y, z);
+    private static Point P(long x, long y, long z)
+        => new Point(x, y, z);
 
     private void BuildShell(double xTiltDeg, double yTiltDeg, double zSpinDeg)
     {

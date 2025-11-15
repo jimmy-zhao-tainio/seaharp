@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
 using Seaharp.Topology;
+using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
 public sealed class Sphere : Shape
 {
-    public Sphere(long radius, Seaharp.Geometry.Point center) : this(radius, ChooseSubdivisions(radius), center) { }
+    public Sphere(long radius, Point center) : this(radius, ChooseSubdivisions(radius), center) { }
 
-    public Sphere(long radius) : this(radius, ChooseSubdivisions(radius), new Seaharp.Geometry.Point(0, 0, 0)) { }
-    public Sphere(long radius, int subdivisions, Seaharp.Geometry.Point? center = null)
+    public Sphere(long radius) : this(radius, ChooseSubdivisions(radius), new Point(0, 0, 0)) { }
+    public Sphere(long radius, int subdivisions, Point? center = null)
     {
         if (radius <= 0) throw new ArgumentOutOfRangeException(nameof(radius));
         if (subdivisions < 0 || subdivisions > 4) throw new ArgumentOutOfRangeException(nameof(subdivisions), "Supported range: 0..4");
 
-        Center = center ?? new Seaharp.Geometry.Point(0, 0, 0);
+        Center = center ?? new Point(0, 0, 0);
         Radius = radius;
         Subdivisions = subdivisions;
 
@@ -23,8 +24,8 @@ public sealed class Sphere : Shape
             Subdivide(ref verts, ref faces);
 
         // Project to sphere, round to grid, dedup
-        var pointMap = new Dictionary<int, Seaharp.Geometry.Point>(verts.Count);
-        var unique = new Dictionary<Seaharp.Geometry.Point, Seaharp.Geometry.Point>();
+        var pointMap = new Dictionary<int, Point>(verts.Count);
+        var unique = new Dictionary<Point, Point>();
         for (int i = 0; i < verts.Count; i++)
         {
             var p = ProjectToGrid(verts[i], Center, radius);
@@ -87,13 +88,13 @@ public sealed class Sphere : Shape
         }
     }
 
-    private static Seaharp.Geometry.Point ProjectToGrid(DVec v, Seaharp.Geometry.Point center, long radius)
+    private static Point ProjectToGrid(DVec v, Point center, long radius)
     {
         var n = v.Normalize().Scale(radius);
         long x = center.X + (long)Math.Round(n.X, MidpointRounding.AwayFromZero);
         long y = center.Y + (long)Math.Round(n.Y, MidpointRounding.AwayFromZero);
         long z = center.Z + (long)Math.Round(n.Z, MidpointRounding.AwayFromZero);
-        return new Seaharp.Geometry.Point(x, y, z);
+        return new Point(x, y, z);
     }
 
     private static void BuildIcosahedron(out List<DVec> verts, out List<(int a, int b, int c)> faces)

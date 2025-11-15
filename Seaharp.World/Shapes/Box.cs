@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Seaharp.Topology;
+using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
@@ -11,16 +12,16 @@ public sealed class Box : Shape
         Depth = depth;
         Height = height;
 
-        var origin = new Seaharp.Geometry.Point(0, 0, 0);
+        var origin = new Point(0, 0, 0);
 
         var p000 = origin;
-        var p100 = new Seaharp.Geometry.Point(origin.X + Width, origin.Y, origin.Z);
-        var p010 = new Seaharp.Geometry.Point(origin.X, origin.Y + Depth, origin.Z);
-        var p001 = new Seaharp.Geometry.Point(origin.X, origin.Y, origin.Z + Height);
-        var p110 = new Seaharp.Geometry.Point(origin.X + Width, origin.Y + Depth, origin.Z);
-        var p101 = new Seaharp.Geometry.Point(origin.X + Width, origin.Y, origin.Z + Height);
-        var p011 = new Seaharp.Geometry.Point(origin.X, origin.Y + Depth, origin.Z + Height);
-        var p111 = new Seaharp.Geometry.Point(origin.X + Width, origin.Y + Depth, origin.Z + Height);
+        var p100 = new Point(origin.X + Width, origin.Y, origin.Z);
+        var p010 = new Point(origin.X, origin.Y + Depth, origin.Z);
+        var p001 = new Point(origin.X, origin.Y, origin.Z + Height);
+        var p110 = new Point(origin.X + Width, origin.Y + Depth, origin.Z);
+        var p101 = new Point(origin.X + Width, origin.Y, origin.Z + Height);
+        var p011 = new Point(origin.X, origin.Y + Depth, origin.Z + Height);
+        var p111 = new Point(origin.X + Width, origin.Y + Depth, origin.Z + Height);
 
         var tetrahedra = new List<Seaharp.Geometry.Tetrahedron>(5)
         {

@@ -1,18 +1,19 @@
 using Seaharp.Topology;
+using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
 public sealed class Tetrahedron : Shape
 {
-    public Tetrahedron(Seaharp.Geometry.Point a, Seaharp.Geometry.Point b, Seaharp.Geometry.Point c, Seaharp.Geometry.Point d)
+    public Tetrahedron(Point a, Point b, Point c, Point d)
     {
         A = a; B = b; C = c; D = d;
         var tetrahedron = new Seaharp.Geometry.Tetrahedron(A, B, C, D);
         Mesh = ClosedSurface.FromTetrahedra(new[] { tetrahedron });
     }
 
-    public Seaharp.Geometry.Point A { get; }
-    public Seaharp.Geometry.Point B { get; }
-    public Seaharp.Geometry.Point C { get; }
-    public Seaharp.Geometry.Point D { get; }
+    public Point A { get; }
+    public Point B { get; }
+    public Point C { get; }
+    public Point D { get; }
 }
