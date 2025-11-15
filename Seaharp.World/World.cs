@@ -11,8 +11,4 @@ public sealed partial class World
         if (shape is null) throw new ArgumentNullException(nameof(shape));
         shapes.Add(shape);
     }
-
-    // Saving moved to World.Save.cs (STL only)
 }
-
-

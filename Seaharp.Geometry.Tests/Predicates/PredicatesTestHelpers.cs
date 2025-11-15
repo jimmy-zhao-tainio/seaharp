@@ -61,4 +61,3 @@ internal static class PredicatesTestHelpers
         return found == 3;
     }
 }
-

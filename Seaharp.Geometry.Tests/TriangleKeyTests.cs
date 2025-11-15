@@ -77,10 +77,3 @@ public class TriangleKeyTests
         if (map.TryGetValue(key, out var c)) map[key] = c + 1; else map[key] = 1;
     }
 }
-
-
-
-
-
-
-

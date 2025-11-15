@@ -45,5 +45,3 @@ public sealed class ClosedSurface
         return new ClosedSurface(boundary);
     }
 }
-
-

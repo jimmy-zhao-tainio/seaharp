@@ -1,4 +1,5 @@
 using Seaharp.IO;
+using Seaharp.Geometry;
 
 namespace Seaharp.World;
 
@@ -8,7 +9,7 @@ public sealed partial class World
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path required", nameof(path));
 
-        var triangles = new List<Seaharp.Geometry.Triangle>();
+        var triangles = new List<Triangle>();
         foreach (var shape in Shapes)
         {
             triangles.AddRange(shape.Mesh.Triangles);
@@ -17,16 +18,3 @@ public sealed partial class World
         StlWriter.Write(triangles, path);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

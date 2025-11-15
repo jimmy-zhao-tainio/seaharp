@@ -50,12 +50,19 @@ public static class InsideClosedSurface
 
         var nx = triangle.Normal.X; var ny = triangle.Normal.Y; var nz = triangle.Normal.Z;
         double ax0, ay0, bx0, by0, cx0, cy0, px0, py0;
+        
         if (Math.Abs(nx) >= Math.Abs(ny) && Math.Abs(nx) >= Math.Abs(nz))
-        { ax0 = ay; ay0 = az; bx0 = by; by0 = bz; cx0 = cy; cy0 = cz; px0 = py; py0 = pz; }
+        { 
+            ax0 = ay; ay0 = az; bx0 = by; by0 = bz; cx0 = cy; cy0 = cz; px0 = py; py0 = pz; 
+        }
         else if (Math.Abs(ny) >= Math.Abs(nz))
-        { ax0 = ax; ay0 = az; bx0 = bx; by0 = bz; cx0 = cx; cy0 = cz; px0 = px; py0 = pz; }
+        { 
+            ax0 = ax; ay0 = az; bx0 = bx; by0 = bz; cx0 = cx; cy0 = cz; px0 = px; py0 = pz; 
+        }
         else
-        { ax0 = ax; ay0 = ay; bx0 = bx; by0 = by; cx0 = cx; cy0 = cy; px0 = px; py0 = py; }
+        { 
+            ax0 = ax; ay0 = ay; bx0 = bx; by0 = by; cx0 = cx; cy0 = cy; px0 = px; py0 = py; 
+        }
 
         double area = Cross2(bx0 - ax0, by0 - ay0, cx0 - ax0, cy0 - ay0);
         if (Math.Abs(area) < Tolerances.PlaneSideEpsilon) return false;
@@ -68,4 +75,3 @@ public static class InsideClosedSurface
 
     private static double Cross2(double ax, double ay, double bx, double by) => ax * by - ay * bx;
 }
-

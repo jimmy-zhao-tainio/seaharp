@@ -54,5 +54,3 @@ public readonly struct TriangleKey : IEquatable<TriangleKey>
         return p.Z > q.Z;
     }
 }
-
-

@@ -150,7 +150,3 @@ public sealed class Sphere : Shape
         verts = v;
     }
 }
-
-
-
-

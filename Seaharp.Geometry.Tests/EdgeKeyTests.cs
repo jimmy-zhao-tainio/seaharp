@@ -45,8 +45,7 @@ public class EdgeKeyTests
     }
 
     private static void Inc(Dictionary<EdgeKey, int> m, EdgeKey k)
-    { if (m.TryGetValue(k, out var c)) m[k] = c + 1; else m[k] = 1; }
+    { 
+        if (m.TryGetValue(k, out var c)) m[k] = c + 1; else m[k] = 1; 
+    }
 }
-
-
-

@@ -82,4 +82,3 @@ public class TrianglePredicatesTests
         Assert.False(TrianglePredicates.IsSame(tABC, tABE));
     }
 }
-

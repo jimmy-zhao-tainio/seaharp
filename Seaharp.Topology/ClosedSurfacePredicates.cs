@@ -30,5 +30,3 @@ public static class ClosedSurfacePredicates
         if (map.TryGetValue(e, out var c)) map[e] = c + 1; else map[e] = 1;
     }
 }
-
-

@@ -36,5 +36,3 @@ public readonly struct EdgeKey : IEquatable<EdgeKey>
         return p.Z < q.Z;
     }
 }
-
-

@@ -39,6 +39,3 @@ public static class Intersections
         return true;
     }
 }
-
-
-

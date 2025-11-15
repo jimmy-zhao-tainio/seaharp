@@ -42,5 +42,3 @@ public readonly struct BoundingBox
         new Point(long.MaxValue, long.MaxValue, long.MaxValue),
         new Point(long.MinValue, long.MinValue, long.MinValue));
 }
-
-

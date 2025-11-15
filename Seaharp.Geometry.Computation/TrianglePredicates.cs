@@ -21,4 +21,3 @@ public static class TrianglePredicates
         return found == 3;
     }
 }
-

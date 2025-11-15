@@ -14,5 +14,3 @@ public readonly struct Ray
         Dx = dx / len; Dy = dy / len; Dz = dz / len;
     }
 }
-
-
