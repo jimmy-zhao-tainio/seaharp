@@ -1,6 +1,6 @@
-# Seaharp
+# Erratri
 
-Seaharp is a small geometry project that builds 3D shapes on the integer grid (Z^3) and exports binary STL. The demo renders a simple solar system with a sun, eight planets, their moons, and thin tilted orbit rings.
+Erratri is a small geometry project that builds 3D shapes on the integer grid (Z^3) and exports binary STL. The demo renders a simple solar system with a sun, eight planets, their moons, and thin tilted orbit rings.
 
 Note: This repository is a fully GPT-5 Codex experiment. All code and documentation were produced end-to-end by the agent in Codex CLI (no hands-on coding).
 
@@ -16,12 +16,12 @@ Note: This repository is a fully GPT-5 Codex experiment. All code and documentat
 
 ## Demo Code
 
-The demo uses a tiny data helper (`Seaharp.Demo/Planets.cs`) so `Program.cs` reads like a short scene description. Here is the essence of the program:
+The demo uses a tiny data helper (`Demo/Planets.cs`) so `Program.cs` reads like a short scene description. Here is the essence of the program:
 
 ```csharp
-using Seaharp.World;
-using Seaharp.Geometry;
-using Seaharp.Demo; // Planets helper (data only)
+using World;
+using Geometry;
+using Demo; // Planets helper (data only)
 
 var world = new World();
 var sunCenter = new Point(0, 0, 0);
@@ -52,13 +52,13 @@ world.Save("clean_system.stl");
 ```
 
 See the full, runnable code in:
-- `Seaharp.Demo/Program.cs`
-- `Seaharp.Demo/Planets.cs`
+- `Demo/Program.cs`
+- `Demo/Planets.cs`
 
 ## Building and Running
 
-- Build: `dotnet build Seaharp.sln -c Release`
-- Run demo: `dotnet run --project Seaharp.Demo -c Release`
-- Output: `Seaharp.Demo/bin/Release/net9.0/clean_system.stl`
+- Build: `dotnet build Erratri.sln -c Release`
+- Run demo: `dotnet run --project Demo -c Release`
+- Output: `Demo/bin/Release/net9.0/clean_system.stl`
 
 The screenshot above is `clean_system.png` generated from that STL.
