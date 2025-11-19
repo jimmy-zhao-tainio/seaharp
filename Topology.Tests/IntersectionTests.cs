@@ -30,17 +30,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.None, kind);
         Assert.False(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -64,17 +53,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.None, kind);
         Assert.False(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -99,17 +77,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.None, kind);
         Assert.False(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -134,17 +101,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.None, kind);
         Assert.False(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -171,17 +127,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Area, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.True(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.True(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -205,17 +150,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Area, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.True(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.True(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -239,17 +173,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Segment, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -273,17 +196,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Area, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.True(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.True(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -311,17 +223,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Segment, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -346,17 +247,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Segment, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -380,17 +270,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Segment, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -418,17 +297,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Point, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -452,17 +320,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Point, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -486,17 +343,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Point, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -520,17 +366,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Point, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -558,17 +393,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Point, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -592,17 +416,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Segment, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.True(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.True(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -626,17 +439,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.Point, kind);
         Assert.True(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.True(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -663,17 +465,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.None, kind);
         Assert.False(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -696,17 +487,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.None, kind);
         Assert.False(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
@@ -730,17 +510,6 @@ public class IntersectionTests
 
         Assert.Equal(IntersectionType.None, kind);
         Assert.False(Intersection.Any(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersection(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersection(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersection(in triA, in triB));
-
-        Assert.False(Intersection.HasAreaIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasSegmentIntersectionCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionCoplanar(in triA, in triB));
-
-        Assert.False(Intersection.HasSegmentIntersectionNonCoplanar(in triA, in triB));
-        Assert.False(Intersection.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
