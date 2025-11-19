@@ -5,7 +5,7 @@ namespace Geometry.Predicates.Internal;
 
 internal static class TriangleNonCoplanarIntersection
 {
-    internal static TriangleContact Classify(in Triangle first, in Triangle second)
+    internal static TriangleIntersection Classify(in Triangle first, in Triangle second)
     {
         // Non-coplanar triangles can intersect only in a point or a segment.
         double epsilon = Tolerances.TrianglePredicateEpsilon;
@@ -18,7 +18,7 @@ internal static class TriangleNonCoplanarIntersection
         if (!IntersectsPlane(first, planeSecond, epsilon) ||
             !IntersectsPlane(second, planeFirst, epsilon))
         {
-            return new TriangleContact(TriangleContactKind.None);
+            return new TriangleIntersection(TriangleIntersectionType.None);
         }
 
         var intersectionPoints = new List<Vector>(4);
@@ -28,7 +28,7 @@ internal static class TriangleNonCoplanarIntersection
 
         if (intersectionPoints.Count == 0)
         {
-            return new TriangleContact(TriangleContactKind.None);
+            return new TriangleIntersection(TriangleIntersectionType.None);
         }
 
         // Deduplicate with a distance-based filter.
@@ -40,12 +40,13 @@ internal static class TriangleNonCoplanarIntersection
 
         if (uniquePoints.Count == 0)
         {
-            return new TriangleContact(TriangleContactKind.None);
+            return new TriangleIntersection(TriangleIntersectionType.None);
         }
 
         if (uniquePoints.Count == 1)
         {
-            return new TriangleContact(TriangleContactKind.Point);
+            // Exactly one intersection point.
+            return new TriangleIntersection(TriangleIntersectionType.Point);
         }
 
         // More than one distinct point: check whether we have a genuine segment.
@@ -71,11 +72,11 @@ internal static class TriangleNonCoplanarIntersection
         if (maximumSquaredDistance <= squaredEpsilon)
         {
             // All intersection samples collapse to a single point within tolerance.
-            return new TriangleContact(TriangleContactKind.Point);
+            return new TriangleIntersection(TriangleIntersectionType.Point);
         }
 
-        // Genuine segment intersection (which also implies point contact).
-        return new TriangleContact(TriangleContactKind.Point | TriangleContactKind.Segment);
+        // Genuine segment intersection.
+        return new TriangleIntersection(TriangleIntersectionType.Segment);
     }
 
     private static bool IntersectsPlane(in Triangle triangle, in Plane plane, double epsilon)

@@ -7,14 +7,14 @@ public enum IntersectionType
     None = 0,
 
     // The triangles touch in exactly one point (0D contact).
-    Point,
+    Point = 1,
 
     // The triangles intersect in a single non-degenerate segment (1D).
     // This includes both coplanar and non-coplanar segment intersections,
     // whether or not the segment coincides with a full edge of either triangle.
-    Segment,
+    Segment = 2,
 
     // Coplanar triangles overlap in area (2D intersection).
     // This includes partial overlap, containment, and equality.
-    Area
+    Area = 3
 }

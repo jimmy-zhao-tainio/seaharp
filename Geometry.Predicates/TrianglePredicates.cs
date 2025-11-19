@@ -31,25 +31,38 @@ public static class TrianglePredicates
             && plane.Side(b.P2) == 0;
     }
 
-    public static TriangleContact ClassifyCoplanar(in Triangle a, in Triangle b)
+    public static TriangleIntersection ClassifyCoplanar(in Triangle a, in Triangle b)
         => TriangleCoplanarIntersection.Classify(in a, in b);
 
-    public static TriangleContact ClassifyNonCoplanar(in Triangle a, in Triangle b)
+    public static TriangleIntersection ClassifyNonCoplanar(in Triangle a, in Triangle b)
         => TriangleNonCoplanarIntersection.Classify(in a, in b);
 
     public static bool HasAreaIntersectionCoplanar(in Triangle a, in Triangle b)
-        => (ClassifyCoplanar(in a, in b).Kind & TriangleContactKind.Area) != 0;
+        => ClassifyCoplanar(in a, in b).Type == TriangleIntersectionType.Area;
 
     public static bool HasSegmentIntersectionCoplanar(in Triangle a, in Triangle b)
-        => (ClassifyCoplanar(in a, in b).Kind & TriangleContactKind.Segment) != 0;
+    {
+        var type = ClassifyCoplanar(in a, in b).Type;
+        return type == TriangleIntersectionType.Segment
+            || type == TriangleIntersectionType.Area;
+    }
 
     public static bool HasPointIntersectionCoplanar(in Triangle a, in Triangle b)
-        => (ClassifyCoplanar(in a, in b).Kind & TriangleContactKind.Point) != 0;
+    {
+        var type = ClassifyCoplanar(in a, in b).Type;
+        return type == TriangleIntersectionType.Point
+            || type == TriangleIntersectionType.Segment
+            || type == TriangleIntersectionType.Area;
+    }
 
     public static bool HasSegmentIntersectionNonCoplanar(in Triangle a, in Triangle b)
-        => (ClassifyNonCoplanar(in a, in b).Kind & TriangleContactKind.Segment) != 0;
+        => ClassifyNonCoplanar(in a, in b).Type == TriangleIntersectionType.Segment;
 
     public static bool HasPointIntersectionNonCoplanar(in Triangle a, in Triangle b)
-        => (ClassifyNonCoplanar(in a, in b).Kind & TriangleContactKind.Point) != 0;
+    {
+        var type = ClassifyNonCoplanar(in a, in b).Type;
+        return type == TriangleIntersectionType.Point
+            || type == TriangleIntersectionType.Segment;
+    }
 }
 

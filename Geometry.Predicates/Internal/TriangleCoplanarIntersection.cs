@@ -5,7 +5,7 @@ namespace Geometry.Predicates.Internal;
 
 internal static class TriangleCoplanarIntersection
 {
-    internal static TriangleContact Classify(in Triangle a, in Triangle b)
+    internal static TriangleIntersection Classify(in Triangle a, in Triangle b)
     {
         // Project both triangles to 2D (dropping the dominant normal axis),
         // then build the set of candidate intersection points:
@@ -55,17 +55,22 @@ internal static class TriangleCoplanarIntersection
         }
 
         if (candidates.Count == 0)
-            return new TriangleContact(TriangleContactKind.None);
+            return new TriangleIntersection(TriangleIntersectionType.None);
 
         if (TriangleProjection2D.HasNonCollinearTriple(candidates))
         {
             // 2D overlap region has positive area.
-            return new TriangleContact(TriangleContactKind.Area | TriangleContactKind.Segment | TriangleContactKind.Point);
+            return new TriangleIntersection(TriangleIntersectionType.Area);
         }
 
-        // Intersection is 0D or 1D (point or segment). For now we do not
-        // distinguish between them and treat as both.
-        return new TriangleContact(TriangleContactKind.Point | TriangleContactKind.Segment);
+        // Intersection is 0D or 1D (point or segment). Decide based on how
+        // many unique candidate points we have.
+        if (candidates.Count == 1)
+        {
+            return new TriangleIntersection(TriangleIntersectionType.Point);
+        }
+
+        return new TriangleIntersection(TriangleIntersectionType.Segment);
     }
 }
 

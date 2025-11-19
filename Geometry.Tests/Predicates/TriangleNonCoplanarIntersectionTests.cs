@@ -21,8 +21,8 @@ public class TriangleNonCoplanarIntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
-        Assert.Equal(TriangleContactKind.None, contact.Kind);
+        var intersection = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
+        Assert.Equal(TriangleIntersectionType.None, intersection.Type);
         Assert.False(TrianglePredicates.HasSegmentIntersectionNonCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
@@ -44,8 +44,8 @@ public class TriangleNonCoplanarIntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
-        Assert.Equal(TriangleContactKind.Point, contact.Kind);
+        var intersection = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
+        Assert.Equal(TriangleIntersectionType.Point, intersection.Type);
         Assert.True(TrianglePredicates.HasPointIntersectionNonCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.HasSegmentIntersectionNonCoplanar(in triA, in triB));
     }
@@ -67,15 +67,14 @@ public class TriangleNonCoplanarIntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
-        Assert.True((contact.Kind & TriangleContactKind.Segment) != 0);
-        Assert.True((contact.Kind & TriangleContactKind.Point) != 0);
+        var intersection = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
+        Assert.Equal(TriangleIntersectionType.Segment, intersection.Type);
         Assert.True(TrianglePredicates.HasSegmentIntersectionNonCoplanar(in triA, in triB));
         Assert.True(TrianglePredicates.HasPointIntersectionNonCoplanar(in triA, in triB));
     }
 
     [Fact]
-    public void ClassifyNonCoplanar_SymmetricUnderSwap_ReturnsSameKind()
+    public void ClassifyNonCoplanar_SymmetricUnderSwap_ReturnsSameType()
     {
         var a0 = new Point(0, -1, 0);
         var a1 = new Point(0, 1, 0);
@@ -90,10 +89,10 @@ public class TriangleNonCoplanarIntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contactAB = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
-        var contactBA = TrianglePredicates.ClassifyNonCoplanar(in triB, in triA);
+        var intersectionAB = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
+        var intersectionBA = TrianglePredicates.ClassifyNonCoplanar(in triB, in triA);
 
-        Assert.Equal(contactAB.Kind, contactBA.Kind);
+        Assert.Equal(intersectionAB.Type, intersectionBA.Type);
     }
 
     [Fact]
@@ -114,9 +113,9 @@ public class TriangleNonCoplanarIntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
+        var intersection = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
 
-        Assert.Equal(TriangleContactKind.None, contact.Kind);
+        Assert.Equal(TriangleIntersectionType.None, intersection.Type);
         Assert.False(TrianglePredicates.HasPointIntersectionNonCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.HasSegmentIntersectionNonCoplanar(in triA, in triB));
     }
@@ -136,26 +135,26 @@ public class TriangleNonCoplanarIntersectionTests
         var triA = new Triangle(a0, a1, a2, new Point(0, 0, 1));
         var triB = new Triangle(b0, b1, b2, new Point(1, 0, 0));
 
-        var contactBase = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
+        var intersectionBase = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
 
         // Flip winding of A and B separately; classification should not change.
         var triAFlipped = new Triangle(a0, a2, a1, new Point(0, 0, 1));
         var triBFlipped = new Triangle(b0, b2, b1, new Point(1, 0, 0));
 
-        var contactAFlipped = TrianglePredicates.ClassifyNonCoplanar(in triAFlipped, in triB);
-        var contactBFlipped = TrianglePredicates.ClassifyNonCoplanar(in triA, in triBFlipped);
-        var contactBothFlipped = TrianglePredicates.ClassifyNonCoplanar(in triAFlipped, in triBFlipped);
+        var intersectionAFlipped = TrianglePredicates.ClassifyNonCoplanar(in triAFlipped, in triB);
+        var intersectionBFlipped = TrianglePredicates.ClassifyNonCoplanar(in triA, in triBFlipped);
+        var intersectionBothFlipped = TrianglePredicates.ClassifyNonCoplanar(in triAFlipped, in triBFlipped);
 
-        Assert.Equal(contactBase.Kind, contactAFlipped.Kind);
-        Assert.Equal(contactBase.Kind, contactBFlipped.Kind);
-        Assert.Equal(contactBase.Kind, contactBothFlipped.Kind);
+        Assert.Equal(intersectionBase.Type, intersectionAFlipped.Type);
+        Assert.Equal(intersectionBase.Type, intersectionBFlipped.Type);
+        Assert.Equal(intersectionBase.Type, intersectionBothFlipped.Type);
     }
 
     [Fact]
     public void ClassifyNonCoplanar_StraddlingPlanesButNoOverlap_ReturnsNone()
     {
         // Both triangles cross each other's planes, but their clipped intervals
-        // along the intersection line do not overlap, so there is no contact.
+        // along the intersection line do not overlap, so there is no intersection.
         var a0 = new Point(0, -1, 0);
         var a1 = new Point(0, 1, 0);
         var a2 = new Point(1, 0, 0);
@@ -169,9 +168,9 @@ public class TriangleNonCoplanarIntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
+        var intersection = TrianglePredicates.ClassifyNonCoplanar(in triA, in triB);
 
-        Assert.Equal(TriangleContactKind.None, contact.Kind);
+        Assert.Equal(TriangleIntersectionType.None, intersection.Type);
         Assert.False(TrianglePredicates.HasPointIntersectionNonCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.HasSegmentIntersectionNonCoplanar(in triA, in triB));
     }

@@ -20,8 +20,8 @@ public class TriangleCoplanarIntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
-        Assert.Equal(TriangleContactKind.None, contact.Kind);
+        var intersection = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
+        Assert.Equal(TriangleIntersectionType.None, intersection.Type);
         Assert.False(TrianglePredicates.HasAreaIntersectionCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.HasSegmentIntersectionCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.HasPointIntersectionCoplanar(in triA, in triB));
@@ -44,8 +44,8 @@ public class TriangleCoplanarIntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
-        Assert.True((contact.Kind & TriangleContactKind.Area) != 0);
+        var intersection = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
+        Assert.Equal(TriangleIntersectionType.Area, intersection.Type);
         Assert.True(TrianglePredicates.HasAreaIntersectionCoplanar(in triA, in triB));
     }
 
@@ -65,9 +65,8 @@ public class TriangleCoplanarIntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
-        Assert.False((contact.Kind & TriangleContactKind.Area) != 0);
-        Assert.True((contact.Kind & TriangleContactKind.Segment) != 0);
+        var intersection = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
+        Assert.Equal(TriangleIntersectionType.Segment, intersection.Type);
         Assert.True(TrianglePredicates.HasSegmentIntersectionCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.HasAreaIntersectionCoplanar(in triA, in triB));
     }
@@ -88,9 +87,8 @@ public class TriangleCoplanarIntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var contact = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
-        Assert.False((contact.Kind & TriangleContactKind.Area) != 0);
-        Assert.True((contact.Kind & TriangleContactKind.Point) != 0);
+        var intersection = TrianglePredicates.ClassifyCoplanar(in triA, in triB);
+        Assert.Equal(TriangleIntersectionType.Point, intersection.Type);
         Assert.False(TrianglePredicates.HasAreaIntersectionCoplanar(in triA, in triB));
         Assert.True(TrianglePredicates.HasPointIntersectionCoplanar(in triA, in triB));
     }
