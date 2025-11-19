@@ -153,9 +153,9 @@ public class IntersectionTests
     }
 
     [Fact]
-    public void Classify_CoplanarLensShapedOverlap_ReturnsSegment()
+    public void Classify_CoplanarSharedEdgeFullOverlap_ReturnsSegment()
     {
-        // Two large triangles overlapping in a "lens"-like region.
+        // Two coplanar triangles sharing one full edge, no area overlap.
         var a0 = new Point(0, 0, 0);
         var a1 = new Point(5, 0, 0);
         var a2 = new Point(0, 5, 0);
