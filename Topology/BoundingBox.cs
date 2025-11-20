@@ -32,6 +32,11 @@ public readonly struct BoundingBox
             new Point(Math.Min(a.Min.X, b.Min.X), Math.Min(a.Min.Y, b.Min.Y), Math.Min(a.Min.Z, b.Min.Z)),
             new Point(Math.Max(a.Max.X, b.Max.X), Math.Max(a.Max.Y, b.Max.Y), Math.Max(a.Max.Z, b.Max.Z)));
 
+    public bool IsEmpty
+        => Min.X > Max.X
+        || Min.Y > Max.Y
+        || Min.Z > Max.Z;
+
     public bool Intersects(in BoundingBox other)
     {
         return !(other.Min.X > Max.X || other.Max.X < Min.X ||

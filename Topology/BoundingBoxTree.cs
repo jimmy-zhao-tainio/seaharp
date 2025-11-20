@@ -29,6 +29,19 @@ public sealed class BoundingBoxTree
     public BoundingBoxTree(IReadOnlyList<Triangle> triangles)
     {
         if (triangles is null) throw new ArgumentNullException(nameof(triangles));
+
+        if (triangles.Count == 0)
+        {
+            this.triangles = Array.Empty<TriangleBox>();
+            root = new Node
+            {
+                Box = BoundingBox.Empty,
+                Start = 0,
+                Count = 0
+            };
+            return;
+        }
+
         this.triangles = BuildTriangleBoxes(triangles);
         root = Build(0, this.triangles.Length);
     }

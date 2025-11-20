@@ -9,8 +9,10 @@ public readonly struct Triangle
     public readonly Point P2;
     public readonly Normal Normal; // outward, unit length
 
-    // Construct a triangle from three points and a 'missing' point used to orient the normal outward
-    // (away from the missing point), identical to prior Tetrahedron.Triangle behavior.
+    // Construct a triangle from three points and a "missing" point.
+    // The missing point is NOT part of the triangle. It is a fourth vertex
+    // (typically from a tetrahedron) used only to orient the triangle's normal
+    // so that it points away from that missing point.
     public Triangle(Point p0, Point p1, Point p2, Point missing)
     {
         P0 = p0;
@@ -48,5 +50,58 @@ public readonly struct Triangle
     private Triangle(Point p0, Point p1, Point p2, Vector unitNormal)
     {
         P0 = p0; P1 = p1; P2 = p2; Normal = Normal.FromVector(unitNormal);
+    }
+
+    // Convert a point in the plane of this triangle to barycentric
+    // coordinates (U,V,W) such that P = U*P0 + V*P1 + W*P2 and
+    // U + V + W = 1. Uses double precision; intended for parametrization
+    // only, not for robust geometric classification.
+    public Barycentric ToBarycentric(Point point)
+    {
+        // Work in double to avoid repeated casting in arithmetic.
+        var p0 = new Vector(P0.X, P0.Y, P0.Z);
+        var p1 = new Vector(P1.X, P1.Y, P1.Z);
+        var p2 = new Vector(P2.X, P2.Y, P2.Z);
+        var p = new Vector(point.X, point.Y, point.Z);
+
+        var v0 = p1 - p0;
+        var v1 = p2 - p0;
+        var v2 = p - p0;
+
+        var d00 = v0.Dot(v0);
+        var d01 = v0.Dot(v1);
+        var d11 = v1.Dot(v1);
+        var d20 = v2.Dot(v0);
+        var d21 = v2.Dot(v1);
+
+        var denom = d00 * d11 - d01 * d01;
+        if (denom == 0.0)
+        {
+            // Degenerate triangle in this metric; return a neutral value.
+            return new Barycentric(0.0, 0.0, 0.0);
+        }
+
+        var invDenom = 1.0 / denom;
+        var v = (d11 * d20 - d01 * d21) * invDenom;
+        var w = (d00 * d21 - d01 * d20) * invDenom;
+        var u = 1.0 - v - w;
+        return new Barycentric(u, v, w);
+    }
+
+    // Reconstruct a real-valued point from barycentric coordinates
+    // with respect to this triangle: P = U*P0 + V*P1 + W*P2.
+    // Returns RealPoint; any snapping back to integer grid should be
+    // done via GridRounding.
+    public RealPoint FromBarycentric(in Barycentric barycentric)
+    {
+        var u = barycentric.U;
+        var v = barycentric.V;
+        var w = barycentric.W;
+
+        var x = u * P0.X + v * P1.X + w * P2.X;
+        var y = u * P0.Y + v * P1.Y + w * P2.Y;
+        var z = u * P0.Z + v * P1.Z + w * P2.Z;
+
+        return new RealPoint(x, y, z);
     }
 }
