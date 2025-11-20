@@ -11,12 +11,14 @@ public class BarycentricTests
         var center = new Barycentric(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0);
         var vertex = new Barycentric(1.0, 0.0, 0.0);
         var edgeMidpoint = new Barycentric(0.5, 0.5, 0.0);
-        var outside = new Barycentric(-0.1, 0.5, 0.6);
+        var outsideNegative = new Barycentric(-0.1, 0.5, 0.6);
+        var outsideSumNotOne = new Barycentric(0.3, 0.3, 0.3);
 
         Assert.True(center.IsInsideInclusive());
         Assert.True(vertex.IsInsideInclusive());
         Assert.True(edgeMidpoint.IsInsideInclusive());
-        Assert.False(outside.IsInsideInclusive());
+        Assert.False(outsideNegative.IsInsideInclusive());
+        Assert.False(outsideSumNotOne.IsInsideInclusive());
     }
 
     [Fact]
@@ -52,4 +54,3 @@ public class BarycentricTests
         }
     }
 }
-

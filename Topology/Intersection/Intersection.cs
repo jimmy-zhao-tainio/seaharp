@@ -1,7 +1,7 @@
 using Geometry;
 using Geometry.Predicates;
 
-public static class Intersection
+public static class IntersectionTypes
 {
     public static IntersectionType Classify(in Triangle a, in Triangle b)
     {

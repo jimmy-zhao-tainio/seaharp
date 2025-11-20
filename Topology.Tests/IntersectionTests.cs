@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Topology.Tests;
 
-public class IntersectionTests
+public class IntersectionTypesTests
 {
     // ----------------------------------------------------------------------
     // Coplanar: no intersection (None)
@@ -26,10 +26,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.None, kind);
-        Assert.False(Intersection.Any(in triA, in triB));
+        Assert.False(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -49,10 +49,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.None, kind);
-        Assert.False(Intersection.Any(in triA, in triB));
+        Assert.False(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -73,10 +73,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.None, kind);
-        Assert.False(Intersection.Any(in triA, in triB));
+        Assert.False(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -97,10 +97,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.None, kind);
-        Assert.False(Intersection.Any(in triA, in triB));
+        Assert.False(IntersectionTypes.Any(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -119,10 +119,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Area, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -141,10 +141,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Area, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -164,10 +164,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Area, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -187,10 +187,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Area, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -210,10 +210,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Segment, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -233,10 +233,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Area, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -260,10 +260,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Segment, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -284,10 +284,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Segment, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -307,10 +307,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Segment, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -334,10 +334,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Point, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -357,10 +357,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Point, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -380,10 +380,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Point, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -404,10 +404,10 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Point, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -431,10 +431,10 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Point, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -454,16 +454,16 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Segment, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
     public void Classify_NonCoplanarSegmentEqualsEdgeOfAAndSubsegmentOfB_ReturnsSegment()
     {
-        // Intersection segment is the full bottom edge of A, but only a subsegment
+        // IntersectionTypes.segment is the full bottom edge of A, but only a subsegment
         // of a longer bottom edge of B.
         var a0 = new Point(0, 0, 0);
         var a1 = new Point(2, 0, 0);
@@ -478,16 +478,16 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Segment, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
     public void Classify_NonCoplanarSegmentEqualsFullEdgeInBothTriangles_ReturnsSegment()
     {
-        // Intersection segment is a shared full edge between non-coplanar triangles.
+        // IntersectionTypes.segment is a shared full edge between non-coplanar triangles.
         var a0 = new Point(0, 0, 0);
         var a1 = new Point(2, 0, 0);
         var a2 = new Point(0, 1, 0);
@@ -501,10 +501,10 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Segment, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -524,10 +524,10 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.Point, kind);
-        Assert.True(Intersection.Any(in triA, in triB));
+        Assert.True(IntersectionTypes.Any(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -550,10 +550,10 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.None, kind);
-        Assert.False(Intersection.Any(in triA, in triB));
+        Assert.False(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -572,10 +572,10 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.None, kind);
-        Assert.False(Intersection.Any(in triA, in triB));
+        Assert.False(IntersectionTypes.Any(in triA, in triB));
     }
 
     [Fact]
@@ -595,10 +595,10 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kind = Intersection.Classify(in triA, in triB);
+        var kind = IntersectionTypes.Classify(in triA, in triB);
 
         Assert.Equal(IntersectionType.None, kind);
-        Assert.False(Intersection.Any(in triA, in triB));
+        Assert.False(IntersectionTypes.Any(in triA, in triB));
     }
 
     // ----------------------------------------------------------------------
@@ -621,8 +621,8 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kindAB = Intersection.Classify(in triA, in triB);
-        var kindBA = Intersection.Classify(in triB, in triA);
+        var kindAB = IntersectionTypes.Classify(in triA, in triB);
+        var kindBA = IntersectionTypes.Classify(in triB, in triA);
 
         Assert.Equal(IntersectionType.Area, kindAB);
         Assert.Equal(kindAB, kindBA);
@@ -644,8 +644,8 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kindAB = Intersection.Classify(in triA, in triB);
-        var kindBA = Intersection.Classify(in triB, in triA);
+        var kindAB = IntersectionTypes.Classify(in triA, in triB);
+        var kindBA = IntersectionTypes.Classify(in triB, in triA);
 
         Assert.Equal(IntersectionType.Segment, kindAB);
         Assert.Equal(kindAB, kindBA);
@@ -667,8 +667,8 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kindAB = Intersection.Classify(in triA, in triB);
-        var kindBA = Intersection.Classify(in triB, in triA);
+        var kindAB = IntersectionTypes.Classify(in triA, in triB);
+        var kindBA = IntersectionTypes.Classify(in triB, in triA);
 
         Assert.Equal(IntersectionType.Point, kindAB);
         Assert.Equal(kindAB, kindBA);
@@ -690,8 +690,8 @@ public class IntersectionTests
 
         Assert.True(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kindAB = Intersection.Classify(in triA, in triB);
-        var kindBA = Intersection.Classify(in triB, in triA);
+        var kindAB = IntersectionTypes.Classify(in triA, in triB);
+        var kindBA = IntersectionTypes.Classify(in triB, in triA);
 
         Assert.Equal(IntersectionType.None, kindAB);
         Assert.Equal(kindAB, kindBA);
@@ -714,14 +714,14 @@ public class IntersectionTests
         var triA = new Triangle(a0, a1, a2, new Point(0, 0, 1));
         var triB = new Triangle(b0, b1, b2, new Point(0, 0, 1));
 
-        var kindBase = Intersection.Classify(in triA, in triB);
+        var kindBase = IntersectionTypes.Classify(in triA, in triB);
 
         var triAFlipped = new Triangle(a0, a2, a1, new Point(0, 0, 1));
         var triBFlipped = new Triangle(b0, b2, b1, new Point(0, 0, 1));
 
-        var kindAFlipped = Intersection.Classify(in triAFlipped, in triB);
-        var kindBFlipped = Intersection.Classify(in triA, in triBFlipped);
-        var kindBothFlipped = Intersection.Classify(in triAFlipped, in triBFlipped);
+        var kindAFlipped = IntersectionTypes.Classify(in triAFlipped, in triB);
+        var kindBFlipped = IntersectionTypes.Classify(in triA, in triBFlipped);
+        var kindBothFlipped = IntersectionTypes.Classify(in triAFlipped, in triBFlipped);
 
         Assert.Equal(kindBase, kindAFlipped);
         Assert.Equal(kindBase, kindBFlipped);
@@ -745,14 +745,14 @@ public class IntersectionTests
 
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
 
-        var kindBase = Intersection.Classify(in triA, in triB);
+        var kindBase = IntersectionTypes.Classify(in triA, in triB);
 
         var triAFlipped = new Triangle(a0, a2, a1, new Point(0, 0, 1));
         var triBFlipped = new Triangle(b0, b2, b1, new Point(1, 0, 0));
 
-        var kindAFlipped = Intersection.Classify(in triAFlipped, in triB);
-        var kindBFlipped = Intersection.Classify(in triA, in triBFlipped);
-        var kindBothFlipped = Intersection.Classify(in triAFlipped, in triBFlipped);
+        var kindAFlipped = IntersectionTypes.Classify(in triAFlipped, in triB);
+        var kindBFlipped = IntersectionTypes.Classify(in triA, in triBFlipped);
+        var kindBothFlipped = IntersectionTypes.Classify(in triAFlipped, in triBFlipped);
 
         Assert.Equal(kindBase, kindAFlipped);
         Assert.Equal(kindBase, kindBFlipped);
@@ -783,8 +783,8 @@ public class IntersectionTests
         Assert.True(TrianglePredicates.IsCoplanar(in triAUp, in triBUp));
         Assert.True(TrianglePredicates.IsCoplanar(in triADown, in triBDown));
 
-        var kindUp = Intersection.Classify(in triAUp, in triBUp);
-        var kindDown = Intersection.Classify(in triADown, in triBDown);
+        var kindUp = IntersectionTypes.Classify(in triAUp, in triBUp);
+        var kindDown = IntersectionTypes.Classify(in triADown, in triBDown);
 
         Assert.Equal(IntersectionType.Area, kindUp);
         Assert.Equal(kindUp, kindDown);
@@ -810,8 +810,8 @@ public class IntersectionTests
         Assert.False(TrianglePredicates.IsCoplanar(in triA, in triB));
         Assert.False(TrianglePredicates.IsCoplanar(in triAFlippedNormal, in triBFlippedNormal));
 
-        var kindBase = Intersection.Classify(in triA, in triB);
-        var kindFlippedNormal = Intersection.Classify(in triAFlippedNormal, in triBFlippedNormal);
+        var kindBase = IntersectionTypes.Classify(in triA, in triB);
+        var kindFlippedNormal = IntersectionTypes.Classify(in triAFlippedNormal, in triBFlippedNormal);
 
         Assert.Equal(IntersectionType.Segment, kindBase);
         Assert.Equal(kindBase, kindFlippedNormal);

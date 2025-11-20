@@ -103,7 +103,7 @@ internal static class Program
 
     private static void ValidateIntersection(string label, in Triangle first, in Triangle second, IntersectionType expected)
     {
-        var actual = Intersection.Classify(in first, in second);
+        var actual = IntersectionTypes.Classify(in first, in second);
         if (actual != expected)
         {
             throw new InvalidOperationException(
