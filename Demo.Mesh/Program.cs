@@ -1,6 +1,5 @@
 using Geometry;
-using WorldModel = global::World.World;
-using Sphere = global::World.Sphere;
+using World;
 
 internal static class Program
 {
@@ -13,7 +12,7 @@ internal static class Program
         var a = new Sphere(r, subdivisions: 3, center: aCenter);
         var b = new Sphere(r, subdivisions: 3, center: bCenter);
 
-        var world = new WorldModel();
+        var world = new World.World();
         world.Add(a);
         world.Add(b);
 

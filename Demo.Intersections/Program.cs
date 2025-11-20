@@ -1,6 +1,8 @@
 using Geometry;
 using World;
 using Topology;
+using Kernel;
+using IO;
 
 namespace Demo.Intersections;
 
@@ -20,6 +22,7 @@ internal static class Program
         SavePointExample();
         SaveSegmentExample();
         SaveAreaExample();
+        SaveSphereIntersectionExample();
     }
 
     private static void SaveNoneExample()
@@ -99,6 +102,40 @@ internal static class Program
 
         ValidateIntersection("area", in triA, in triB, IntersectionType.Area);
         SavePair("intersection_area.stl", in triA, in triB);
+    }
+
+    private static void SaveSphereIntersectionExample()
+    {
+        long r = 200;
+        var aCenter = new Point(0, 0, 0);
+        var bCenter = new Point(150, 50, -30);
+
+        var sphereA = new Sphere(r, subdivisions: 3, center: aCenter);
+        var sphereB = new Sphere(r, subdivisions: 3, center: bCenter);
+
+        var set = new IntersectionSet(
+            sphereA.Mesh.Triangles,
+            sphereB.Mesh.Triangles);
+
+        var involved = new List<Triangle>();
+        var seenA = new HashSet<int>();
+        var seenB = new HashSet<int>();
+
+        foreach (var intersection in set.Intersections)
+        {
+            if (seenA.Add(intersection.TriangleIndexA))
+            {
+                involved.Add(set.TrianglesA[intersection.TriangleIndexA]);
+            }
+
+            if (seenB.Add(intersection.TriangleIndexB))
+            {
+                involved.Add(set.TrianglesB[intersection.TriangleIndexB]);
+            }
+        }
+
+        var outputPath = "spheres_intersection_set.stl";
+        StlWriter.Write(involved, outputPath);
     }
 
     private static void ValidateIntersection(string label, in Triangle first, in Triangle second, IntersectionType expected)

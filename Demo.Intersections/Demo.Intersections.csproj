@@ -11,6 +11,6 @@
     <ProjectReference Include="..\Topology\Topology.csproj" />
     <ProjectReference Include="..\World\World.csproj" />
     <ProjectReference Include="..\IO\IO.csproj" />
+    <ProjectReference Include="..\Kernel\Kernel.csproj" />
   </ItemGroup>
 </Project>
-
