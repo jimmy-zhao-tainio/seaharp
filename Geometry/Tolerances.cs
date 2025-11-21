@@ -19,6 +19,9 @@ public static class Tolerances
     public const double FeatureWorldDistanceEpsilonSquared =
         TrianglePredicateEpsilon * TrianglePredicateEpsilon;
 
+    // Used for inclusive barycentric inside tests (U, V, W >= 0 and U+V+W == 1).
+    public const double BarycentricInsideEpsilon = 1e-9;
+
     // Used when comparing barycentric coordinates (U, V, W) on triangles
     // when deduplicating feature-layer vertices.
     public const double FeatureBarycentricEpsilon = TrianglePredicateEpsilon;

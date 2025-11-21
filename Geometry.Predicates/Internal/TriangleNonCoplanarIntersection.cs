@@ -15,16 +15,16 @@ internal static class TriangleNonCoplanarIntersection
 
         // Quick rejection: if either triangle lies strictly on one side of
         // the other's plane (by more than epsilon), there is no intersection.
-        if (!IntersectsPlane(first, planeSecond, epsilon) ||
-            !IntersectsPlane(second, planeFirst, epsilon))
+        if (!IntersectsPlane(first, planeSecond) ||
+            !IntersectsPlane(second, planeFirst))
         {
             return new TriangleIntersection(TriangleIntersectionType.None);
         }
 
         var intersectionPoints = new List<Vector>(4);
 
-        CollectTrianglePlaneIntersections(first, planeSecond, in second, intersectionPoints, epsilon);
-        CollectTrianglePlaneIntersections(second, planeFirst, in first, intersectionPoints, epsilon);
+        CollectTrianglePlaneIntersections(first, planeSecond, in second, intersectionPoints);
+        CollectTrianglePlaneIntersections(second, planeFirst, in first, intersectionPoints);
 
         if (intersectionPoints.Count == 0)
         {
@@ -35,7 +35,7 @@ internal static class TriangleNonCoplanarIntersection
         var uniquePoints = new List<Vector>(intersectionPoints.Count);
         foreach (var point in intersectionPoints)
         {
-            AddUniqueIntersectionPoint(uniquePoints, in point, epsilon);
+            AddUniqueIntersectionPoint(uniquePoints, in point);
         }
 
         if (uniquePoints.Count == 0)
@@ -79,8 +79,10 @@ internal static class TriangleNonCoplanarIntersection
         return new TriangleIntersection(TriangleIntersectionType.Segment);
     }
 
-    private static bool IntersectsPlane(in Triangle triangle, in Plane plane, double epsilon)
+    private static bool IntersectsPlane(in Triangle triangle, in Plane plane)
     {
+        double epsilon = Tolerances.TrianglePredicateEpsilon;
+
         double distance0 = plane.Evaluate(triangle.P0);
         double distance1 = plane.Evaluate(triangle.P1);
         double distance2 = plane.Evaluate(triangle.P2);
@@ -95,13 +97,12 @@ internal static class TriangleNonCoplanarIntersection
         in Triangle sourceTriangle,
         in Plane targetPlane,
         in Triangle targetTriangle,
-        List<Vector> intersectionPoints,
-        double epsilon)
+        List<Vector> intersectionPoints)
     {
         // First, handle vertices of the source triangle that lie on the target plane.
-        AddVertexIfOnPlaneAndInside(sourceTriangle.P0, targetPlane, in targetTriangle, intersectionPoints, epsilon);
-        AddVertexIfOnPlaneAndInside(sourceTriangle.P1, targetPlane, in targetTriangle, intersectionPoints, epsilon);
-        AddVertexIfOnPlaneAndInside(sourceTriangle.P2, targetPlane, in targetTriangle, intersectionPoints, epsilon);
+        AddVertexIfOnPlaneAndInside(sourceTriangle.P0, targetPlane, in targetTriangle, intersectionPoints);
+        AddVertexIfOnPlaneAndInside(sourceTriangle.P1, targetPlane, in targetTriangle, intersectionPoints);
+        AddVertexIfOnPlaneAndInside(sourceTriangle.P2, targetPlane, in targetTriangle, intersectionPoints);
 
         var vertices = new[] { sourceTriangle.P0, sourceTriangle.P1, sourceTriangle.P2 };
 
@@ -115,6 +116,7 @@ internal static class TriangleNonCoplanarIntersection
 
             // If both endpoints are on the same side of the plane and not within
             // epsilon of it, the segment does not cross the plane.
+            double epsilon = Tolerances.TrianglePredicateEpsilon;
             if (distanceStart > epsilon && distanceEnd > epsilon) continue;
             if (distanceStart < -epsilon && distanceEnd < -epsilon) continue;
 
@@ -137,9 +139,9 @@ internal static class TriangleNonCoplanarIntersection
                 startVector.Y + t * (endVector.Y - startVector.Y),
                 startVector.Z + t * (endVector.Z - startVector.Z));
 
-            if (IsPointInTriangle(intersectionPoint, in targetTriangle, epsilon))
+            if (IsPointInTriangle(intersectionPoint, in targetTriangle))
             {
-                AddUniqueIntersectionPoint(intersectionPoints, in intersectionPoint, epsilon);
+                AddUniqueIntersectionPoint(intersectionPoints, in intersectionPoint);
             }
         }
     }
@@ -148,9 +150,10 @@ internal static class TriangleNonCoplanarIntersection
         in Point vertex,
         in Plane targetPlane,
         in Triangle targetTriangle,
-        List<Vector> intersectionPoints,
-        double epsilon)
+        List<Vector> intersectionPoints)
     {
+        double epsilon = Tolerances.TrianglePredicateEpsilon;
+
         double distance = targetPlane.Evaluate(vertex);
         if (Math.Abs(distance) > epsilon)
         {
@@ -158,9 +161,9 @@ internal static class TriangleNonCoplanarIntersection
         }
 
         var vertexVector = ToVector(vertex);
-        if (IsPointInTriangle(vertexVector, in targetTriangle, epsilon))
+        if (IsPointInTriangle(vertexVector, in targetTriangle))
         {
-            AddUniqueIntersectionPoint(intersectionPoints, in vertexVector, epsilon);
+            AddUniqueIntersectionPoint(intersectionPoints, in vertexVector);
         }
     }
 
@@ -169,9 +172,10 @@ internal static class TriangleNonCoplanarIntersection
 
     private static bool IsPointInTriangle(
         in Vector point,
-        in Triangle triangle,
-        double epsilon)
+        in Triangle triangle)
     {
+        double epsilon = Tolerances.TrianglePredicateEpsilon;
+
         var a = ToVector(triangle.P0);
         var b = ToVector(triangle.P1);
         var c = ToVector(triangle.P2);
@@ -218,10 +222,9 @@ internal static class TriangleNonCoplanarIntersection
 
     private static void AddUniqueIntersectionPoint(
         List<Vector> points,
-        in Vector candidate,
-        double epsilon)
+        in Vector candidate)
     {
-        double squaredEpsilon = epsilon * epsilon;
+        double squaredEpsilon = Tolerances.FeatureWorldDistanceEpsilonSquared;
         for (int i = 0; i < points.Count; i++)
         {
             var existing = points[i];

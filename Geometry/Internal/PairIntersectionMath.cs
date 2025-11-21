@@ -24,28 +24,25 @@ internal static class PairIntersectionMath
     }
 
     // Non-coplanar feature extraction: return a list of unique 3D
-    // intersection sample points between triA and triB. The epsilon
-    // parameter controls plane/triangle classification and the
-    // uniqueness filter, and should typically be
-    // Tolerances.TrianglePredicateEpsilon.
+    // intersection sample points between triA and triB. Numerical
+    // tolerances come from Geometry.Tolerances.
     internal static List<Vector> ComputeNonCoplanarIntersectionPoints(
         in Triangle triA,
-        in Triangle triB,
-        double epsilon)
+        in Triangle triB)
     {
         var planeA = Plane.FromTriangle(in triA);
         var planeB = Plane.FromTriangle(in triB);
 
-        if (!IntersectsPlane(in triA, in planeB, epsilon) ||
-            !IntersectsPlane(in triB, in planeA, epsilon))
+        if (!IntersectsPlane(in triA, in planeB) ||
+            !IntersectsPlane(in triB, in planeA))
         {
             return new List<Vector>();
         }
 
         var rawPoints = new List<Vector>(4);
 
-        CollectTrianglePlaneIntersections(in triA, in planeB, in triB, rawPoints, epsilon);
-        CollectTrianglePlaneIntersections(in triB, in planeA, in triA, rawPoints, epsilon);
+        CollectTrianglePlaneIntersections(in triA, in planeB, in triB, rawPoints);
+        CollectTrianglePlaneIntersections(in triB, in planeA, in triA, rawPoints);
 
         if (rawPoints.Count == 0)
         {
@@ -57,7 +54,7 @@ internal static class PairIntersectionMath
         var unique = new List<Vector>(rawPoints.Count);
         foreach (var p in rawPoints)
         {
-            AddUniqueIntersectionPoint(unique, in p, epsilon);
+            AddUniqueIntersectionPoint(unique, in p);
         }
 
         return unique;
@@ -66,19 +63,6 @@ internal static class PairIntersectionMath
     internal static List<Point2D> ComputeCoplanarIntersectionPoints(
         in Triangle triA,
         in Triangle triB,
-        out int projectionAxis)
-    {
-        return ComputeCoplanarIntersectionPoints(
-            in triA,
-            in triB,
-            Tolerances.TrianglePredicateEpsilon,
-            out projectionAxis);
-    }
-
-    internal static List<Point2D> ComputeCoplanarIntersectionPoints(
-        in Triangle triA,
-        in Triangle triB,
-        double epsilon,
         out int projectionAxis)
     {
         projectionAxis = ChooseProjectionAxis(triA.Normal);
@@ -94,14 +78,14 @@ internal static class PairIntersectionMath
         var candidates = new List<Point2D>(12);
 
         // Vertices of A inside B (including on boundary)
-        AddIfInsideTriangle(a0, b0, b1, b2, candidates, epsilon);
-        AddIfInsideTriangle(a1, b0, b1, b2, candidates, epsilon);
-        AddIfInsideTriangle(a2, b0, b1, b2, candidates, epsilon);
+        AddIfInsideTriangle(a0, b0, b1, b2, candidates);
+        AddIfInsideTriangle(a1, b0, b1, b2, candidates);
+        AddIfInsideTriangle(a2, b0, b1, b2, candidates);
 
         // Vertices of B inside A
-        AddIfInsideTriangle(b0, a0, a1, a2, candidates, epsilon);
-        AddIfInsideTriangle(b1, a0, a1, a2, candidates, epsilon);
-        AddIfInsideTriangle(b2, a0, a1, a2, candidates, epsilon);
+        AddIfInsideTriangle(b0, a0, a1, a2, candidates);
+        AddIfInsideTriangle(b1, a0, a1, a2, candidates);
+        AddIfInsideTriangle(b2, a0, a1, a2, candidates);
 
         // Edge-edge intersections
         var aVerts = new[] { a0, a1, a2 };
@@ -114,9 +98,9 @@ internal static class PairIntersectionMath
             {
                 var bStart = bVerts[j];
                 var bEnd = bVerts[(j + 1) % 3];
-                if (TrySegmentIntersection(aStart, aEnd, bStart, bEnd, epsilon, out var intersection))
+                if (TrySegmentIntersection(aStart, aEnd, bStart, bEnd, out var intersection))
                 {
-                    AddUniquePoint(candidates, intersection, epsilon);
+                    AddUniquePoint(candidates, intersection);
                 }
             }
         }
@@ -126,13 +110,11 @@ internal static class PairIntersectionMath
 
     // 3D barycentric point-in-triangle test aligned with
     // Geometry.Predicates.Internal.TriangleNonCoplanarIntersection.
-    // Edge vectors, dot products, and epsilon usage follow the same
-    // pattern so feature construction does not diverge from the
-    // predicate layer.
+    // Edge vectors and dot products follow the same pattern so
+    // feature construction does not diverge from the predicate layer.
     internal static bool IsPointInTriangle(
         in Vector point,
-        in Triangle triangle,
-        double epsilon)
+        in Triangle triangle)
     {
         var a = ToVector(triangle.P0);
         var b = ToVector(triangle.P1);
@@ -149,7 +131,7 @@ internal static class PairIntersectionMath
         double d21 = v2.Dot(v1);
 
         double denom = d00 * d11 - d01 * d01;
-        if (Math.Abs(denom) < epsilon)
+        if (Math.Abs(denom) < Tolerances.TrianglePredicateEpsilon)
         {
             return false;
         }
@@ -159,6 +141,7 @@ internal static class PairIntersectionMath
         double w = (d00 * d21 - d01 * d20) * invDenom;
         double u = 1.0 - v - w;
 
+        double epsilon = Tolerances.TrianglePredicateEpsilon;
         if (u < -epsilon || v < -epsilon || w < -epsilon)
         {
             return false;
@@ -261,9 +244,10 @@ internal static class PairIntersectionMath
 
     private static bool IntersectsPlane(
         in Triangle triangle,
-        in Plane plane,
-        double epsilon)
+        in Plane plane)
     {
+        double epsilon = Tolerances.TrianglePredicateEpsilon;
+
         double d0 = plane.Evaluate(triangle.P0);
         double d1 = plane.Evaluate(triangle.P1);
         double d2 = plane.Evaluate(triangle.P2);
@@ -278,12 +262,11 @@ internal static class PairIntersectionMath
         in Triangle sourceTriangle,
         in Plane targetPlane,
         in Triangle targetTriangle,
-        List<Vector> intersectionPoints,
-        double epsilon)
+        List<Vector> intersectionPoints)
     {
-        AddVertexIfOnPlaneAndInside(sourceTriangle.P0, in targetPlane, in targetTriangle, intersectionPoints, epsilon);
-        AddVertexIfOnPlaneAndInside(sourceTriangle.P1, in targetPlane, in targetTriangle, intersectionPoints, epsilon);
-        AddVertexIfOnPlaneAndInside(sourceTriangle.P2, in targetPlane, in targetTriangle, intersectionPoints, epsilon);
+        AddVertexIfOnPlaneAndInside(sourceTriangle.P0, in targetPlane, in targetTriangle, intersectionPoints);
+        AddVertexIfOnPlaneAndInside(sourceTriangle.P1, in targetPlane, in targetTriangle, intersectionPoints);
+        AddVertexIfOnPlaneAndInside(sourceTriangle.P2, in targetPlane, in targetTriangle, intersectionPoints);
 
         var vertices = new[] { sourceTriangle.P0, sourceTriangle.P1, sourceTriangle.P2 };
 
@@ -294,6 +277,8 @@ internal static class PairIntersectionMath
 
             double distanceStart = targetPlane.Evaluate(start);
             double distanceEnd = targetPlane.Evaluate(end);
+
+            double epsilon = Tolerances.TrianglePredicateEpsilon;
 
             if (distanceStart > epsilon && distanceEnd > epsilon) continue;
             if (distanceStart < -epsilon && distanceEnd < -epsilon) continue;
@@ -317,9 +302,9 @@ internal static class PairIntersectionMath
                 startVector.Y + t * (endVector.Y - startVector.Y),
                 startVector.Z + t * (endVector.Z - startVector.Z));
 
-            if (IsPointInTriangle(intersectionPoint, in targetTriangle, epsilon))
+            if (IsPointInTriangle(intersectionPoint, in targetTriangle))
             {
-                AddUniqueIntersectionPoint(intersectionPoints, in intersectionPoint, epsilon);
+                AddUniqueIntersectionPoint(intersectionPoints, in intersectionPoint);
             }
         }
     }
@@ -328,19 +313,18 @@ internal static class PairIntersectionMath
         in Point vertex,
         in Plane targetPlane,
         in Triangle targetTriangle,
-        List<Vector> intersectionPoints,
-        double epsilon)
+        List<Vector> intersectionPoints)
     {
         double distance = targetPlane.Evaluate(vertex);
-        if (Math.Abs(distance) > epsilon)
+        if (Math.Abs(distance) > Tolerances.TrianglePredicateEpsilon)
         {
             return;
         }
 
         var vertexVector = ToVector(vertex);
-        if (IsPointInTriangle(vertexVector, in targetTriangle, epsilon))
+        if (IsPointInTriangle(vertexVector, in targetTriangle))
         {
-            AddUniqueIntersectionPoint(intersectionPoints, in vertexVector, epsilon);
+            AddUniqueIntersectionPoint(intersectionPoints, in vertexVector);
         }
     }
 
@@ -349,10 +333,9 @@ internal static class PairIntersectionMath
 
     private static void AddUniqueIntersectionPoint(
         List<Vector> points,
-        in Vector candidate,
-        double epsilon)
+        in Vector candidate)
     {
-        double squaredEpsilon = epsilon * epsilon;
+        double squaredEpsilon = Tolerances.FeatureWorldDistanceEpsilonSquared;
         for (int i = 0; i < points.Count; i++)
         {
             var existing = points[i];
@@ -429,12 +412,11 @@ internal static class PairIntersectionMath
         in Point2D t0,
         in Point2D t1,
         in Point2D t2,
-        List<Point2D> output,
-        double epsilon)
+        List<Point2D> output)
     {
         if (IsPointInTriangle2D(candidate, t0, t1, t2))
         {
-            AddUniquePoint(output, candidate, epsilon);
+            AddUniquePoint(output, candidate);
         }
     }
 
@@ -446,7 +428,6 @@ internal static class PairIntersectionMath
         in Point2D p1,
         in Point2D q0,
         in Point2D q1,
-        double epsilon,
         out Point2D intersection)
     {
         var pDirection = new Point2D(p1.X - p0.X, p1.Y - p0.Y);
@@ -454,7 +435,7 @@ internal static class PairIntersectionMath
 
         double denominator = Cross(pDirection, qDirection);
 
-        if (Math.Abs(denominator) < epsilon)
+        if (Math.Abs(denominator) < Tolerances.TrianglePredicateEpsilon)
         {
             intersection = default;
             return false;
@@ -464,6 +445,7 @@ internal static class PairIntersectionMath
         double t = Cross(qMinusP, qDirection) / denominator;
         double u = Cross(qMinusP, pDirection) / denominator;
 
+        double epsilon = Tolerances.TrianglePredicateEpsilon;
         if (t < -epsilon || t > 1.0 + epsilon || u < -epsilon || u > 1.0 + epsilon)
         {
             intersection = default;
@@ -482,10 +464,9 @@ internal static class PairIntersectionMath
 
     private static void AddUniquePoint(
         List<Point2D> points,
-        in Point2D candidate,
-        double epsilon)
+        in Point2D candidate)
     {
-        double squaredEpsilon = epsilon * epsilon;
+        double squaredEpsilon = Tolerances.FeatureWorldDistanceEpsilonSquared;
         for (int i = 0; i < points.Count; i++)
         {
             var p = points[i];

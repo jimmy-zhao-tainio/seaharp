@@ -135,8 +135,7 @@ public static class PairFeaturesFactory
     {
         var rawPoints = PairIntersectionMath.ComputeNonCoplanarIntersectionPoints(
             in triA,
-            in triB,
-            Tolerances.TrianglePredicateEpsilon);
+            in triB);
 
         if (rawPoints.Count == 0)
         {

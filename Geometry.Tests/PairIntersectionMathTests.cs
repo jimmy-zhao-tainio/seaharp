@@ -23,9 +23,7 @@ public class PairIntersectionMathTests
             new Point(0, 2, 0),
             new Point(1, 0, 0));
 
-        double epsilon = Tolerances.TrianglePredicateEpsilon;
-
-        var points = PairIntersectionMath.ComputeNonCoplanarIntersectionPoints(in triA, in triB, epsilon);
+        var points = PairIntersectionMath.ComputeNonCoplanarIntersectionPoints(in triA, in triB);
 
         Assert.Equal(2, points.Count);
 
@@ -54,12 +52,9 @@ public class PairIntersectionMathTests
             new Point(0, 6, 0),
             new Point(0, 0, 1));
 
-        double epsilon = Tolerances.TrianglePredicateEpsilon;
-
         var points = PairIntersectionMath.ComputeCoplanarIntersectionPoints(
             in triA,
             in triB,
-            epsilon,
             out int axis);
 
         Assert.True(points.Count >= 3);
@@ -96,8 +91,8 @@ public class PairIntersectionMathTests
                     py = y;
                 }
 
-                if (System.Math.Abs(p.X - px) <= epsilon &&
-                    System.Math.Abs(p.Y - py) <= epsilon)
+                if (System.Math.Abs(p.X - px) <= Tolerances.TrianglePredicateEpsilon &&
+                    System.Math.Abs(p.Y - py) <= Tolerances.TrianglePredicateEpsilon)
                 {
                     return true;
                 }
@@ -112,4 +107,3 @@ public class PairIntersectionMathTests
         }
     }
 }
-

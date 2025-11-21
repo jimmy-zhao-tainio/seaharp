@@ -43,7 +43,7 @@ public class BarycentricTests
         foreach (var p in points)
         {
             var bary = tri.ToBarycentric(p);
-            Assert.True(bary.IsInsideInclusive(1e-6));
+            Assert.True(bary.IsInsideInclusive());
 
             var real = tri.FromBarycentric(in bary);
             var snapped = GridRounding.Snap(real);

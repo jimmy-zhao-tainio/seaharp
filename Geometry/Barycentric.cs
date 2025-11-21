@@ -19,8 +19,10 @@ public readonly struct Barycentric
     // Inclusive test for being inside or on the boundary of the
     // reference triangle, with a small tolerance on the barycentric
     // constraints U, V, W >= 0 and U + V + W == 1.
-    public bool IsInsideInclusive(double epsilon = 1e-9)
+    public bool IsInsideInclusive()
     {
+        const double epsilon = Tolerances.BarycentricInsideEpsilon;
+
         if (U < -epsilon || V < -epsilon || W < -epsilon)
             return false;
 
@@ -28,21 +30,13 @@ public readonly struct Barycentric
         return System.Math.Abs(sum - 1.0) <= epsilon;
     }
 
-    // Component-wise closeness between two barycentric coordinates.
-    // The epsilon parameter is supplied by the caller so that feature
-    // layers can choose their own tolerance independently of the
-    // predicate layer.
-    public bool IsCloseTo(in Barycentric other, double epsilon)
+    // Component-wise closeness between two barycentric coordinates using
+    // the shared feature-layer tolerance from Geometry.Tolerances.
+    public bool IsCloseTo(in Barycentric other)
     {
+        double epsilon = Tolerances.FeatureBarycentricEpsilon;
         return System.Math.Abs(U - other.U) <= epsilon &&
                System.Math.Abs(V - other.V) <= epsilon &&
                System.Math.Abs(W - other.W) <= epsilon;
-    }
-
-    // Convenience overload for callers that use the shared feature-layer
-    // tolerance from Geometry.Tolerances.
-    public bool IsCloseTo(in Barycentric other)
-    {
-        return IsCloseTo(in other, Tolerances.FeatureBarycentricEpsilon);
     }
 }
