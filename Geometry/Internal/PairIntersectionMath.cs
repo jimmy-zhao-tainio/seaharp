@@ -3,12 +3,18 @@ using System.Collections.Generic;
 
 namespace Geometry.Internal;
 
-// Low-level geometric helpers for per-pair triangle intersections.
-// These functions mirror the math used in the predicate layer
-// (TriangleNonCoplanarIntersection and TriangleProjection2D) but are
-// focused on producing concrete intersection samples for a single
-// triangle pair. Kernel-level code builds higher-level features on
-// top of these samples.
+// Helper functions for *one* triangle pair.
+//
+// This file is the "raw geometry" layer. Given two triangles it can
+// tell you:
+//
+//   - Which points lie on both triangles (non-coplanar case)
+//   - How the intersection polygon looks in 2D (coplanar case)
+//   - Barycentric coordinates for those points
+//
+// It does NOT know anything about meshes, PairFeatures, or graphs.
+// Kernel code calls these functions, then wraps the results up in
+// PairVertex / PairSegment.
 internal static class PairIntersectionMath
 {
     internal readonly struct Point2D
@@ -23,9 +29,19 @@ internal static class PairIntersectionMath
         }
     }
 
-    // Non-coplanar feature extraction: return a list of unique 3D
-    // intersection sample points between triA and triB. Numerical
-    // tolerances come from Geometry.Tolerances.
+    // NON-COPLANAR case:
+    //
+    // This collects all world-space points where triangleA and triangleB
+    // touch when they are NOT coplanar.
+    //
+    // The list can contain:
+    //   - 0 points  => no intersection
+    //   - 1 point   => touch at a vertex
+    //   - 2 points  => segment
+    //   - 3+ points => degenerate / corner cases
+    //
+    // Deduplication is done with a small epsilon so we don't get the same
+    // point twice from different edge/vertex combinations.
     internal static List<Vector> ComputeNonCoplanarIntersectionPoints(
         in Triangle triA,
         in Triangle triB)
@@ -60,6 +76,14 @@ internal static class PairIntersectionMath
         return unique;
     }
 
+    // COPLANAR case:
+    //
+    // Here both triangles lie in the same plane. We project them to 2D,
+    // compute the overlap polygon between the two triangles, and return
+    // its vertices in that 2D space.
+    //
+    // Later we map these 2D points back to barycentric coords on each
+    // original triangle.
     internal static List<Point2D> ComputeCoplanarIntersectionPoints(
         in Triangle triA,
         in Triangle triB,
@@ -162,9 +186,15 @@ internal static class PairIntersectionMath
         t2 = ProjectTo2D(tri.P2, axis);
     }
 
-    // Barycentric solve in 3D aligned with the formulation used by
-    // the predicate layer (same edge vectors and dot-product
-    // structure). Epsilon handling remains with the caller.
+    // Convert a 3D point into barycentric coordinates (u, v, w) for a given
+    // triangle in 3D.
+    //
+    // In plain words: find the numbers u, v, w such that
+    //
+    //   p ≈ u * t0 + v * t1 + w * t2,  with  u + v + w = 1
+    //
+    // This lets us store "the same point" in a triangle-local way instead
+    // of as a raw Vector.
     internal static Barycentric ToBarycentric(
         in Triangle tri,
         in Vector point)
@@ -200,10 +230,13 @@ internal static class PairIntersectionMath
         return new Barycentric(u, v, w);
     }
 
-    // 2D barycentric solve consistent with the projection math used
-    // in ComputeCoplanarIntersectionPoints. Operates in the projected
-    // plane but feeds into the same barycentric containers used by
-    // the rest of Geometry and Kernel.
+    // Same as ToBarycentric, but in the 2D projected plane.
+    //
+    // Used in the coplanar case, where both triangles live in the same plane
+    // and we have already projected them down to 2D (Point2D).
+    //
+    // The output is still Barycentric so the rest of the code can treat
+    // 2D and 3D barycentric data the same way.
     internal static Barycentric ToBarycentric2D(
         in Point2D p,
         in Point2D t0,

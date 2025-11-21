@@ -36,20 +36,17 @@ public readonly struct IntersectionEdgeId
 public sealed class IntersectionGraph
 {
     public IntersectionSet IntersectionSet { get; }
-
     public IReadOnlyList<(IntersectionVertexId Id, RealPoint Position)> Vertices { get; }
-
     public IReadOnlyList<(IntersectionEdgeId Id, IntersectionVertexId Start, IntersectionVertexId End)> Edges { get; }
 
     // Per-intersection feature boxes, one for each entry in
     // IntersectionSet.Intersections, in matching index order.
     public IReadOnlyList<PairFeatures> Pairs { get; }
 
-    internal IntersectionGraph(
-        IntersectionSet intersectionSet,
-        IReadOnlyList<(IntersectionVertexId, RealPoint)> vertices,
-        IReadOnlyList<(IntersectionEdgeId, IntersectionVertexId, IntersectionVertexId)> edges,
-        IReadOnlyList<PairFeatures> pairs)
+    internal IntersectionGraph(IntersectionSet intersectionSet,
+                               IReadOnlyList<(IntersectionVertexId, RealPoint)> vertices,
+                               IReadOnlyList<(IntersectionEdgeId, IntersectionVertexId, IntersectionVertexId)> edges,
+                               IReadOnlyList<PairFeatures> pairs)
     {
         if (intersectionSet.TrianglesA is null)
             throw new ArgumentNullException(nameof(intersectionSet));

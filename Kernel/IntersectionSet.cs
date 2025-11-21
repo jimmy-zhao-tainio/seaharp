@@ -27,9 +27,8 @@ public readonly struct IntersectionSet
     public IReadOnlyList<Triangle> TrianglesB { get; }
     public IReadOnlyList<Intersection> Intersections { get; }
 
-    public IntersectionSet(
-        IReadOnlyList<Triangle> trianglesA,
-        IReadOnlyList<Triangle> trianglesB)
+    public IntersectionSet(IReadOnlyList<Triangle> trianglesA,
+                           IReadOnlyList<Triangle> trianglesB)
     {
         if (trianglesA is null) throw new ArgumentNullException(nameof(trianglesA));
         if (trianglesB is null) throw new ArgumentNullException(nameof(trianglesB));
@@ -83,8 +82,6 @@ public readonly struct IntersectionSet
 
 public static class Kernel
 {
-    public static IntersectionSet Intersections(
-        IReadOnlyList<Triangle> trianglesA,
-        IReadOnlyList<Triangle> trianglesB)
+    public static IntersectionSet Intersections(IReadOnlyList<Triangle> trianglesA, IReadOnlyList<Triangle> trianglesB)
         => new IntersectionSet(trianglesA, trianglesB);
 }

@@ -5,10 +5,16 @@ using Geometry.Internal;
 
 namespace Kernel;
 
-// Collection of 3D intersection samples tied to local PairVertex
-// indices. Encapsulates basic operations such as finding the
-// farthest-apart pair of vertices. This keeps the non-coplanar
-// segment logic testable independently of PairFeaturesFactory.
+// Small helper for "candidate intersection points for one pair".
+//
+// For a single triangle pair we often have several candidate points
+// that might form a segment or polygon. This class:
+//
+//   - Stores the world-space point together with its local PairVertex index
+//   - Can answer "which two vertices are farthest apart?"
+//
+// The actual PairVertex list lives in PairFeatures; this type just
+// helps decide *which* vertex indices to connect with a segment.
 internal sealed class BaryVertices
 {
     private readonly List<PairVertexSample3D> _samples = new();
@@ -17,14 +23,20 @@ internal sealed class BaryVertices
 
     public IReadOnlyList<PairVertexSample3D> Samples => _samples;
 
+    // Remember that "vertexIndex" in the PairFeatures.Vertices list
+    // has a 3D position "point" in world space.
     public void Add(int vertexIndex, in Vector point)
     {
         _samples.Add(new PairVertexSample3D(vertexIndex, point));
     }
 
-    public void FindFarthestPair(
-        out int startVertexIndex,
-        out int endVertexIndex)
+    // Brute-force farthest pair in this small set.
+    //
+    // We only ever have a handful of intersection samples per pair, so an
+    // O(n^2) search is perfectly fine here. The result is reported as
+    // vertex indices (not positions), so callers can reuse the existing
+    // PairVertex array.
+    public void FindFarthestPair(out int startVertexIndex, out int endVertexIndex)
     {
         PairVertexSample3D.FindFarthestPair(_samples, out startVertexIndex, out endVertexIndex);
     }
@@ -33,7 +45,6 @@ internal sealed class BaryVertices
 internal readonly struct PairVertexSample3D
 {
     public int VertexIndex { get; }
-
     public Vector Point { get; }
 
     public PairVertexSample3D(int vertexIndex, Vector point)
@@ -45,10 +56,9 @@ internal readonly struct PairVertexSample3D
     // Find the pair of samples whose 3D points are farthest apart
     // in squared-distance sense. Returns the corresponding vertex
     // indices from the PairVertex list.
-    public static void FindFarthestPair(
-        IReadOnlyList<PairVertexSample3D> samples,
-        out int startVertexIndex,
-        out int endVertexIndex)
+    public static void FindFarthestPair(IReadOnlyList<PairVertexSample3D> samples,
+                                        out int startVertexIndex,
+                                        out int endVertexIndex)
     {
         if (samples is null) throw new ArgumentNullException(nameof(samples));
         if (samples.Count == 0) throw new ArgumentException("Samples must be non-empty.", nameof(samples));
@@ -78,16 +88,20 @@ internal readonly struct PairVertexSample3D
     }
 }
 
-// Collection of 2D projected samples (for coplanar pairs) with
-// helpers for operations such as finding the farthest-apart
-// pair. This mirrors the 3D BaryVertices path but works in the
-// projected plane.
+// Same idea as BaryVertices, but for the 2D projected coplanar case.
+//
+// Each entry is:
+//   - a PairVertex index, and
+//   - its 2D position in the projection plane.
+//
+// This is used to:
+//   - find the farthest-apart vertices in 2D (for "segment" cases)
+//   - build a simple ordered polygon loop from the unique vertices
+//     (for "area" overlap cases).
 internal sealed class BaryVertices2D
 {
     private readonly List<PairVertexSample2D> _samples = new();
-
     public int Count => _samples.Count;
-
     public IReadOnlyList<PairVertexSample2D> Samples => _samples;
 
     public void Add(int vertexIndex, in PairIntersectionMath.Point2D point)
@@ -95,22 +109,26 @@ internal sealed class BaryVertices2D
         _samples.Add(new PairVertexSample2D(vertexIndex, point));
     }
 
-    public void FindFarthestPair(
-        out int startVertexIndex,
-        out int endVertexIndex)
+    // 2D version of "farthest pair" for coplanar projected points.
+    public void FindFarthestPair(out int startVertexIndex, out int endVertexIndex)
     {
         PairVertexSample2D.FindFarthestPair(_samples, out startVertexIndex, out endVertexIndex);
     }
 
-    // Build an ordered loop of unique vertex indices that approximates
-    // a convex boundary around all samples. Multiple samples with the
-    // same vertex index are collapsed so each vertex appears at most once.
+    // Build a simple polygon loop from the samples we have.
+    //
+    // Steps:
+    //   1. Remove duplicate vertex indices while keeping their first 2D point.
+    //   2. Compute the centroid of all remaining points.
+    //   3. Sort the vertices by angle around the centroid.
+    //
+    // Because the overlap of two triangles is always convex, this cheap
+    // "angle sort" is enough to give us a sane vertex order for the area
+    // intersection on this pair.
     public List<int> BuildOrderedUniqueLoop()
     {
         if (_samples.Count == 0)
-        {
             return new List<int>();
-        }
 
         // Compute centroid of all sample points.
         double sumX = 0.0;
@@ -146,11 +164,8 @@ internal sealed class BaryVertices2D
         {
             int vertexIndex = _samples[i].VertexIndex;
             if (seen.Add(vertexIndex))
-            {
                 orderedUnique.Add(vertexIndex);
-            }
         }
-
         return orderedUnique;
     }
 }
@@ -158,7 +173,6 @@ internal sealed class BaryVertices2D
 internal readonly struct PairVertexSample2D
 {
     public int VertexIndex { get; }
-
     public PairIntersectionMath.Point2D Point { get; }
 
     public PairVertexSample2D(int vertexIndex, PairIntersectionMath.Point2D point)
@@ -167,10 +181,9 @@ internal readonly struct PairVertexSample2D
         Point = point;
     }
 
-    public static void FindFarthestPair(
-        IReadOnlyList<PairVertexSample2D> samples,
-        out int startVertexIndex,
-        out int endVertexIndex)
+    public static void FindFarthestPair(IReadOnlyList<PairVertexSample2D> samples,
+                                        out int startVertexIndex,
+                                        out int endVertexIndex)
     {
         if (samples is null) throw new ArgumentNullException(nameof(samples));
         if (samples.Count == 0) throw new ArgumentException("Samples must be non-empty.", nameof(samples));

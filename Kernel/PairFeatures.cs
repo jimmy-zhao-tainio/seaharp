@@ -7,22 +7,35 @@ using Topology;
 
 namespace Kernel;
 
-// Represents one intersection point for a specific triangle pair,
-// expressed in barycentric coordinates on both triangle A and B.
-// This is a pure data container; it does not compute barycentric
-// coordinates or perform any geometric predicates.
+// This file describes *local* intersection data for ONE triangle pair
+// (one triangle from mesh A and one from mesh B).
+//
+// The idea:
+//
+//   IntersectionSet: Tells us "triangle i in A intersects triangle j in B"
+//   PairFeatures: For that (i, j) pair, stores the actual intersection vertices and line segments on those two triangles
+//   IntersectionGraph: Later will glue all PairFeatures together into a global graph over the whole mesh
+//
+// Everything here is purely local to a single pair. No global vertex IDs are
+// assigned yet; that happens in IntersectionGraph when we merge pair data.
+
+// One intersection point for this triangle pair.
+//
+// The same geometric point is stored twice:
+//   - OnTriangleA: barycentric coords relative to triangle A
+//   - OnTriangleB: barycentric coords relative to triangle B
+//
+// IntersectionVertexId is only set once the global graph is built.
+// Until then, PairVertex is basically "this point on A, and the same point on B".
 public readonly struct PairVertex
 {
     public IntersectionVertexId VertexId { get; }
-
     public Barycentric OnTriangleA { get; }
-
     public Barycentric OnTriangleB { get; }
 
-    public PairVertex(
-        IntersectionVertexId vertexId,
-        Barycentric onTriangleA,
-        Barycentric onTriangleB)
+    public PairVertex(IntersectionVertexId vertexId,
+                      Barycentric onTriangleA,
+                      Barycentric onTriangleB)
     {
         VertexId = vertexId;
         OnTriangleA = onTriangleA;
@@ -30,39 +43,45 @@ public readonly struct PairVertex
     }
 }
 
-// Represents a segment of the intersection curve between two triangles,
-// in the local coordinates of a single triangle pair. This is also
-// just a container; no geometric computations are performed here.
+// Simple undirected edge between two PairVertex indices.
+//
+// Start/End are indexes (ed: vertices?) into the PairFeatures.Vertices array. The same segment
+// lives on both triangles A and B; which triangle you care about is handled
+// when we later convert barycentric coords to world positions.
 public readonly struct PairSegment
 {
     public PairVertex Start { get; }
-
     public PairVertex End { get; }
 
-    public PairSegment(
-        PairVertex start,
-        PairVertex end)
+    public PairSegment(PairVertex start, PairVertex end)
     {
         Start = start;
         End = end;
     }
 }
 
-// Holds all intersection vertices and segments for a single triangle pair.
-// The pair is identified by an IntersectionSet.Intersection, which carries
-// the triangle indices and the high-level IntersectionType classification.
+// All intersection geometry for a single triangle pair.
+//
+// For one (triangleA, triangleB) pair we collect:
+//   - All intersection vertices (Vertices)
+//   - All intersection line segments between those vertices (Segments)
+//
+// Intersections.Type tells us if this pair meets at:
+//   - a single point
+//   - a segment
+//   - or an overlapping area (coplanar case)
+//
+// This struct does NOT compute anything by itself; it just stores the result
+// of running the low-level math in PairIntersectionMath.
 public sealed class PairFeatures
 {
     public IntersectionSet.Intersection Intersection { get; }
-
     public IReadOnlyList<PairVertex> Vertices { get; }
-
     public IReadOnlyList<PairSegment> Segments { get; }
 
-    public PairFeatures(
-        IntersectionSet.Intersection intersection,
-        IReadOnlyList<PairVertex> vertices,
-        IReadOnlyList<PairSegment> segments)
+    public PairFeatures(IntersectionSet.Intersection intersection,
+                        IReadOnlyList<PairVertex> vertices,
+                        IReadOnlyList<PairSegment> segments)
     {
         Intersection = intersection;
         Vertices = vertices ?? throw new ArgumentNullException(nameof(vertices));
@@ -70,11 +89,14 @@ public sealed class PairFeatures
     }
 }
 
-// Factory entry point for building PairFeatures instances.
-// PairFeaturesFactory.CreateEmpty keeps the original "empty box"
-// behaviour; PairFeaturesFactory.Create performs real per-pair
-// feature extraction on top of the Geometry helpers in
-// Geometry.Internal.PairIntersectionMath.
+// Factory for building PairFeatures.
+//
+//   - Looks up the actual Triangle A + Triangle B for this pair
+//   - Asks PairIntersectionMath for all raw intersection points
+//   - Converts those to barycentric coords on both triangles
+//   - Builds a clean list of PairVertex + PairSegment for this pair
+//
+// That way, all the "how do we compute intersections?" logic is in one place.
 public static class PairFeaturesFactory
 {
     public static PairFeatures CreateEmpty(in IntersectionSet.Intersection intersection)
@@ -99,9 +121,7 @@ public static class PairFeaturesFactory
     //     * deduplicates vertices using feature-level tolerances,
     //     * degrades noisy inputs so the output is consistent with the
     //       reported IntersectionType without reclassifying it.
-    public static PairFeatures Create(
-        in IntersectionSet set,
-        in IntersectionSet.Intersection intersection)
+    public static PairFeatures Create(in IntersectionSet set, in IntersectionSet.Intersection intersection)
     {
         if (set.TrianglesA is null) throw new ArgumentNullException(nameof(set.TrianglesA));
         if (set.TrianglesB is null) throw new ArgumentNullException(nameof(set.TrianglesB));
@@ -115,36 +135,25 @@ public static class PairFeaturesFactory
         bool coplanar = TrianglePredicates.IsCoplanar(in triA, in triB);
 
         if (coplanar)
-        {
             BuildCoplanarFeatures(in triA, in triB, intersection.Type, vertices, segments);
-        }
         else
-        {
             BuildNonCoplanarFeatures(in triA, in triB, intersection.Type, vertices, segments);
-        }
 
         return new PairFeatures(intersection, vertices, segments);
     }
 
-    private static void BuildNonCoplanarFeatures(
-        in Triangle triA,
-        in Triangle triB,
-        IntersectionType type,
-        List<PairVertex> vertices,
-        List<PairSegment> segments)
+    private static void BuildNonCoplanarFeatures(in Triangle triA,
+                                                 in Triangle triB,
+                                                 IntersectionType type,
+                                                 List<PairVertex> vertices,
+                                                 List<PairSegment> segments)
     {
-        var rawPoints = PairIntersectionMath.ComputeNonCoplanarIntersectionPoints(
-            in triA,
-            in triB);
+        var rawPoints = PairIntersectionMath.ComputeNonCoplanarIntersectionPoints(in triA, in triB);
 
         if (rawPoints.Count == 0)
         {
             if (type != IntersectionType.None)
-            {
-                System.Diagnostics.Debug.Assert(false,
-                    "Non-empty intersection type but no non-coplanar feature vertices were found.");
-            }
-
+                System.Diagnostics.Debug.Assert(false, "Non-empty intersection type but no non-coplanar feature vertices were found.");
             return;
         }
 
@@ -153,18 +162,12 @@ public static class PairFeaturesFactory
         // samples.
         var uniquePoints = new List<Vector>(rawPoints.Count);
         foreach (var p in rawPoints)
-        {
             AddUniqueWorldPoint(uniquePoints, in p);
-        }
 
         if (uniquePoints.Count == 0)
         {
             if (type != IntersectionType.None)
-            {
-                System.Diagnostics.Debug.Assert(false,
-                    "Non-empty intersection type but no non-coplanar feature vertices were found after dedup.");
-            }
-
+                System.Diagnostics.Debug.Assert(false, "Non-empty intersection type but no non-coplanar feature vertices were found after dedup.");
             return;
         }
 
@@ -183,11 +186,7 @@ public static class PairFeaturesFactory
         if (vertices.Count == 0)
         {
             if (type != IntersectionType.None)
-            {
-                System.Diagnostics.Debug.Assert(false,
-                    "Non-empty intersection type but no non-coplanar feature vertices were created.");
-            }
-
+                System.Diagnostics.Debug.Assert(false, "Non-empty intersection type but no non-coplanar feature vertices were created.");
             return;
         }
 
@@ -200,8 +199,7 @@ public static class PairFeaturesFactory
             // vertex and drop any segments.
             if (vertices.Count == 0)
             {
-                System.Diagnostics.Debug.Assert(false,
-                    "IntersectionType.Point but no feature vertices were found.");
+                System.Diagnostics.Debug.Assert(false, "IntersectionType.Point but no feature vertices were found.");
                 return;
             }
 
@@ -226,7 +224,6 @@ public static class PairFeaturesFactory
                     vertices.Clear();
                     vertices.Add(v0);
                 }
-
                 segments.Clear();
                 return;
             }
@@ -237,34 +234,23 @@ public static class PairFeaturesFactory
 
             segments.Clear();
             if (startIndex != endIndex)
-            {
                 segments.Add(new PairSegment(vertices[startIndex], vertices[endIndex]));
-            }
-
             return;
         }
     }
 
-    private static void BuildCoplanarFeatures(
-        in Triangle triA,
-        in Triangle triB,
-        IntersectionType type,
-        List<PairVertex> vertices,
-        List<PairSegment> segments)
+    private static void BuildCoplanarFeatures(in Triangle triA,
+                                              in Triangle triB,
+                                              IntersectionType type,
+                                              List<PairVertex> vertices,
+                                              List<PairSegment> segments)
     {
-        var candidates = PairIntersectionMath.ComputeCoplanarIntersectionPoints(
-            in triA,
-            in triB,
-            out int axis);
+        var candidates = PairIntersectionMath.ComputeCoplanarIntersectionPoints(in triA, in triB, out int axis);
 
         if (candidates.Count == 0)
         {
             if (type != IntersectionType.None)
-            {
-                System.Diagnostics.Debug.Assert(false,
-                    "Non-empty intersection type but no coplanar feature vertices were found.");
-            }
-
+                System.Diagnostics.Debug.Assert(false, "Non-empty intersection type but no coplanar feature vertices were found.");
             return;
         }
 
@@ -286,11 +272,7 @@ public static class PairFeaturesFactory
         if (vertices.Count == 0)
         {
             if (type != IntersectionType.None)
-            {
-                System.Diagnostics.Debug.Assert(false,
-                    "Non-empty intersection type but no coplanar feature vertices were created.");
-            }
-
+                System.Diagnostics.Debug.Assert(false, "Non-empty intersection type but no coplanar feature vertices were created.");
             return;
         }
 
@@ -305,7 +287,6 @@ public static class PairFeaturesFactory
                 vertices.Clear();
                 vertices.Add(v0);
             }
-
             segments.Clear();
             return;
         }
@@ -322,7 +303,6 @@ public static class PairFeaturesFactory
                     vertices.Clear();
                     vertices.Add(v0);
                 }
-
                 segments.Clear();
                 return;
             }
@@ -332,10 +312,7 @@ public static class PairFeaturesFactory
 
             segments.Clear();
             if (startIndex != endIndex)
-            {
                 segments.Add(new PairSegment(vertices[startIndex], vertices[endIndex]));
-            }
-
             return;
         }
 
@@ -350,16 +327,13 @@ public static class PairFeaturesFactory
                 if (uniqueCount == 2)
                 {
                     segments.Clear();
-                    segments.Add(new PairSegment(
-                        vertices[orderedVertexIndices[0]],
-                        vertices[orderedVertexIndices[1]]));
+                    segments.Add(new PairSegment(vertices[orderedVertexIndices[0]], vertices[orderedVertexIndices[1]]));
                 }
                 else
                 {
                     // Single point (or none); represent as point only.
                     segments.Clear();
                 }
-
                 return;
             }
 
@@ -369,11 +343,8 @@ public static class PairFeaturesFactory
                 int current = orderedVertexIndices[i];
                 int next = orderedVertexIndices[(i + 1) % uniqueCount];
                 if (current != next)
-                {
                     segments.Add(new PairSegment(vertices[current], vertices[next]));
-                }
             }
-
             return;
         }
     }
@@ -383,19 +354,15 @@ public static class PairFeaturesFactory
     // BarycentricEpsilon. This keeps the local vertex set stable
     // even if world-space computations produce slightly different
     // samples for the same geometric point.
-    private static int AddOrGetVertex(
-        List<PairVertex> vertices,
-        Barycentric onA,
-        Barycentric onB)
+    private static int AddOrGetVertex(List<PairVertex> vertices,
+                                      Barycentric onA,
+                                      Barycentric onB)
     {
         for (int i = 0; i < vertices.Count; i++)
         {
             var v = vertices[i];
-            if (v.OnTriangleA.IsCloseTo(in onA) &&
-                v.OnTriangleB.IsCloseTo(in onB))
-            {
+            if (v.OnTriangleA.IsCloseTo(in onA) && v.OnTriangleB.IsCloseTo(in onB))
                 return i;
-            }
         }
 
         var id = new IntersectionVertexId(vertices.Count);
@@ -404,9 +371,7 @@ public static class PairFeaturesFactory
         return vertices.Count - 1;
     }
 
-    private static void AddUniqueWorldPoint(
-        List<Vector> points,
-        in Vector candidate)
+    private static void AddUniqueWorldPoint(List<Vector> points, in Vector candidate)
     {
         for (int i = 0; i < points.Count; i++)
         {
@@ -415,12 +380,10 @@ public static class PairFeaturesFactory
             double dy = existing.Y - candidate.Y;
             double dz = existing.Z - candidate.Z;
             double squaredDistance = dx * dx + dy * dy + dz * dz;
-            if (squaredDistance <= Tolerances.FeatureWorldDistanceEpsilonSquared)
-            {
-                return;
-            }
-        }
 
+            if (squaredDistance <= Tolerances.FeatureWorldDistanceEpsilonSquared)
+                return;
+        }
         points.Add(candidate);
     }
 }
