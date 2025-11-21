@@ -98,8 +98,44 @@ internal static class Program
         }
 
         Console.WriteLine();
+
+        // Run the intersection curve regularizer and report its output.
+        var regularization = IntersectionCurveRegularizer.RegularizeMeshA(graph, meshATopology);
+        Console.WriteLine("Regularizer component stats on mesh A:");
+        for (int i = 0; i < regularization.Components.Count; i++)
+        {
+            var s = regularization.Components[i];
+            Console.WriteLine(
+                $"  Component {i}: vertices={s.VertexCount}, edges={s.EdgeCount}, " +
+                $"deg1={s.Degree1Count}, deg2={s.Degree2Count}, degMore={s.DegreeMoreCount}, " +
+                $"totalLength={s.TotalLength:F3}, medianEdge={s.MedianEdgeLength:F3}, classification={s.Classification}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Regularized curves on mesh A:");
+        Console.WriteLine($"  curveCount = {regularization.Curves.Count}");
+        for (int i = 0; i < regularization.Curves.Count; i++)
+        {
+            var curve = regularization.Curves[i];
+            bool closed = curve.Vertices.Length > 1 && curve.Vertices[0].Value == curve.Vertices[^1].Value;
+
+            bool hasSyntheticClosure = false;
+            foreach (var flag in curve.IsClosureEdge)
+            {
+                if (flag)
+                {
+                    hasSyntheticClosure = true;
+                    break;
+                }
+            }
+
+            Console.WriteLine(
+                $"  Curve {i}: vertices={curve.Vertices.Length}, edges={curve.Edges.Length}, " +
+                $"totalLength={curve.TotalLength:F3}, closed={closed}, hasSyntheticClosure={hasSyntheticClosure}");
+        }
+
+        Console.WriteLine();
         Console.WriteLine("Done. Press any key to exit.");
         Console.ReadKey();
     }
 }
-
