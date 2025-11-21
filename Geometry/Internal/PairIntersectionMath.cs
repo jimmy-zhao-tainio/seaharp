@@ -66,6 +66,18 @@ internal static class PairIntersectionMath
     internal static List<Point2D> ComputeCoplanarIntersectionPoints(
         in Triangle triA,
         in Triangle triB,
+        out int projectionAxis)
+    {
+        return ComputeCoplanarIntersectionPoints(
+            in triA,
+            in triB,
+            Tolerances.TrianglePredicateEpsilon,
+            out projectionAxis);
+    }
+
+    internal static List<Point2D> ComputeCoplanarIntersectionPoints(
+        in Triangle triA,
+        in Triangle triB,
         double epsilon,
         out int projectionAxis)
     {
@@ -489,4 +501,3 @@ internal static class PairIntersectionMath
         points.Add(candidate);
     }
 }
-

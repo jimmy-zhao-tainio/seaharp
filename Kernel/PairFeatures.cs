@@ -256,7 +256,6 @@ public static class PairFeaturesFactory
         var candidates = PairIntersectionMath.ComputeCoplanarIntersectionPoints(
             in triA,
             in triB,
-            Tolerances.TrianglePredicateEpsilon,
             out int axis);
 
         if (candidates.Count == 0)
