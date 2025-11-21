@@ -25,8 +25,9 @@ namespace Kernel;
 //   - OnTriangleA: barycentric coords relative to triangle A
 //   - OnTriangleB: barycentric coords relative to triangle B
 //
-// IntersectionVertexId is only set once the global graph is built.
-// Until then, PairVertex is basically "this point on A, and the same point on B".
+// VertexId is a pair-local index assigned by the factory; the global
+// IntersectionGraph uses it to map these local vertices onto a shared
+// set of global intersection vertices.
 public readonly struct PairVertex
 {
     public IntersectionVertexId VertexId { get; }
