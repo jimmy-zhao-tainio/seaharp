@@ -57,36 +57,9 @@ public readonly struct Triangle
     // U + V + W = 1. Uses double precision; intended for parametrization
     // only, not for robust geometric classification.
     public Barycentric ToBarycentric(Point point)
-    {
-        // Work in double to avoid repeated casting in arithmetic.
-        var p0 = new Vector(P0.X, P0.Y, P0.Z);
-        var p1 = new Vector(P1.X, P1.Y, P1.Z);
-        var p2 = new Vector(P2.X, P2.Y, P2.Z);
-        var p = new Vector(point.X, point.Y, point.Z);
-
-        var v0 = p1 - p0;
-        var v1 = p2 - p0;
-        var v2 = p - p0;
-
-        var d00 = v0.Dot(v0);
-        var d01 = v0.Dot(v1);
-        var d11 = v1.Dot(v1);
-        var d20 = v2.Dot(v0);
-        var d21 = v2.Dot(v1);
-
-        var denom = d00 * d11 - d01 * d01;
-        if (denom == 0.0)
-        {
-            // Degenerate triangle in this metric; return a neutral value.
-            return new Barycentric(0.0, 0.0, 0.0);
-        }
-
-        var invDenom = 1.0 / denom;
-        var v = (d11 * d20 - d01 * d21) * invDenom;
-        var w = (d00 * d21 - d01 * d20) * invDenom;
-        var u = 1.0 - v - w;
-        return new Barycentric(u, v, w);
-    }
+        => Internal.PairIntersectionMath.ToBarycentric(
+            in this,
+            new Vector(point.X, point.Y, point.Z));
 
     // Reconstruct a real-valued point from barycentric coordinates
     // with respect to this triangle: P = U*P0 + V*P1 + W*P2.

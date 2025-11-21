@@ -27,5 +27,15 @@ public readonly struct Barycentric
         var sum = U + V + W;
         return System.Math.Abs(sum - 1.0) <= epsilon;
     }
-}
 
+    // Component-wise closeness between two barycentric coordinates.
+    // The epsilon parameter is supplied by the caller so that feature
+    // layers can choose their own tolerance independently of the
+    // predicate layer.
+    public bool IsCloseTo(in Barycentric other, double epsilon)
+    {
+        return System.Math.Abs(U - other.U) <= epsilon &&
+               System.Math.Abs(V - other.V) <= epsilon &&
+               System.Math.Abs(W - other.W) <= epsilon;
+    }
+}
