@@ -133,12 +133,10 @@ public static class PairFeaturesFactory
         List<PairVertex> vertices,
         List<PairSegment> segments)
     {
-        double epsilon = Tolerances.TrianglePredicateEpsilon;
-
         var rawPoints = PairIntersectionMath.ComputeNonCoplanarIntersectionPoints(
             in triA,
             in triB,
-            epsilon);
+            Tolerances.TrianglePredicateEpsilon);
 
         if (rawPoints.Count == 0)
         {
@@ -255,12 +253,10 @@ public static class PairFeaturesFactory
         List<PairVertex> vertices,
         List<PairSegment> segments)
     {
-        double epsilon = Tolerances.TrianglePredicateEpsilon;
-
         var candidates = PairIntersectionMath.ComputeCoplanarIntersectionPoints(
             in triA,
             in triB,
-            epsilon,
+            Tolerances.TrianglePredicateEpsilon,
             out int axis);
 
         if (candidates.Count == 0)
@@ -278,7 +274,6 @@ public static class PairFeaturesFactory
         PairIntersectionMath.ProjectTriangleTo2D(in triA, axis, out var a0, out var a1, out var a2);
         PairIntersectionMath.ProjectTriangleTo2D(in triB, axis, out var b0, out var b1, out var b2);
 
-        var baryIndices = new List<(int VertexIndex, PairIntersectionMath.Point2D P)>(candidates.Count);
         var baryVertices2D = new BaryVertices2D();
         for (int i = 0; i < candidates.Count; i++)
         {
@@ -287,7 +282,6 @@ public static class PairFeaturesFactory
             var baryB = PairIntersectionMath.ToBarycentric2D(in p, in b0, in b1, in b2);
 
             int idx = AddOrGetVertex(vertices, baryA, baryB);
-            baryIndices.Add((idx, p));
             baryVertices2D.Add(idx, in p);
         }
 
@@ -350,45 +344,8 @@ public static class PairFeaturesFactory
         if (type == IntersectionType.Area)
         {
             // Area intersection: build a convex boundary loop from all samples.
-            var centroid = new PairIntersectionMath.Point2D(0.0, 0.0);
-            for (int i = 0; i < baryIndices.Count; i++)
-            {
-                centroid = new PairIntersectionMath.Point2D(
-                    centroid.X + baryIndices[i].P.X,
-                    centroid.Y + baryIndices[i].P.Y);
-            }
-
-            double invCount = 1.0 / baryIndices.Count;
-            centroid = new PairIntersectionMath.Point2D(
-                centroid.X * invCount,
-                centroid.Y * invCount);
-
-            baryIndices.Sort((a, b) =>
-            {
-                var daX = a.P.X - centroid.X;
-                var daY = a.P.Y - centroid.Y;
-                var dbX = b.P.X - centroid.X;
-                var dbY = b.P.Y - centroid.Y;
-
-                var angleA = Math.Atan2(daY, daX);
-                var angleB = Math.Atan2(dbY, dbX);
-                return angleA.CompareTo(angleB);
-            });
-
-            // Collapse multiple occurrences of the same VertexIndex so that
-            // each logical vertex appears at most once in the loop.
-            var orderedUnique = new List<(int VertexIndex, PairIntersectionMath.Point2D P)>(baryIndices.Count);
-            var seen = new HashSet<int>();
-            for (int i = 0; i < baryIndices.Count; i++)
-            {
-                var entry = baryIndices[i];
-                if (seen.Add(entry.VertexIndex))
-                {
-                    orderedUnique.Add(entry);
-                }
-            }
-
-            int uniqueCount = orderedUnique.Count;
+            var orderedVertexIndices = baryVertices2D.BuildOrderedUniqueLoop();
+            int uniqueCount = orderedVertexIndices.Count;
             if (uniqueCount < 3)
             {
                 // Area collapsed to a lower-dimensional feature.
@@ -396,8 +353,8 @@ public static class PairFeaturesFactory
                 {
                     segments.Clear();
                     segments.Add(new PairSegment(
-                        vertices[orderedUnique[0].VertexIndex],
-                        vertices[orderedUnique[1].VertexIndex]));
+                        vertices[orderedVertexIndices[0]],
+                        vertices[orderedVertexIndices[1]]));
                 }
                 else
                 {
@@ -411,8 +368,8 @@ public static class PairFeaturesFactory
             segments.Clear();
             for (int i = 0; i < uniqueCount; i++)
             {
-                int current = orderedUnique[i].VertexIndex;
-                int next = orderedUnique[(i + 1) % uniqueCount].VertexIndex;
+                int current = orderedVertexIndices[i];
+                int next = orderedVertexIndices[(i + 1) % uniqueCount];
                 if (current != next)
                 {
                     segments.Add(new PairSegment(vertices[current], vertices[next]));
@@ -436,8 +393,8 @@ public static class PairFeaturesFactory
         for (int i = 0; i < vertices.Count; i++)
         {
             var v = vertices[i];
-            if (v.OnTriangleA.IsCloseTo(in onA, Tolerances.FeatureBarycentricEpsilon) &&
-                v.OnTriangleB.IsCloseTo(in onB, Tolerances.FeatureBarycentricEpsilon))
+            if (v.OnTriangleA.IsCloseTo(in onA) &&
+                v.OnTriangleB.IsCloseTo(in onB))
             {
                 return i;
             }
@@ -453,7 +410,6 @@ public static class PairFeaturesFactory
         List<Vector> points,
         in Vector candidate)
     {
-        double squaredEpsilon = Tolerances.FeatureWorldDistanceEpsilonSquared;
         for (int i = 0; i < points.Count; i++)
         {
             var existing = points[i];
@@ -461,7 +417,7 @@ public static class PairFeaturesFactory
             double dy = existing.Y - candidate.Y;
             double dz = existing.Z - candidate.Z;
             double squaredDistance = dx * dx + dy * dy + dz * dz;
-            if (squaredDistance <= squaredEpsilon)
+            if (squaredDistance <= Tolerances.FeatureWorldDistanceEpsilonSquared)
             {
                 return;
             }

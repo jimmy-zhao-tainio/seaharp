@@ -101,6 +101,58 @@ internal sealed class BaryVertices2D
     {
         PairVertexSample2D.FindFarthestPair(_samples, out startVertexIndex, out endVertexIndex);
     }
+
+    // Build an ordered loop of unique vertex indices that approximates
+    // a convex boundary around all samples. Multiple samples with the
+    // same vertex index are collapsed so each vertex appears at most once.
+    public List<int> BuildOrderedUniqueLoop()
+    {
+        if (_samples.Count == 0)
+        {
+            return new List<int>();
+        }
+
+        // Compute centroid of all sample points.
+        double sumX = 0.0;
+        double sumY = 0.0;
+        for (int i = 0; i < _samples.Count; i++)
+        {
+            var p = _samples[i].Point;
+            sumX += p.X;
+            sumY += p.Y;
+        }
+
+        double invCount = 1.0 / _samples.Count;
+        var centroid = new PairIntersectionMath.Point2D(sumX * invCount, sumY * invCount);
+
+        // Sort samples around the centroid by polar angle.
+        _samples.Sort((a, b) =>
+        {
+            var daX = a.Point.X - centroid.X;
+            var daY = a.Point.Y - centroid.Y;
+            var dbX = b.Point.X - centroid.X;
+            var dbY = b.Point.Y - centroid.Y;
+
+            var angleA = Math.Atan2(daY, daX);
+            var angleB = Math.Atan2(dbY, dbX);
+            return angleA.CompareTo(angleB);
+        });
+
+        // Collapse multiple occurrences of the same VertexIndex so that
+        // each logical vertex appears at most once in the loop.
+        var orderedUnique = new List<int>(_samples.Count);
+        var seen = new HashSet<int>();
+        for (int i = 0; i < _samples.Count; i++)
+        {
+            int vertexIndex = _samples[i].VertexIndex;
+            if (seen.Add(vertexIndex))
+            {
+                orderedUnique.Add(vertexIndex);
+            }
+        }
+
+        return orderedUnique;
+    }
 }
 
 internal readonly struct PairVertexSample2D

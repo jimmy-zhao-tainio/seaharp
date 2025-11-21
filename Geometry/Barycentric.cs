@@ -38,4 +38,11 @@ public readonly struct Barycentric
                System.Math.Abs(V - other.V) <= epsilon &&
                System.Math.Abs(W - other.W) <= epsilon;
     }
+
+    // Convenience overload for callers that use the shared feature-layer
+    // tolerance from Geometry.Tolerances.
+    public bool IsCloseTo(in Barycentric other)
+    {
+        return IsCloseTo(in other, Tolerances.FeatureBarycentricEpsilon);
+    }
 }

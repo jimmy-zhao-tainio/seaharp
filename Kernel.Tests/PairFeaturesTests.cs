@@ -124,7 +124,7 @@ public class PairFeaturesTests
         var features = PairFeaturesFactory.Create(in set, in intersection);
 
         Assert.Equal(IntersectionType.Point, features.Intersection.Type);
-        Assert.Equal(1, features.Vertices.Count);
+        Assert.Single(features.Vertices);
         Assert.Empty(features.Segments);
 
         var vertex = features.Vertices[0];
@@ -202,7 +202,7 @@ public class PairFeaturesTests
         var features = PairFeaturesFactory.Create(in set, in fakeIntersection);
 
         Assert.Equal(IntersectionType.Segment, features.Intersection.Type);
-        Assert.Equal(1, features.Vertices.Count);
+        Assert.Single(features.Vertices);
         Assert.Empty(features.Segments);
     }
 }
