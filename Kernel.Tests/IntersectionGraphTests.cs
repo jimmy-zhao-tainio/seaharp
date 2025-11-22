@@ -360,62 +360,102 @@ public class IntersectionGraphTests
             }
         }
 
-        // Build mesh-A topology (per-triangle edges, vertex adjacency, loops),
-        // then run the intersection curve regularizer on mesh A.
+        // Build mesh-local topologies (per-triangle edges, vertex adjacency, loops),
+        // then run the intersection curve regularizer on mesh A and mesh B.
         var meshATopology = MeshATopology.Build(graph, index);
-        var regularization = IntersectionCurveRegularizer.RegularizeMeshA(graph, meshATopology);
+        var meshBTopology = MeshBTopology.Build(graph, index);
+        var regularizationA = IntersectionCurveRegularizer.RegularizeMeshA(graph, meshATopology);
 
         // For the sphere-sphere case we expect at least one regularized
-        // intersection curve on mesh A whose vertices form a closed cycle
+        // intersection curve on each mesh whose vertices form a closed cycle
         // with internal degree 2.
-        Assert.NotEmpty(regularization.Curves);
+        Assert.NotEmpty(regularizationA.Curves);
 
         bool foundValidCurve = false;
+        double longestLengthA = 0.0;
 
-        foreach (var curve in regularization.Curves)
+        foreach (var curve in regularizationA.Curves)
         {
-            if (curve.Vertices.Length < 3)
+            if (!IsClosedTwoRegular(curve))
             {
                 continue;
             }
 
-            // Closed cycle: first == last.
-            if (curve.Vertices[0].Value != curve.Vertices[^1].Value)
+            foundValidCurve = true;
+            if (curve.TotalLength > longestLengthA)
             {
-                continue;
-            }
-
-            var degree = new Dictionary<int, int>();
-
-            for (int i = 0; i < curve.Vertices.Length - 1; i++)
-            {
-                int a = curve.Vertices[i].Value;
-                int b = curve.Vertices[i + 1].Value;
-
-                degree.TryGetValue(a, out var da);
-                degree[a] = da + 1;
-
-                degree.TryGetValue(b, out var db);
-                degree[b] = db + 1;
-            }
-
-            bool allDegreeTwo = true;
-            foreach (var kvp in degree)
-            {
-                if (kvp.Value != 2)
-                {
-                    allDegreeTwo = false;
-                    break;
-                }
-            }
-
-            if (allDegreeTwo)
-            {
-                foundValidCurve = true;
-                break;
+                longestLengthA = curve.TotalLength;
             }
         }
 
         Assert.True(foundValidCurve);
+
+        var regularizationB = IntersectionCurveRegularizer.RegularizeMeshB(graph, meshBTopology);
+        Assert.NotEmpty(regularizationB.Curves);
+
+        foundValidCurve = false;
+        double longestLengthB = 0.0;
+
+        foreach (var curve in regularizationB.Curves)
+        {
+            if (!IsClosedTwoRegular(curve))
+            {
+                continue;
+            }
+
+            foundValidCurve = true;
+            if (curve.TotalLength > longestLengthB)
+            {
+                longestLengthB = curve.TotalLength;
+            }
+        }
+
+        Assert.True(foundValidCurve);
+
+        // The primary intersection loop on A and B should have nearly identical length.
+        Assert.True(longestLengthA > 0.0);
+        Assert.True(longestLengthB > 0.0);
+
+        const double lengthTol = 1e-6;
+        var diff = System.Math.Abs(longestLengthA - longestLengthB);
+        var relDiff = diff / System.Math.Max(longestLengthA, longestLengthB);
+        Assert.True(relDiff <= lengthTol);
+    }
+
+    private static bool IsClosedTwoRegular(IntersectionCurve curve)
+    {
+        if (curve.Vertices.Length < 3)
+        {
+            return false;
+        }
+
+        if (curve.Vertices[0].Value != curve.Vertices[^1].Value)
+        {
+            return false;
+        }
+
+        var degree = new Dictionary<int, int>();
+
+        for (int i = 0; i < curve.Vertices.Length - 1; i++)
+        {
+            int a = curve.Vertices[i].Value;
+            int b = curve.Vertices[i + 1].Value;
+
+            degree.TryGetValue(a, out var da);
+            degree[a] = da + 1;
+
+            degree.TryGetValue(b, out var db);
+            degree[b] = db + 1;
+        }
+
+        foreach (var kvp in degree)
+        {
+            if (kvp.Value != 2)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

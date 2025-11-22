@@ -6,10 +6,11 @@ using Geometry;
 namespace Kernel;
 
 // Higher-level helper for extracting reasonably clean closed intersection
-// curves on mesh A from the raw IntersectionGraph / MeshATopology data.
+// curves on a single mesh (A or B) from the raw IntersectionGraph /
+// mesh-local topology data.
 //
 // This layer:
-//   - works per connected component on mesh A,
+//   - works per connected component on a chosen mesh,
 //   - classifies components using simple degree/length heuristics,
 //   - optionally repairs a single small gap in strong loop candidates by
 //     adding a synthetic closure edge between nearby degree-1 endpoints,
@@ -89,6 +90,22 @@ public static class IntersectionCurveRegularizer
         if (graph is null) throw new ArgumentNullException(nameof(graph));
         if (topology is null) throw new ArgumentNullException(nameof(topology));
 
+        return RegularizeInternal(graph, topology.VertexEdges, topology.Edges);
+    }
+
+    public static Result RegularizeMeshB(IntersectionGraph graph, MeshBTopology topology)
+    {
+        if (graph is null) throw new ArgumentNullException(nameof(graph));
+        if (topology is null) throw new ArgumentNullException(nameof(topology));
+
+        return RegularizeInternal(graph, topology.VertexEdges, topology.Edges);
+    }
+
+    private static Result RegularizeInternal(
+        IntersectionGraph graph,
+        IReadOnlyDictionary<IntersectionVertexId, IReadOnlyList<IntersectionEdgeId>> adjacency,
+        IReadOnlyList<IntersectionEdgeId> meshEdgeList)
+    {
         var positions = BuildVertexPositionMap(graph);
 
         var edgeById = new Dictionary<int, (IntersectionVertexId Start, IntersectionVertexId End)>();
@@ -98,12 +115,13 @@ public static class IntersectionCurveRegularizer
         }
 
         var meshEdges = new HashSet<int>();
-        foreach (var edgeId in topology.Edges)
+        for (int i = 0; i < meshEdgeList.Count; i++)
         {
+            var edgeId = meshEdgeList[i];
             meshEdges.Add(edgeId.Value);
         }
 
-        var components = BuildComponentsOnMeshA(topology.VertexEdges, edgeById, meshEdges);
+        var components = BuildComponentsOnMeshA(adjacency, edgeById, meshEdges);
 
         var curves = new List<IntersectionCurve>();
         var statsList = new List<ComponentStats>(components.Count);
@@ -116,7 +134,7 @@ public static class IntersectionCurveRegularizer
             var stats = ComputeComponentStats(
                 componentIndex,
                 component,
-                topology.VertexEdges,
+                adjacency,
                 positions,
                 edgeById,
                 out var degrees);

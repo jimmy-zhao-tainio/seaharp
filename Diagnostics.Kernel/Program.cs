@@ -29,6 +29,7 @@ internal static class Program
         var graph = IntersectionGraph.FromIntersectionSet(set);
         var index = TriangleIntersectionIndex.Build(graph);
         var meshATopology = MeshATopology.Build(graph, index);
+        var meshBTopology = MeshBTopology.Build(graph, index);
 
         Console.WriteLine("=== Sphere-Sphere Intersection Diagnostics (Mesh A) ===");
         Console.WriteLine($"Triangles A: {set.TrianglesA.Count}");
@@ -99,12 +100,12 @@ internal static class Program
 
         Console.WriteLine();
 
-        // Run the intersection curve regularizer and report its output.
-        var regularization = IntersectionCurveRegularizer.RegularizeMeshA(graph, meshATopology);
+        // Run the intersection curve regularizer and report its output on mesh A.
+        var regularizationA = IntersectionCurveRegularizer.RegularizeMeshA(graph, meshATopology);
         Console.WriteLine("Regularizer component stats on mesh A:");
-        for (int i = 0; i < regularization.Components.Count; i++)
+        for (int i = 0; i < regularizationA.Components.Count; i++)
         {
-            var s = regularization.Components[i];
+            var s = regularizationA.Components[i];
             Console.WriteLine(
                 $"  Component {i}: vertices={s.VertexCount}, edges={s.EdgeCount}, " +
                 $"deg1={s.Degree1Count}, deg2={s.Degree2Count}, degMore={s.DegreeMoreCount}, " +
@@ -113,10 +114,52 @@ internal static class Program
 
         Console.WriteLine();
         Console.WriteLine("Regularized curves on mesh A:");
-        Console.WriteLine($"  curveCount = {regularization.Curves.Count}");
-        for (int i = 0; i < regularization.Curves.Count; i++)
+        Console.WriteLine($"  curveCount = {regularizationA.Curves.Count}");
+        for (int i = 0; i < regularizationA.Curves.Count; i++)
         {
-            var curve = regularization.Curves[i];
+            var curve = regularizationA.Curves[i];
+            bool closed = curve.Vertices.Length > 1 && curve.Vertices[0].Value == curve.Vertices[^1].Value;
+
+            bool hasSyntheticClosure = false;
+            foreach (var flag in curve.IsClosureEdge)
+            {
+                if (flag)
+                {
+                    hasSyntheticClosure = true;
+                    break;
+                }
+            }
+
+            Console.WriteLine(
+                $"  Curve {i}: vertices={curve.Vertices.Length}, edges={curve.Edges.Length}, " +
+                $"totalLength={curve.TotalLength:F3}, closed={closed}, hasSyntheticClosure={hasSyntheticClosure}");
+        }
+
+        Console.WriteLine();
+
+        // Mesh B summary.
+        Console.WriteLine("=== Sphere-Sphere Intersection Diagnostics (Mesh B) ===");
+        Console.WriteLine($"Mesh-B edges: {meshBTopology.Edges.Count}");
+        Console.WriteLine($"Mesh-B components (Loops entries): {meshBTopology.Loops.Count}");
+        Console.WriteLine();
+
+        var regularizationB = IntersectionCurveRegularizer.RegularizeMeshB(graph, meshBTopology);
+        Console.WriteLine("Regularizer component stats on mesh B:");
+        for (int i = 0; i < regularizationB.Components.Count; i++)
+        {
+            var s = regularizationB.Components[i];
+            Console.WriteLine(
+                $"  Component {i}: vertices={s.VertexCount}, edges={s.EdgeCount}, " +
+                $"deg1={s.Degree1Count}, deg2={s.Degree2Count}, degMore={s.DegreeMoreCount}, " +
+                $"totalLength={s.TotalLength:F3}, medianEdge={s.MedianEdgeLength:F3}, classification={s.Classification}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Regularized curves on mesh B:");
+        Console.WriteLine($"  curveCount = {regularizationB.Curves.Count}");
+        for (int i = 0; i < regularizationB.Curves.Count; i++)
+        {
+            var curve = regularizationB.Curves[i];
             bool closed = curve.Vertices.Length > 1 && curve.Vertices[0].Value == curve.Vertices[^1].Value;
 
             bool hasSyntheticClosure = false;
